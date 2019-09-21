@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "OpenSora.Extractor": {
+      "commandName": "Project",
+      "commandLineArgs": "\"D:\\Games\\Steam\\steamapps\\common\\Trails in the Sky SC\" \"D:\\Temp\\sora\""
+    }
+  }
+}

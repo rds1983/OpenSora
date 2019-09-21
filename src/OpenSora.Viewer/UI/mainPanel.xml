@@ -1,0 +1,40 @@
+<Project>
+  <ExportOptions Namespace="OpenSora.Viewer.UI" Class="MainPanel" OutputPath="D:\Projects\OpenSora\src\OpenSora.Viewer\UI" />
+  <Panel>
+    <Grid ColumnSpacing="8" RowSpacing="8">
+      <ColumnsProportions>
+        <Proportion Type="Fill" />
+      </ColumnsProportions>
+      <RowsProportions>
+        <Proportion />
+        <Proportion Type="Fill" />
+      </RowsProportions>
+      <Grid ColumnSpacing="8" RowSpacing="8">
+        <ColumnsProportions>
+          <Proportion />
+          <Proportion />
+        </ColumnsProportions>
+        <TextField Text="" Readonly="True" Id="_textPath" Width="300" />
+        <TextButton Text="Change..." Id="_buttonChange" GridColumn="1" />
+      </Grid>
+      <Grid ColumnSpacing="8" RowSpacing="8" GridRow="1">
+        <ColumnsProportions>
+          <Proportion />
+          <Proportion Type="Fill" />
+        </ColumnsProportions>
+        <RowsProportions>
+          <Proportion />
+          <Proportion Type="Fill" />
+        </RowsProportions>
+        <ComboBox Id="_comboResourceType" HorizontalAlignment="Stretch">
+          <ListItem Text="Textures" />
+        </ComboBox>
+        <ListBox Id="_listFiles" VerticalAlignment="Stretch" GridRow="1">
+          <ListItem Text="TEXTURE1._DS" />
+          <ListItem Text="TEXTURE2._DS" />
+        </ListBox>
+        <Panel Id="_panelViewer" GridColumn="1" GridRowSpan="2"></Panel>
+      </Grid>
+    </Grid>
+  </Panel>
+</Project>

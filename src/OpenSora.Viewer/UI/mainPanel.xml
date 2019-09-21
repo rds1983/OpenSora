@@ -28,6 +28,7 @@
         </RowsProportions>
         <ComboBox Id="_comboResourceType" HorizontalAlignment="Stretch">
           <ListItem Text="Textures" />
+          <ListItem Text="Models" />
         </ComboBox>
         <ListBox Id="_listFiles" VerticalAlignment="Stretch" GridRow="1">
           <ListItem Text="TEXTURE1._DS" />

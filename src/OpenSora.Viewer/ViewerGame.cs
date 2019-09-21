@@ -6,6 +6,7 @@ using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.File;
 using OpenSora.Viewer.UI;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -24,6 +25,7 @@ namespace OpenSora.Viewer
 		private MainPanel _mainPanel;
 		private SpriteBatch _spriteBatch;
 		private Texture2D _texture;
+		private Dictionary<string, List<DirEntry>> _entries;
 
 		public ViewerGame()
 		{
@@ -55,6 +57,7 @@ namespace OpenSora.Viewer
 
 			_mainPanel._buttonChange.Click += OnChangeFolder;
 			_mainPanel._listFiles.SelectedIndexChanged += _listFiles_SelectedIndexChanged;
+			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
 
 			_mainPanel._comboResourceType.SelectedIndex = 0;
 
@@ -64,6 +67,11 @@ namespace OpenSora.Viewer
 			var folder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 			folder = @"D:\Games\Steam\steamapps\common\Trails in the Sky FC";
 			SetFolder(folder);
+		}
+
+		private void _comboResourceType_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			RefreshFiles();
 		}
 
 		private void LoadFile(FileAndEntry fileAndEntry)
@@ -79,9 +87,19 @@ namespace OpenSora.Viewer
 					data = reader.ReadBytes(entry.CompressedSize);
 				}
 
-				var image = DDS.LoadImage(data);
-				_texture = new Texture2D(GraphicsDevice, image.Width, image.Height);
-				_texture.SetData(image.Data);
+				switch (_mainPanel._comboResourceType.SelectedIndex)
+				{
+					case 0:
+						// Texture
+						var image = DDS.LoadImage(data);
+						_texture = new Texture2D(GraphicsDevice, image.Width, image.Height);
+						_texture.SetData(image.Data);
+						break;
+					case 1:
+						// Model
+						ModelLoader.LoadModel(data);
+						break;
+				}
 			}
 		}
 
@@ -98,17 +116,22 @@ namespace OpenSora.Viewer
 			}
 		}
 
-		private void SetFolder(string folder)
+		private void RefreshFiles()
 		{
 			_mainPanel._listFiles.Items.Clear();
-
-			var entries = DirProcessor.BuildEntries(folder);
-
-			foreach(var pair in entries)
+			if (_entries == null)
 			{
-				foreach(var entry in pair.Value)
+				return;
+			}
+
+			foreach (var pair in _entries)
+			{
+				foreach (var entry in pair.Value)
 				{
-					if (entry.Name.EndsWith("_DS"))
+					var index = _mainPanel._comboResourceType.SelectedIndex;
+					var add = index == 0 && entry.Name.EndsWith("_DS") ||
+						index == 1 && entry.Name.EndsWith("_X2");
+					if (add)
 					{
 						_mainPanel._listFiles.Items.Add(new ListItem
 						{
@@ -122,6 +145,12 @@ namespace OpenSora.Viewer
 					}
 				}
 			}
+		}
+
+		private void SetFolder(string folder)
+		{
+			_entries = DirProcessor.BuildEntries(folder);
+			RefreshFiles();
 
 			_mainPanel._textPath.Text = folder;
 		}

@@ -20,6 +20,7 @@ Use W, A, S, D to move camera.
 Hold right button and move mouse to rotate it.
 
 # Credits
+* [uyjulian](https://github.com/uyjulian)
 * [MonoGame](http://www.monogame.net/)
 * [Myra](https://github.com/rds1983/Myra)
 * [Nursia](https://github.com/rds1983/Nursia)

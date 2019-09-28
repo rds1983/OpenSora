@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Forms;
 
 namespace OpenSora.Viewer
 {
@@ -12,10 +13,18 @@ namespace OpenSora.Viewer
 				return;
 			}
 
-			using (var game = new ViewerGame())
+			try
 			{
-				game.SoraFolder = args[0];
-				game.Run();
+				using (var game = new ViewerGame())
+				{
+					game.SoraFolder = args[0];
+					game.Run();
+				}
+			}
+			catch(Exception ex)
+			{
+				MessageBox.Show(ex.ToString());
+				Console.WriteLine(ex.ToString());
 			}
 		}
 	}

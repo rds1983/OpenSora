@@ -15,4 +15,8 @@
     <ProjectReference Include="..\..\deps\Nursia\src\Nursia\Nursia.csproj" />
     <ProjectReference Include="..\OpenSora\OpenSora.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
 </Project>

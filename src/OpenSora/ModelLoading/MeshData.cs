@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.IO;
 
-namespace OpenSora.Viewer.ModelLoading
+namespace OpenSora.ModelLoading
 {
 	public class MeshData
 	{
@@ -86,6 +86,8 @@ namespace OpenSora.Viewer.ModelLoading
 			{
 				_indices.Add(reader.ReadInt16());
 			}
+
+			reader.SkipBytes(44);
 		}
 	}
 }

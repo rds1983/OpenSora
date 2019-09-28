@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 
-namespace OpenSora.Viewer.ModelLoading
+namespace OpenSora.ModelLoading
 {
-	static class ModelLoader
+	public static class Decompressor
 	{
-		private class Decompressor
+		private class InternalDecompressor
 		{
 			byte _bits = 9; //8 to start off with, then 16
 			ushort _flags;
@@ -108,9 +108,9 @@ namespace OpenSora.Viewer.ModelLoading
 							}
 
 							int prev_u_buffer_pos = _reader.ReadByte();// Load low - order distance(max = 0xFF)
-																	  // Also acts as flag byte
-																	  // run = 0 and byte = 0->exit program
-																	  // run = 0 and byte = 1->sequence of repeating bytes
+																	   // Also acts as flag byte
+																	   // run = 0 and byte = 0->exit program
+																	   // run = 0 and byte = 1->sequence of repeating bytes
 							if (run != 0)
 							{
 								prev_u_buffer_pos = prev_u_buffer_pos | (run << 8); // Add high and low order distance(max distance = 0x31FF)
@@ -162,37 +162,11 @@ namespace OpenSora.Viewer.ModelLoading
 			}
 		}
 
-		private static Frame LoadDecompressedModel(MemoryStream stream)
-		{
-			using (var reader = new BinaryReader(stream))
-			{
-				reader.SkipBytes(4);
-
-				int length = 0;
-				var id = reader.LoadZeroTerminatedString(out length);
-
-				var rootFrame = new Frame
-				{
-					Id = id
-				};
-
-				try
-				{
-					rootFrame.LoadFromStream(reader);
-				}
-				catch (Exception)
-				{
-				}
-
-				return rootFrame;
-			}
-		}
-
-		public static Frame LoadModel(byte[] compressed)
+		public static byte[] Decompress(byte[] compressed)
 		{
 			using (var decompressed = new MemoryStream())
 			{
-				var decompressor = new Decompressor();
+				var decompressor = new InternalDecompressor();
 				using (var stream = new MemoryStream(compressed))
 				using (var reader = new BinaryReader(stream))
 				{
@@ -221,7 +195,7 @@ namespace OpenSora.Viewer.ModelLoading
 				}
 
 				decompressed.Seek(0, SeekOrigin.Begin);
-				return LoadDecompressedModel(decompressed);
+				return decompressed.GetBuffer();
 			}
 		}
 	}

@@ -1,9 +1,7 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 
-namespace OpenSora.Viewer.ModelLoading
+namespace OpenSora.ModelLoading
 {
 	public class Frame
 	{
@@ -41,30 +39,33 @@ namespace OpenSora.Viewer.ModelLoading
 			}
 
 			// Skip first two bytes
-			reader.SkipBytes(2);
+			var count = reader.ReadInt16();
 
-			int length = 0;
-			var id = reader.LoadZeroTerminatedString(out length);
-
-			if (id.Contains("Frame"))
+			for (var i = 0; i < count; ++i)
 			{
-				var child = new Frame
-				{
-					Id = id
-				};
+				int length = 0;
+				var id = reader.LoadZeroTerminatedString(out length);
 
-				child.LoadFromStream(reader);
-				Children.Add(child);
-			}
-			else if (id.Contains("Mesh"))
-			{
-				var mesh = new MeshData
+				if (id.Contains("Frame"))
 				{
-					Id = id
-				};
+					var child = new Frame
+					{
+						Id = id
+					};
 
-				mesh.LoadFromStream(reader);
-				Meshes.Add(mesh);
+					child.LoadFromStream(reader);
+					Children.Add(child);
+				}
+				else if (id.Contains("Mesh"))
+				{
+					var mesh = new MeshData
+					{
+						Id = id
+					};
+
+					mesh.LoadFromStream(reader);
+					Meshes.Add(mesh);
+				}
 			}
 		}
 	}

@@ -11,7 +11,6 @@ using Nursia.Graphics3D.ForwardRendering;
 using Nursia.Graphics3D.Lights;
 using Nursia.Graphics3D.Modelling;
 using Nursia.Graphics3D.Utils;
-using OpenSora.Viewer.ModelLoading;
 using OpenSora.Viewer.UI;
 using System;
 using System.Collections.Generic;
@@ -89,13 +88,14 @@ namespace OpenSora.Viewer
 			_controller = new CameraInputController(_scene.Camera);
 
 			// Add a light
-			/*			_scene.Lights.Add(new DirectLight
-						{
-							Color = Color.White,
-							Direction = new Vector3(-1, -1, -1)
-						});*/
+			_scene.Lights.Add(new DirectLight
+			{
+				Color = Color.White,
+				Direction = new Vector3(-1, -1, -1)
+			});
 
-			_renderer.RasterizerState = RasterizerState.CullNone;
+			//			_renderer.RasterizerState = RasterizerState.CullNone;
+			_renderer.BlendState = BlendState.NonPremultiplied;
 		}
 
 		private void _comboResourceType_SelectedIndexChanged(object sender, EventArgs e)
@@ -164,33 +164,35 @@ namespace OpenSora.Viewer
 						// Model
 						var frame = ModelLoader.LoadModel(data);
 
-						var meshData = frame.Children[0].Meshes[0];
-
-						var mesh = Mesh.Create(meshData.Vertices.ToArray(), meshData.Indices.ToArray());
+						var meshes = frame.Children[0].Meshes;
 
 						_model = new NursiaModel();
 
-						var meshNode = new MeshNode
+						foreach (var meshData in meshes)
 						{
-							Id = meshData.Id,
-							BoundingSphere = BoundingSphere.CreateFromPoints(from v in meshData.Vertices select v.Position)
-						};
+							var mesh = Mesh.Create(meshData.Vertices.ToArray(), meshData.Indices.ToArray());
 
-						var material = new Material
-						{
-							DiffuseColor = Color.White,
-							Texture = LoadTexture(meshData.Materials[0])
-						};
+							var meshNode = new MeshNode
+							{
+								Id = meshData.Id,
+								BoundingSphere = BoundingSphere.CreateFromPoints(from v in meshData.Vertices select v.Position)
+							};
 
-						var part = new MeshPart
-						{
-							BoundingSphere = meshNode.BoundingSphere,
-							Mesh = mesh,
-							Material = material
-						};
+							var material = new Material
+							{
+								DiffuseColor = Color.White,
+								Texture = LoadTexture(meshData.Materials[0])
+							};
 
-						meshNode.Parts.Add(part);
-						_model.Meshes.Add(meshNode);
+							var part = new MeshPart
+							{
+								BoundingSphere = meshNode.BoundingSphere,
+								Mesh = mesh,
+								Material = material
+							};
+							meshNode.Parts.Add(part);
+							_model.Meshes.Add(meshNode);
+						}
 
 						_scene.Models.Clear();
 						_scene.Models.Add(_model);

@@ -1,4 +1,4 @@
-﻿namespace OpenSora.Viewer
+﻿namespace OpenSora.Dir
 {
 	public class DirEntry
 	{

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace OpenSora.Viewer
+namespace OpenSora.Dir
 {
 	public static class DirProcessor
 	{

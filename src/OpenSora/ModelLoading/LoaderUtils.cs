@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace OpenSora.Viewer.ModelLoading
+namespace OpenSora.ModelLoading
 {
 	public static class LoaderUtils
 	{

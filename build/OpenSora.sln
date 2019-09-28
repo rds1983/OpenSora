@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Myra", "..\..\Myra\src\Myra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nursia", "..\..\Nursia\src\Nursia\Nursia.csproj", "{92C4C204-FADE-46F9-B898-266F19251E4D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSora", "..\src\OpenSora\OpenSora.csproj", "{F94305BB-A561-4D7D-8C6D-FE872DD7D816}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{92C4C204-FADE-46F9-B898-266F19251E4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92C4C204-FADE-46F9-B898-266F19251E4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92C4C204-FADE-46F9-B898-266F19251E4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F94305BB-A561-4D7D-8C6D-FE872DD7D816}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F94305BB-A561-4D7D-8C6D-FE872DD7D816}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F94305BB-A561-4D7D-8C6D-FE872DD7D816}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F94305BB-A561-4D7D-8C6D-FE872DD7D816}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

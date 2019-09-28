@@ -1,0 +1,6 @@
+[submodule "deps/Myra"]
+	path = deps/Myra
+	url = https://github.com/rds1983/Myra.git
+[submodule "deps/Nursia"]
+	path = deps/Nursia
+	url = https://github.com/rds1983/Nursia.git

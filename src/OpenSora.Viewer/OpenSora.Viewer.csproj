@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Myra\src\Myra\Myra.csproj" />
-    <ProjectReference Include="..\..\..\Nursia\src\Nursia\Nursia.csproj" />
+    <ProjectReference Include="..\..\deps\Myra\src\Myra\Myra.csproj" />
+    <ProjectReference Include="..\..\deps\Nursia\src\Nursia\Nursia.csproj" />
     <ProjectReference Include="..\OpenSora\OpenSora.csproj" />
   </ItemGroup>
 </Project>

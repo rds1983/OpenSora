@@ -5,9 +5,9 @@ VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSora.Viewer", "..\src\OpenSora.Viewer\OpenSora.Viewer.csproj", "{38AE0CE4-4284-44FA-A453-161D9DD5C6FB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Myra", "..\..\Myra\src\Myra\Myra.csproj", "{FAEA5CAF-F779-456C-9D00-38199A9BD03E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Myra", "..\deps\Myra\src\Myra\Myra.csproj", "{FAEA5CAF-F779-456C-9D00-38199A9BD03E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nursia", "..\..\Nursia\src\Nursia\Nursia.csproj", "{92C4C204-FADE-46F9-B898-266F19251E4D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nursia", "..\deps\Nursia\src\Nursia\Nursia.csproj", "{92C4C204-FADE-46F9-B898-266F19251E4D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSora", "..\src\OpenSora\OpenSora.csproj", "{F94305BB-A561-4D7D-8C6D-FE872DD7D816}"
 EndProject

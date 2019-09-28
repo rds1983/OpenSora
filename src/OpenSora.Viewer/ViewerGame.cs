@@ -146,7 +146,7 @@ namespace OpenSora.Viewer
 				}
 			}
 
-			return Assets.White;
+			return DefaultAssets.White;
 		}
 
 		private void LoadFile(FileAndEntry fileAndEntry)

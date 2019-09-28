@@ -15,7 +15,7 @@ For now it consists only from OpenSora.Viewer, wchi is utility that allows to vi
 
 # Camera Controls
 Use W, A, S, D to move camera.
-Hold right mouse button and move mouse to rotate it.
+Hold right button and move mouse to rotate it.
 
 # Credits
 * [MonoGame](http://www.monogame.net/)

@@ -5,7 +5,7 @@ namespace OpenSora.ModelLoading
 {
 	public static class ModelLoader
 	{
-		public static Frame LoadDecompressedModel(Stream stream)
+		public static Frame Load(Stream stream)
 		{
 			using (var reader = new BinaryReader(stream))
 			{

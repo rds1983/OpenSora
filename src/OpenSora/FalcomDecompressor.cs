@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 
-namespace OpenSora.ModelLoading
+namespace OpenSora
 {
-	public static class Decompressor
+	public static class FalcomDecompressor
 	{
 		private class InternalDecompressor
 		{

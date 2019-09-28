@@ -17,6 +17,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using OpenSora;
+using OpenSora.Dir;
+using OpenSora.ModelLoading;
 
 namespace OpenSora.Viewer
 {
@@ -162,7 +165,12 @@ namespace OpenSora.Viewer
 						break;
 					case 1:
 						// Model
-						var frame = ModelLoader.LoadModel(data);
+						var decompressed = FalcomDecompressor.Decompress(data);
+						Frame frame;
+						using (var stream = new MemoryStream(decompressed))
+						{
+							frame = ModelLoader.Load(stream);
+						}
 
 						var meshes = frame.Children[0].Meshes;
 
@@ -213,7 +221,15 @@ namespace OpenSora.Viewer
 			else
 			{
 				var entry = (FileAndEntry)item.Tag;
-				LoadFile(entry);
+				try
+				{
+					LoadFile(entry);
+				}
+				catch(Exception ex)
+				{
+					var msg = Dialog.CreateMessageBox("Error", ex.ToString());
+					msg.ShowModal(_desktop);
+				}
 			}
 		}
 
@@ -343,6 +359,13 @@ namespace OpenSora.Viewer
 			_desktop.Render();
 
 			var bounds = _mainPanel._panelViewer.Bounds;
+
+			if (_desktop.Widgets.Count > 1 && _desktop.Widgets[1] is Window)
+			{
+				// Do not draw resource if there's a window
+				return;
+			}
+
 			if (_mainPanel._comboResourceType.SelectedIndex == 0 && _texture != null)
 			{
 				_spriteBatch.Begin(blendState: BlendState.NonPremultiplied);

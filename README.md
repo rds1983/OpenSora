@@ -17,4 +17,7 @@ For now it consists only from OpenSora.Viewer utility that allows to view "Trail
 Use W, A, S, D to move camera.
 Hold right mouse button and move mouse to rotate it.
 
-
+# Credits
+* [MonoGame](http://www.monogame.net/)
+* [Myra](https://github.com/rds1983/Myra)
+* [Nursia](https://github.com/rds1983/Nursia)

@@ -11,6 +11,7 @@ For now it consists only from OpenSora.Viewer, which is utility to view "Trails 
 1. Download latest binary release(OpenSora.v.v.v.v.zip) from https://github.com/rds1983/OpenSora/releases
 2. Unpack it
 3. Run "OpenSora.Viewer.exe <folder_to_sora_fc>".
+
    I.e. `OpenSora.Viewer.exe "D:\Games\Steam\steamapps\common\Trails in the Sky FC"`
 4. Enjoy.
 

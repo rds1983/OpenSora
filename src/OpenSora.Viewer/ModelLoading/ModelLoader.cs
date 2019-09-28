@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace OpenSora.Viewer
+namespace OpenSora.Viewer.ModelLoading
 {
 	static class ModelLoader
 	{
@@ -162,13 +162,38 @@ namespace OpenSora.Viewer
 			}
 		}
 
-		public static void LoadModel(byte[] data)
+		private static Frame LoadDecompressedModel(MemoryStream stream)
 		{
-			byte[] result;
-			using (var output = new MemoryStream())
+			using (var reader = new BinaryReader(stream))
+			{
+				reader.SkipBytes(4);
+
+				int length = 0;
+				var id = reader.LoadZeroTerminatedString(out length);
+
+				var rootFrame = new Frame
+				{
+					Id = id
+				};
+
+				try
+				{
+					rootFrame.LoadFromStream(reader);
+				}
+				catch (Exception)
+				{
+				}
+
+				return rootFrame;
+			}
+		}
+
+		public static Frame LoadModel(byte[] compressed)
+		{
+			using (var decompressed = new MemoryStream())
 			{
 				var decompressor = new Decompressor();
-				using (var stream = new MemoryStream(data))
+				using (var stream = new MemoryStream(compressed))
 				using (var reader = new BinaryReader(stream))
 				{
 					while (true)
@@ -180,7 +205,7 @@ namespace OpenSora.Viewer
 						{
 							decompressor.Decompress(reader);
 
-							output.Write(decompressor.Output, 0, decompressor.OutputSize);
+							decompressed.Write(decompressor.Output, 0, decompressor.OutputSize);
 						}
 						else
 						{
@@ -195,10 +220,9 @@ namespace OpenSora.Viewer
 					}
 				}
 
-				result = output.ToArray();
+				decompressed.Seek(0, SeekOrigin.Begin);
+				return LoadDecompressedModel(decompressed);
 			}
-
-			File.WriteAllBytes("d:\\temp\\output.x2", result);
 		}
 	}
 }

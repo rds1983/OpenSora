@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Myra\src\Myra\Myra.csproj" />
+    <ProjectReference Include="..\..\..\Nursia\src\Nursia\Nursia.csproj" />
   </ItemGroup>
 
 </Project>

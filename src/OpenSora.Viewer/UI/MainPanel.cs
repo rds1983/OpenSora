@@ -3,7 +3,7 @@ using Myra.Graphics2D.UI;
 
 namespace OpenSora.Viewer.UI
 {
-	public partial class MainPanel: Panel
+	public partial class MainPanel: VerticalBox
 	{
 		public MainPanel()
 		{

@@ -7,17 +7,10 @@ namespace OpenSora.Viewer
 	{
 		static void Main(string[] args)
 		{
-			if (args.Length < 1)
-			{
-				Console.WriteLine("Usage: OpenSora.Viewer <folder_to_sora_fc>");
-				return;
-			}
-
 			try
 			{
 				using (var game = new ViewerGame())
 				{
-					game.SoraFolder = args[0];
 					game.Run();
 				}
 			}

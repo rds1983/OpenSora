@@ -41,16 +41,29 @@ namespace OpenSora.Viewer
 		private readonly ForwardRenderer _renderer = new ForwardRenderer();
 		private readonly Scene _scene = new Scene();
 		private CameraInputController _controller;
-
-		public string SoraFolder;
+		private readonly State _state;
 
 		public ViewerGame()
 		{
-			_graphics = new GraphicsDeviceManager(this)
+			// Restore state
+			_state = State.Load();
+
+			if (_state != null)
 			{
-				PreferredBackBufferWidth = 1200,
-				PreferredBackBufferHeight = 800
-			};
+				_graphics = new GraphicsDeviceManager(this)
+				{
+					PreferredBackBufferWidth = _state.Size.X,
+					PreferredBackBufferHeight = _state.Size.Y
+				};
+			}
+			else
+			{
+				_graphics = new GraphicsDeviceManager(this)
+				{
+					PreferredBackBufferWidth = 1200,
+					PreferredBackBufferHeight = 800
+				};
+			}
 
 			Window.AllowUserResizing = true;
 			IsMouseVisible = true;
@@ -72,6 +85,7 @@ namespace OpenSora.Viewer
 			MyraEnvironment.Game = this;
 			_mainPanel = new MainPanel();
 
+			_mainPanel._buttonChange.Click += OnChangeFolder;
 			_mainPanel._listFiles.SelectedIndexChanged += _listFiles_SelectedIndexChanged;
 			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
 
@@ -80,8 +94,10 @@ namespace OpenSora.Viewer
 			_desktop = new Desktop();
 			_desktop.Widgets.Add(_mainPanel);
 
-//			folder = @"D:\Games\Steam\steamapps\common\Trails in the Sky FC";
-			SetFolder(SoraFolder);
+			if (_state != null)
+			{
+				SetFolder(_state.LastFolder);
+			}
 
 			// Nursia
 			Nrs.Game = this;
@@ -91,11 +107,11 @@ namespace OpenSora.Viewer
 			_controller = new CameraInputController(_scene.Camera);
 
 			// Add a light
-/*			_scene.Lights.Add(new DirectLight
-			{
-				Color = Color.White,
-				Direction = new Vector3(-1, -1, -1)
-			});*/
+			/*			_scene.Lights.Add(new DirectLight
+						{
+							Color = Color.White,
+							Direction = new Vector3(-1, -1, -1)
+						});*/
 
 			//			_renderer.RasterizerState = RasterizerState.CullNone;
 			_renderer.BlendState = BlendState.NonPremultiplied;
@@ -103,7 +119,15 @@ namespace OpenSora.Viewer
 
 		private void _comboResourceType_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			RefreshFiles();
+			try
+			{
+				RefreshFiles();
+			}
+			catch (Exception ex)
+			{
+				var msg = Dialog.CreateMessageBox("Error", ex.ToString());
+				msg.ShowModal(_desktop);
+			}
 		}
 
 		private byte[] LoadData(string dataFilePath, DirEntry entry)
@@ -225,7 +249,7 @@ namespace OpenSora.Viewer
 				{
 					LoadFile(entry);
 				}
-				catch(Exception ex)
+				catch (Exception ex)
 				{
 					var msg = Dialog.CreateMessageBox("Error", ex.ToString());
 					msg.ShowModal(_desktop);
@@ -277,8 +301,55 @@ namespace OpenSora.Viewer
 
 		private void SetFolder(string folder)
 		{
-			_entries = DirProcessor.BuildEntries(folder);
-			RefreshFiles();
+			try
+			{
+				_mainPanel._textPath.Text = folder;
+				_entries = null;
+				if (!string.IsNullOrEmpty(folder))
+				{
+					_entries = DirProcessor.BuildEntries(folder);
+				}
+
+				RefreshFiles();
+			}
+			catch (Exception ex)
+			{
+				var msg = Dialog.CreateMessageBox("Error", ex.ToString());
+				msg.ShowModal(_desktop);
+			}
+		}
+
+		private void OnChangeFolder(object sender, EventArgs e)
+		{
+			var dlg = new FileDialog(FileDialogMode.ChooseFolder);
+
+			try
+			{
+				if (!string.IsNullOrEmpty(_mainPanel._textPath.Text))
+				{
+					dlg.Folder = _mainPanel._textPath.Text;
+				}
+				else
+				{
+					var folder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+					dlg.Folder = folder;
+				}
+			}
+			catch (Exception)
+			{
+			}
+
+			dlg.Closed += (s, a) =>
+			{
+				if (!dlg.Result)
+				{
+					return;
+				}
+
+				SetFolder(dlg.FilePath);
+			};
+
+			dlg.ShowModal(_desktop);
 		}
 
 		protected override void Update(GameTime gameTime)
@@ -359,6 +430,19 @@ namespace OpenSora.Viewer
 					device.Viewport = oldViewport;
 				}
 			}
+		}
+
+		protected override void EndRun()
+		{
+			base.EndRun();
+
+			var state = new State
+			{
+				Size = new Point(GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight),
+				LastFolder = _mainPanel._textPath.Text,
+			};
+
+			state.Save();
 		}
 	}
 }

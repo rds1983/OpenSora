@@ -35,7 +35,14 @@ namespace Unpacker
 							continue;
 						}
 
-						Console.WriteLine("Unpacking '{0}'", entry.Name);
+						var unpack = entry.Name.EndsWith("_X2") || entry.Name.EndsWith("_X3");
+						if (unpack)
+						{
+							Console.WriteLine("Unpacking '{0}'", entry.Name);
+						} else
+						{
+							Console.WriteLine("Saving '{0}'", entry.Name);
+						}
 
 						try
 						{
@@ -45,7 +52,7 @@ namespace Unpacker
 								stream.Seek(entry.Offset, SeekOrigin.Begin);
 								stream.Read(bytes, 0, bytes.Length);
 							}
-							if (entry.CompressedSize != entry.DecompressedSize)
+							if (unpack)
 							{
 								bytes = FalcomDecompressor.Decompress(bytes);
 							}

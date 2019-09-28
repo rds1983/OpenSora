@@ -1,9 +1,14 @@
 <Project>
-  <ExportOptions Namespace="OpenSora.Viewer.UI" Class="MainPanel" OutputPath="D:\Projects\OpenSora\src\OpenSora.Viewer\UI" />
-  <VerticalBox Spacing="8" HorizontalAlignment="Stretch">
+  <ExportOptions Namespace="OpenSora.Viewer.UI" Class="MainPanel" OutputPath="D:\Projects\OpenSora\src\Viewer\UI" />
+  <VerticalBox Spacing="8">
     <Proportions>
+      <Proportion />
       <Proportion Type="Fill" />
     </Proportions>
+    <HorizontalBox Spacing="8">
+      <TextField Text="" Readonly="True" Id="_textPath" Width="300" />
+      <TextButton Text="Change..." Id="_buttonChange" />
+    </HorizontalBox>
     <Grid ColumnSpacing="8" RowSpacing="8">
       <ColumnsProportions>
         <Proportion />

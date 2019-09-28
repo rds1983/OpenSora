@@ -91,11 +91,11 @@ namespace OpenSora.Viewer
 			_controller = new CameraInputController(_scene.Camera);
 
 			// Add a light
-			_scene.Lights.Add(new DirectLight
+/*			_scene.Lights.Add(new DirectLight
 			{
 				Color = Color.White,
 				Direction = new Vector3(-1, -1, -1)
-			});
+			});*/
 
 			//			_renderer.RasterizerState = RasterizerState.CullNone;
 			_renderer.BlendState = BlendState.NonPremultiplied;

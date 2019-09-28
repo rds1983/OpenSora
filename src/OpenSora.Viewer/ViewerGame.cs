@@ -42,6 +42,8 @@ namespace OpenSora.Viewer
 		private readonly Scene _scene = new Scene();
 		private CameraInputController _controller;
 
+		public string SoraFolder;
+
 		public ViewerGame()
 		{
 			_graphics = new GraphicsDeviceManager(this)
@@ -70,7 +72,6 @@ namespace OpenSora.Viewer
 			MyraEnvironment.Game = this;
 			_mainPanel = new MainPanel();
 
-			_mainPanel._buttonChange.Click += OnChangeFolder;
 			_mainPanel._listFiles.SelectedIndexChanged += _listFiles_SelectedIndexChanged;
 			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
 
@@ -79,9 +80,8 @@ namespace OpenSora.Viewer
 			_desktop = new Desktop();
 			_desktop.Widgets.Add(_mainPanel);
 
-			var folder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-			folder = @"D:\Games\Steam\steamapps\common\Trails in the Sky FC";
-			SetFolder(folder);
+//			folder = @"D:\Games\Steam\steamapps\common\Trails in the Sky FC";
+			SetFolder(SoraFolder);
 
 			// Nursia
 			Nrs.Game = this;
@@ -279,41 +279,6 @@ namespace OpenSora.Viewer
 		{
 			_entries = DirProcessor.BuildEntries(folder);
 			RefreshFiles();
-
-			_mainPanel._textPath.Text = folder;
-		}
-
-		private void OnChangeFolder(object sender, EventArgs e)
-		{
-			; var dlg = new FileDialog(FileDialogMode.ChooseFolder);
-
-			try
-			{
-				if (!string.IsNullOrEmpty(_mainPanel._textPath.Text))
-				{
-					dlg.Folder = _mainPanel._textPath.Text;
-				}
-				else
-				{
-					var folder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-					dlg.Folder = folder;
-				}
-			}
-			catch (Exception)
-			{
-			}
-
-			dlg.Closed += (s, a) =>
-			{
-				if (!dlg.Result)
-				{
-					return;
-				}
-
-				SetFolder(dlg.FilePath);
-			};
-
-			dlg.ShowModal(_desktop);
 		}
 
 		protected override void Update(GameTime gameTime)

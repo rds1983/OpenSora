@@ -20,6 +20,7 @@ using System.Reflection;
 using OpenSora;
 using OpenSora.Dir;
 using OpenSora.ModelLoading;
+using System.Threading.Tasks;
 
 namespace OpenSora.Viewer
 {
@@ -39,10 +40,11 @@ namespace OpenSora.Viewer
 		private Dictionary<string, List<DirEntry>> _entries;
 		private NursiaModel _model;
 		private readonly ForwardRenderer _renderer = new ForwardRenderer();
-		private readonly Scene _scene = new Scene();
+		private Scene _scene = new Scene();
 		private CameraInputController _controller;
 		private readonly State _state;
 		private static readonly List<DirectLight> _defaultLights = new List<DirectLight>();
+		private Queue<string> _statusMessages = new Queue<string>();
 
 		static ViewerGame()
 		{
@@ -117,6 +119,8 @@ namespace OpenSora.Viewer
 			_mainPanel._comboResourceType.SelectedIndex = 1;
 
 			_mainPanel._checkLightning.PressedChanged += _checkLightning_PressedChanged;
+
+			PushStatusMessage(string.Empty);
 
 			_desktop = new Desktop();
 			_desktop.Widgets.Add(_mainPanel);
@@ -211,83 +215,125 @@ namespace OpenSora.Viewer
 			return DefaultAssets.White;
 		}
 
-		private void LoadFile(FileAndEntry fileAndEntry)
+		private void PushStatusMessage(string text)
 		{
-			if (fileAndEntry != null)
+			lock(_statusMessages)
 			{
-				var data = LoadData(fileAndEntry.DataFilePath, fileAndEntry.Entry);
+				_statusMessages.Enqueue(text);
+			}
+		}
 
-				switch (_mainPanel._comboResourceType.SelectedIndex)
+		private void ProcessMesh(string statusPrefix, MeshData meshData, int meshCount)
+		{
+			var mesh = Mesh.Create(meshData.Vertices.ToArray(), meshData.Indices.ToArray());
+			foreach (var md in meshData.Materials)
+			{
+				if (md.PrimitivesCount == 0 || md.VerticesCount == 0)
 				{
-					case 0:
-						// Texture
-						var image = DDS.LoadImage(data);
-						_texture = new Texture2D(GraphicsDevice, image.Width, image.Height);
-						_texture.SetData(image.Data);
+					continue;
+				}
 
-/*						using (var output = File.OpenWrite(@"D:\Temp\" + fileAndEntry.Entry.Name + ".png"))
-						{
-							_texture.SaveAsPng(output, _texture.Width, _texture.Height);
-						}*/
-						break;
-					case 1:
-						// Model
-						var decompressed = FalcomDecompressor.Decompress(data);
-						Frame frame;
-						using (var stream = new MemoryStream(decompressed))
-						{
-							frame = ModelLoader.Load(stream);
-						}
+				var meshNode = new MeshNode
+				{
+					Id = meshData.Id,
+					BoundingSphere = BoundingSphere.CreateFromPoints(from v in meshData.Vertices select v.Position)
+				};
 
-						var meshes = frame.Children[0].Meshes;
+				var material = new Material
+				{
+					DiffuseColor = Color.White,
+					Texture = LoadTexture(md.TextureName)
+				};
 
-						_model = new NursiaModel();
+				var part = new MeshPart
+				{
+					BoundingSphere = meshNode.BoundingSphere,
+					Mesh = mesh,
+					Material = material,
+					VertexCount = md.VerticesCount,
+					StartIndex = md.PrimitivesStart * 3,
+					PrimitiveCount = md.PrimitivesCount
+				};
+				meshNode.Parts.Add(part);
 
-						foreach (var meshData in meshes)
-						{
-							var mesh = Mesh.Create(meshData.Vertices.ToArray(), meshData.Indices.ToArray());
-
-							foreach (var md in meshData.Materials)
-							{
-								if (md.PrimitivesCount == 0 || md.VerticesCount == 0)
-								{
-									continue;
-								}
-
-								var meshNode = new MeshNode
-								{
-									Id = meshData.Id,
-									BoundingSphere = BoundingSphere.CreateFromPoints(from v in meshData.Vertices select v.Position)
-								};
-
-								var material = new Material
-								{
-									DiffuseColor = Color.White,
-									Texture = LoadTexture(md.TextureName)
-								};
-
-								var part = new MeshPart
-								{
-									BoundingSphere = meshNode.BoundingSphere,
-									Mesh = mesh,
-									Material = material,
-									StartVertex = md.VerticesStart,
-									VertexCount = md.VerticesCount,
-									StartIndex = md.PrimitivesStart * 3,
-									PrimitiveCount = md.PrimitivesCount
-								};
-								meshNode.Parts.Add(part);
-								_model.Meshes.Add(meshNode);
-							}
-						}
-
-						_scene.Models.Clear();
-						_scene.Models.Add(_model);
-
-						_scene.Camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
-						break;
+				lock (_model)
+				{
+					_model.Meshes.Add(meshNode);
 				}
 			}
+
+			PushStatusMessage(string.Format(statusPrefix + "Meshed proceeded {0}/{1}", _model.Meshes.Count, meshCount));
+		}
+
+		private void LoadFile(FileAndEntry fileAndEntry)
+		{
+			if (fileAndEntry == null)
+			{
+				return;
+			}
+
+			var statusPrefix = string.Format("Loading '{0}'", fileAndEntry.Entry.Name);
+			PushStatusMessage(statusPrefix);
+			var data = LoadData(fileAndEntry.DataFilePath, fileAndEntry.Entry);
+
+			statusPrefix += ": ";
+
+			switch (_mainPanel._comboResourceType.SelectedIndex)
+			{
+				case 0:
+					// Texture
+					var image = DDS.LoadImage(data);
+					_texture = new Texture2D(GraphicsDevice, image.Width, image.Height);
+					_texture.SetData(image.Data);
+
+					/*						using (var output = File.OpenWrite(@"D:\Temp\" + fileAndEntry.Entry.Name + ".png"))
+											{
+												_texture.SaveAsPng(output, _texture.Width, _texture.Height);
+											}*/
+					break;
+				case 1:
+					// Model
+					PushStatusMessage(statusPrefix + "Decompressing");
+					var decompressed = FalcomDecompressor.Decompress(data);
+
+					PushStatusMessage(statusPrefix + "Parsing mesh data");
+
+					Frame frame;
+					using (var stream = new MemoryStream(decompressed))
+					{
+						frame = ModelLoader.Load(stream);
+					}
+
+					var meshes = frame.Children[0].Meshes;
+
+					_model = new NursiaModel();
+
+					var tasks = new List<Task>();
+
+					var meshesCount = (from m in meshes select m.Materials.Count).Sum();
+					foreach (var meshData in meshes)
+					{
+						tasks.Add(Task.Factory.StartNew(() =>
+						{
+							ProcessMesh(statusPrefix, meshData, meshesCount);
+						}));
+					}
+
+					Task.WaitAll(tasks.ToArray());
+
+					var scene = new Scene();
+					scene.Models.Add(_model);
+					scene.Camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
+					_controller = new CameraInputController(scene.Camera);
+					_scene = scene;
+					break;
+			}
+
+			lock(_statusMessages)
+			{
+				_statusMessages.Clear();
+			}
+			PushStatusMessage(string.Empty);
 		}
 
 		private void _listFiles_SelectedIndexChanged(object sender, EventArgs e)
@@ -300,15 +346,23 @@ namespace OpenSora.Viewer
 			else
 			{
 				var entry = (FileAndEntry)item.Tag;
-				try
+
+				Task.Factory.StartNew(() =>
 				{
-					LoadFile(entry);
-				}
-				catch (Exception ex)
-				{
-					var msg = Dialog.CreateMessageBox("Error", ex.ToString());
-					msg.ShowModal(_desktop);
-				}
+					try
+					{
+						_mainPanel._listFiles.Enabled = false;
+						LoadFile(entry);
+					}
+					catch (Exception ex)
+					{
+						PushStatusMessage(string.Format("Failed to loading '{0}': {1}", entry.Entry.Name, ex.Message));
+					}
+					finally
+					{
+						_mainPanel._listFiles.Enabled = true;
+					}
+				});
 			}
 		}
 
@@ -447,15 +501,7 @@ namespace OpenSora.Viewer
 
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 
-			_desktop.Render();
-
 			var bounds = _mainPanel._panelViewer.Bounds;
-
-			if (_desktop.Widgets.Count > 1 && _desktop.Widgets[1] is Window)
-			{
-				// Do not draw resource if there's a window
-				return;
-			}
 
 			if (_mainPanel._comboResourceType.SelectedIndex == 0 && _texture != null)
 			{
@@ -485,6 +531,16 @@ namespace OpenSora.Viewer
 					device.Viewport = oldViewport;
 				}
 			}
+
+			lock (_statusMessages)
+			{
+				if (_statusMessages.Count > 0)
+				{
+					_mainPanel._textStatus.Text = _statusMessages.Dequeue();
+				}
+			}
+
+			_desktop.Render();
 		}
 
 		protected override void EndRun()

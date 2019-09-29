@@ -25,6 +25,7 @@ Hold right button and move mouse to rotate it.
 
 # Credits
 * [uyjulian](https://github.com/uyjulian)
+* [Kiseki-Texture-Tool](https://github.com/Sewer56/Kiseki-Texture-Tool)
 * [MonoGame](http://www.monogame.net/)
 * [Myra](https://github.com/rds1983/Myra)
 * [Nursia](https://github.com/rds1983/Nursia)

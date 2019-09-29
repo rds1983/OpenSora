@@ -1,30 +1,30 @@
 <Project>
-  <ExportOptions Namespace="OpenSora.Viewer.UI" Class="MainPanel" OutputPath="D:\Projects\OpenSora\src\Viewer\UI" />
-  <VerticalBox Spacing="8" HorizontalAlignment="Stretch" >
-    <Proportions>
-      <Proportion />
+  <Project.ExportOptions Namespace="OpenSora.Viewer.UI" Class="MainPanel" OutputPath="D:\Projects\OpenSora\src\Viewer\UI" />
+  <VerticalBox Spacing="8">
+    <VerticalBox.Proportions>
+      <Proportion Type="Auto" />
       <Proportion Type="Fill" />
-    </Proportions>
-    <HorizontalBox Spacing="8" >
-      <Proportions>
-        <Proportion />
-        <Proportion />
+    </VerticalBox.Proportions>
+    <HorizontalBox Spacing="8">
+      <HorizontalBox.Proportions>
+        <Proportion Type="Auto" />
+        <Proportion Type="Auto" />
         <Proportion Type="Fill" />
-      </Proportions>
+      </HorizontalBox.Proportions>
       <TextField Text="" Readonly="True" Id="_textPath" Width="300" />
       <TextButton Text="Change..." Id="_buttonChange" />
       <TextButton Text="About" Id="_buttonAbout" HorizontalAlignment="Right" />
     </HorizontalBox>
     <Grid ColumnSpacing="8" RowSpacing="8">
-      <ColumnsProportions>
-        <Proportion />
+      <Grid.ColumnsProportions>
+        <Proportion Type="Auto" />
         <Proportion Type="Fill" />
-      </ColumnsProportions>
-      <RowsProportions>
-        <Proportion />
-        <Proportion />
+      </Grid.ColumnsProportions>
+      <Grid.RowsProportions>
+        <Proportion Type="Auto" />
+        <Proportion Type="Auto" />
         <Proportion Type="Fill" />
-      </RowsProportions>
+      </Grid.RowsProportions>
       <ComboBox Id="_comboResourceType" HorizontalAlignment="Stretch">
         <ListItem Text="Textures" />
         <ListItem Text="Models" />

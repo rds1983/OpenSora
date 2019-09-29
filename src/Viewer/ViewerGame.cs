@@ -134,7 +134,7 @@ namespace OpenSora.Viewer
 			_controller = new CameraInputController(_scene.Camera);
 
 			_renderer.RasterizerState = RasterizerState.CullCounterClockwise;
-			_renderer.BlendState = BlendState.NonPremultiplied;
+			_renderer.BlendState = BlendState.Opaque;
 		}
 
 		private void _checkLightning_PressedChanged(object sender, EventArgs e)
@@ -224,6 +224,11 @@ namespace OpenSora.Viewer
 						var image = DDS.LoadImage(data);
 						_texture = new Texture2D(GraphicsDevice, image.Width, image.Height);
 						_texture.SetData(image.Data);
+
+/*						using (var output = File.OpenWrite(@"D:\Temp\" + fileAndEntry.Entry.Name + ".png"))
+						{
+							_texture.SaveAsPng(output, _texture.Width, _texture.Height);
+						}*/
 						break;
 					case 1:
 						// Model

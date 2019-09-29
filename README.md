@@ -10,7 +10,7 @@ For now it consists only from OpenSora.Viewer, which is utility to view "Trails 
 # Usage
 1. Download latest binary release(OpenSora.v.v.v.v.zip) from https://github.com/rds1983/OpenSora/releases
 2. Unpack it
-3. Run "OpenSora.Viewer.exe"
+3. Run "Viewer.exe"
 4. Click `Change...` button and choose folder with Sora FC(I.e. `D:\Games\Steam\steamapps\common\Trails in the Sky FC`)
 5. Enjoy
 

@@ -132,13 +132,10 @@ namespace Imaging.DDSReader
 			for (int i = 0; i < result.Data.Length; i++)
 			{
 				// iterate through bytes.
-				// Bitmap stores it's data in RGBA order.
-				// DDS stores it's data in BGRA order.
-				result.Data[i].R = rawData[i * 4 + 2];
+				result.Data[i].R = rawData[i * 4 + 0];
 				result.Data[i].G = rawData[i * 4 + 1];
-				result.Data[i].B = rawData[i * 4 + 0];
+				result.Data[i].B = rawData[i * 4 + 2];
 				result.Data[i].A = rawData[i * 4 + 3];
-
 			}
 
 			return result;

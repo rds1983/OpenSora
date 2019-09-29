@@ -46,13 +46,15 @@ namespace OpenSora.ModelLoading
 
 			for (var i = 0; i < texturesCount; ++i)
 			{
-				var material = new MaterialData();
+				var material = new MaterialData
+				{
+					PrimitivesStart = reader.ReadInt32(),
+					PrimitivesCount = reader.ReadInt32(),
+					VerticesStart = reader.ReadInt32(),
+					VerticesCount = reader.ReadInt32()
+				};
 
-				reader.SkipBytes(4);
-				material.PrimitivesCount = reader.ReadInt32();
-				reader.SkipBytes(4);
-				material.VerticesCount = reader.ReadInt32();
-				reader.SkipBytes(4);
+				var unused = reader.ReadInt32();
 
 				reader.SkipBytes(164);
 
@@ -93,6 +95,24 @@ namespace OpenSora.ModelLoading
 			for (var i = 0; i < indicesCount; ++i)
 			{
 				_indices.Add(reader.ReadInt16());
+			}
+
+			int maxv = 0, maxi = 0, sumv = 0, sumi = 0;
+			foreach(var m in _materials)
+			{
+				if (m.PrimitivesStart > maxi)
+				{
+					maxi = m.PrimitivesStart;
+				}
+
+				sumi += m.PrimitivesCount;
+
+				if (m.VerticesStart > maxv)
+				{
+					maxv = m.VerticesStart;
+				}
+
+				sumv += m.VerticesCount;
 			}
 
 			reader.SkipBytes(44);

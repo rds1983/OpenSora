@@ -73,6 +73,8 @@ namespace OpenSora.Viewer
 				IsFixedTimeStep = false;
 				_graphics.SynchronizeWithVerticalRetrace = false;
 			}
+
+			Window.Title = "OpenSora.Viewer";
 		}
 
 		protected override void LoadContent()
@@ -86,6 +88,7 @@ namespace OpenSora.Viewer
 			_mainPanel = new MainPanel();
 
 			_mainPanel._buttonChange.Click += OnChangeFolder;
+			_mainPanel._buttonAbout.Click += OnAbout;
 			_mainPanel._listFiles.SelectedIndexChanged += _listFiles_SelectedIndexChanged;
 			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
 
@@ -115,6 +118,13 @@ namespace OpenSora.Viewer
 
 			//			_renderer.RasterizerState = RasterizerState.CullNone;
 			_renderer.BlendState = BlendState.NonPremultiplied;
+		}
+
+		private void OnAbout(object sender, EventArgs e)
+		{
+			var name = new AssemblyName(GetType().Assembly.FullName);
+			var messageBox = Dialog.CreateMessageBox("About", "OpenSora.Viewer " + name.Version.ToString());
+			messageBox.ShowModal(_desktop);
 		}
 
 		private void _comboResourceType_SelectedIndexChanged(object sender, EventArgs e)
@@ -204,7 +214,6 @@ namespace OpenSora.Viewer
 						{
 							var mesh = Mesh.Create(meshData.Vertices.ToArray(), meshData.Indices.ToArray());
 
-							int verticesIndex = 0, primitivesIndex = 0;
 							foreach (var md in meshData.Materials)
 							{
 								if (md.PrimitivesCount == 0 || md.VerticesCount == 0)
@@ -229,16 +238,13 @@ namespace OpenSora.Viewer
 									BoundingSphere = meshNode.BoundingSphere,
 									Mesh = mesh,
 									Material = material,
-/*									StartVertex = verticesIndex,
+									StartVertex = md.VerticesStart,
 									VertexCount = md.VerticesCount,
-									StartIndex = primitivesIndex * 3,
-									PrimitiveCount = md.PrimitivesCount*/
+									StartIndex = md.PrimitivesStart * 3,
+									PrimitiveCount = md.PrimitivesCount
 								};
 								meshNode.Parts.Add(part);
 								_model.Meshes.Add(meshNode);
-
-								verticesIndex += md.VerticesCount;
-								primitivesIndex += md.PrimitivesCount;
 							}
 						}
 

@@ -30,12 +30,27 @@ namespace Unpacker
 							continue;
 						}
 
-						if (!entry.Name.EndsWith("_X2") && !entry.Name.EndsWith("_X3") && !entry.Name.EndsWith("_DS"))
+						if (entry.Name.EndsWith("_X2") || 
+							entry.Name.EndsWith("_X3") ||
+							entry.Name.EndsWith("_DS") ||
+							entry.Name.EndsWith("WAV") ||
+							entry.Name.EndsWith("_CP") ||
+							entry.Name.EndsWith("_CH") ||
+							entry.Name.EndsWith("_CT") ||
+							entry.Name.EndsWith("_SN") ||
+							entry.Name.EndsWith("_DA") ||
+							entry.Name.EndsWith("_DT"))
 						{
 							continue;
 						}
 
-						var unpack = entry.Name.EndsWith("_X2") || entry.Name.EndsWith("_X3");
+
+						/*						if (!entry.Name.EndsWith("_X2") && !entry.Name.EndsWith("_X3") && !entry.Name.EndsWith("_DS"))
+												{
+													continue;
+												}*/
+
+						var unpack = !entry.Name.EndsWith("_DT");
 						if (unpack)
 						{
 							Console.WriteLine("Unpacking '{0}'", entry.Name);

@@ -204,26 +204,42 @@ namespace OpenSora.Viewer
 						{
 							var mesh = Mesh.Create(meshData.Vertices.ToArray(), meshData.Indices.ToArray());
 
-							var meshNode = new MeshNode
+							int verticesIndex = 0, primitivesIndex = 0;
+							foreach (var md in meshData.Materials)
 							{
-								Id = meshData.Id,
-								BoundingSphere = BoundingSphere.CreateFromPoints(from v in meshData.Vertices select v.Position)
-							};
+								if (md.PrimitivesCount == 0 || md.VerticesCount == 0)
+								{
+									continue;
+								}
 
-							var material = new Material
-							{
-								DiffuseColor = Color.White,
-								Texture = LoadTexture(meshData.Materials[0])
-							};
+								var meshNode = new MeshNode
+								{
+									Id = meshData.Id,
+									BoundingSphere = BoundingSphere.CreateFromPoints(from v in meshData.Vertices select v.Position)
+								};
 
-							var part = new MeshPart
-							{
-								BoundingSphere = meshNode.BoundingSphere,
-								Mesh = mesh,
-								Material = material
-							};
-							meshNode.Parts.Add(part);
-							_model.Meshes.Add(meshNode);
+								var material = new Material
+								{
+									DiffuseColor = Color.White,
+									Texture = LoadTexture(md.TextureName)
+								};
+
+								var part = new MeshPart
+								{
+									BoundingSphere = meshNode.BoundingSphere,
+									Mesh = mesh,
+									Material = material,
+/*									StartVertex = verticesIndex,
+									VertexCount = md.VerticesCount,
+									StartIndex = primitivesIndex * 3,
+									PrimitiveCount = md.PrimitivesCount*/
+								};
+								meshNode.Parts.Add(part);
+								_model.Meshes.Add(meshNode);
+
+								verticesIndex += md.VerticesCount;
+								primitivesIndex += md.PrimitivesCount;
+							}
 						}
 
 						_scene.Models.Clear();

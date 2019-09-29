@@ -7,13 +7,13 @@ namespace OpenSora.ModelLoading
 {
 	public class MeshData
 	{
-		private readonly List<string> _materials = new List<string>();
+		private readonly List<MaterialData> _materials = new List<MaterialData>();
 		private readonly List<VertexPositionNormalTexture> _vertices = new List<VertexPositionNormalTexture>();
 		private readonly List<short> _indices = new List<short>();
 
 		public string Id;
 
-		public List<string> Materials
+		public List<MaterialData> Materials
 		{
 			get
 			{
@@ -43,25 +43,25 @@ namespace OpenSora.ModelLoading
 			reader.SkipBytes(264 - (Id.Length + 1));
 
 			var texturesCount = reader.ReadInt32();
-			reader.SkipBytes(16);
-
-			reader.SkipBytes(168);
 
 			for (var i = 0; i < texturesCount; ++i)
 			{
+				var material = new MaterialData();
+
+				reader.SkipBytes(4);
+				material.PrimitivesCount = reader.ReadInt32();
+				reader.SkipBytes(4);
+				material.VerticesCount = reader.ReadInt32();
+				reader.SkipBytes(4);
+
+				reader.SkipBytes(164);
+
 				int length;
-				var id = reader.LoadZeroTerminatedString(out length);
+				material.TextureName = reader.LoadZeroTerminatedString(out length);
 
-				if (i < texturesCount - 1)
-				{
-					reader.SkipBytes(544 - length);
-				}
-				else
-				{
-					reader.SkipBytes(360 - length);
-				}
+				reader.SkipBytes(360 - length);
 
-				_materials.Add(id);
+				_materials.Add(material);
 			}
 
 			var verticesCount = reader.ReadInt32();
@@ -69,7 +69,15 @@ namespace OpenSora.ModelLoading
 			{
 				var floats = new float[10];
 
-				for (var j = 0; j < floats.Length; ++j)
+				for (var j = 0; j <= 5; ++j)
+				{
+					floats[j] = reader.ReadSingle();
+				}
+
+				int i1 = reader.ReadInt32();
+				int i2 = reader.ReadInt32();
+
+				for (var j = 8; j <= 9; ++j)
 				{
 					floats[j] = reader.ReadSingle();
 				}

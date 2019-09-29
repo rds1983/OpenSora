@@ -18,6 +18,11 @@ For now it consists only from OpenSora.Viewer, which is utility to view "Trails 
 Use W, A, S, D to move camera.
 Hold right button and move mouse to rotate it.
 
+# Building from source code
+1. `git clone https://github.com/rds1983/OpenSora.git`
+2. `git submodule update --init --recursive`
+3. Open solution from the build folder in VS 2017+
+
 # Credits
 * [uyjulian](https://github.com/uyjulian)
 * [MonoGame](http://www.monogame.net/)

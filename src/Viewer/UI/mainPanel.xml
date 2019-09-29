@@ -22,17 +22,19 @@
       </ColumnsProportions>
       <RowsProportions>
         <Proportion />
+        <Proportion />
         <Proportion Type="Fill" />
       </RowsProportions>
       <ComboBox Id="_comboResourceType" HorizontalAlignment="Stretch">
         <ListItem Text="Textures" />
         <ListItem Text="Models" />
       </ComboBox>
-      <ListBox Id="_listFiles" VerticalAlignment="Stretch" GridRow="1">
+      <CheckBox Text="Lightning" Id="_checkLightning" GridRow="1" />
+      <ListBox Id="_listFiles" VerticalAlignment="Stretch" GridRow="2">
         <ListItem Text="TEXTURE1._DS" />
         <ListItem Text="TEXTURE2._DS" />
       </ListBox>
-      <Panel Id="_panelViewer" GridColumn="1" GridRowSpan="2" />
+      <Panel Id="_panelViewer" GridColumn="1" GridRowSpan="3" />
     </Grid>
   </VerticalBox>
 </Project>

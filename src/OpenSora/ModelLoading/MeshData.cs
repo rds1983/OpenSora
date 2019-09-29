@@ -85,7 +85,7 @@ namespace OpenSora.ModelLoading
 				}
 
 				_vertices.Add(new VertexPositionNormalTexture(
-					new Vector3(floats[0], floats[1], floats[2]),
+					new Vector3(floats[0], floats[1], -floats[2]),
 					new Vector3(floats[3], floats[4], floats[5]),
 					new Vector2(floats[8], floats[9])
 				));

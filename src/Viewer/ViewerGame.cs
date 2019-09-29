@@ -42,6 +42,28 @@ namespace OpenSora.Viewer
 		private readonly Scene _scene = new Scene();
 		private CameraInputController _controller;
 		private readonly State _state;
+		private static readonly List<DirectLight> _defaultLights = new List<DirectLight>();
+
+		static ViewerGame()
+		{
+			_defaultLights.Add(new DirectLight
+			{
+				Direction = new Vector3(-0.5265408f, -0.5735765f, -0.6275069f),
+				Color = new Color(1, 0.9607844f, 0.8078432f)
+			});
+
+			_defaultLights.Add(new DirectLight
+			{
+				Direction = new Vector3(0.7198464f, 0.3420201f, 0.6040227f),
+				Color = new Color(0.9647059f, 0.7607844f, 0.4078432f)
+			});
+
+			_defaultLights.Add(new DirectLight
+			{
+				Direction = new Vector3(0.4545195f, -0.7660444f, 0.4545195f),
+				Color = new Color(0.3231373f, 0.3607844f, 0.3937255f)
+			});
+		}
 
 		public ViewerGame()
 		{
@@ -90,9 +112,11 @@ namespace OpenSora.Viewer
 			_mainPanel._buttonChange.Click += OnChangeFolder;
 			_mainPanel._buttonAbout.Click += OnAbout;
 			_mainPanel._listFiles.SelectedIndexChanged += _listFiles_SelectedIndexChanged;
-			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
 
+			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
 			_mainPanel._comboResourceType.SelectedIndex = 1;
+
+			_mainPanel._checkLightning.PressedChanged += _checkLightning_PressedChanged;
 
 			_desktop = new Desktop();
 			_desktop.Widgets.Add(_mainPanel);
@@ -109,20 +133,22 @@ namespace OpenSora.Viewer
 			_scene.Camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
 			_controller = new CameraInputController(_scene.Camera);
 
-			// Add a light
-			/*			_scene.Lights.Add(new DirectLight
-						{
-							Color = Color.White,
-							Direction = new Vector3(-1, -1, -1)
-						});*/
-
-			//			_renderer.RasterizerState = RasterizerState.CullNone;
+			_renderer.RasterizerState = RasterizerState.CullCounterClockwise;
 			_renderer.BlendState = BlendState.NonPremultiplied;
+		}
+
+		private void _checkLightning_PressedChanged(object sender, EventArgs e)
+		{
+			_scene.Lights.Clear();
+			if (_mainPanel._checkLightning.IsPressed)
+			{
+				_scene.Lights.AddRange(_defaultLights);
+			}
 		}
 
 		private void OnAbout(object sender, EventArgs e)
 		{
-			var name = new AssemblyName(GetType().Assembly.FullName);
+			var name = new AssemblyName(typeof(FalcomDecompressor).Assembly.FullName);
 			var messageBox = Dialog.CreateMessageBox("About", "OpenSora.Viewer " + name.Version.ToString());
 			messageBox.ShowModal(_desktop);
 		}
@@ -131,6 +157,8 @@ namespace OpenSora.Viewer
 		{
 			try
 			{
+				_mainPanel._checkLightning.Visible = _mainPanel._comboResourceType.SelectedIndex == 1;
+
 				RefreshFiles();
 			}
 			catch (Exception ex)

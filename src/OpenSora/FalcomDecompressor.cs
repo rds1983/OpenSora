@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace OpenSora
 {
 	public static class FalcomDecompressor
 	{
-		private class InternalDecompressor
+		private class NonZeroDecompressor
 		{
-			byte _bits = 9; //8 to start off with, then 16
+			byte _bits = 8; //8 to start off with, then 16
 			ushort _flags;
 			BinaryReader _reader;
 			private readonly byte[] _output = new byte[65536];
@@ -162,35 +163,131 @@ namespace OpenSora
 			}
 		}
 
+		private static byte[] ZeroDecompress(byte[] input, out int offset, out int outputOffset)
+		{
+			var output = new byte[65536];
+			offset = 0;
+			outputOffset = 0;
+			while (input.Length > (offset + 2))
+			{
+				var save1 = input[offset++];
+				if ((save1 & 0x80) == 0)
+				{
+					if ((save1 & 64) == 0) {
+						var length = save1 & 31;
+						if ((save1 & 32) == 0)
+						{
+							Array.Copy(input, offset, output, outputOffset, length);
+							offset += length;
+							outputOffset += length;
+						}
+						else
+						{
+							length = input[offset++] + (length << 8);
+							Array.Copy(input, offset, output, outputOffset, length);
+							offset += length;
+							outputOffset += length;
+						}
+					}
+					else
+					{
+						if ((save1 & 16) == 0)
+						{
+							var fillbyte = input[offset++];
+							var length = (save1 & 15) + 4;
+							for (var i = 0; i < length; ++i)
+							{
+								output[outputOffset++] = fillbyte;
+							}
+						}
+						else
+						{
+							var length = (save1 & 15 << 8) + input[offset++] + 4;
+							var fillbyte = input[offset++];
+							for (var i = 0; i < length; ++i)
+							{
+								output[outputOffset++] = fillbyte;
+							}
+						}
+					}
+				}
+				else
+				{
+					var loopbackLength = ((save1 & 31) << 8) + input[offset++];
+					var save2Offset = offset;
+					var save2 = input[save2Offset];
+					var loopbackOffset = outputOffset - loopbackLength;
+					var length = ((save1 >> 5) & 3) + 4;
+					if (input.Length != (offset + 2))
+					{
+						while ((save2 & 0xe0) == 96)
+						{
+							length += save2 & 31;
+							++offset;
+							save2 = input[save2Offset] = input[offset]; // We're writing to the input??? Ok...
+						}
+					}
+
+					if (loopbackLength < length)
+					{
+						for (var i = 0; i < length; ++i)
+						{
+							// this needs to be copied in this specific way
+							output[outputOffset++] = output[loopbackOffset++];
+						}
+					}
+					else
+					{
+						Array.Copy(output, loopbackOffset, output, outputOffset, length);
+						outputOffset += length;
+					}
+				}
+			}
+
+			return output;
+		}
+
 		public static byte[] Decompress(byte[] compressed)
 		{
 			using (var decompressed = new MemoryStream())
 			{
-				var decompressor = new InternalDecompressor();
+				var decompressor = new NonZeroDecompressor();
 				using (var stream = new MemoryStream(compressed))
 				using (var reader = new BinaryReader(stream))
 				{
-					while (true)
+					try
 					{
-						var size = reader.ReadUInt16();
-						var method = reader.ReadByte();
-						stream.Seek(-1, SeekOrigin.Current);
-						if (method == 0)
+						while (true)
 						{
-							decompressor.Decompress(reader);
+							var size = reader.ReadUInt16();
+							var method = reader.ReadByte();
+							stream.Seek(-1, SeekOrigin.Current);
+							if (method == 0)
+							{
+								decompressor.Decompress(reader);
 
-							decompressed.Write(decompressor.Output, 0, decompressor.OutputSize);
-						}
-						else
-						{
-							throw new NotImplementedException();
-						}
+								decompressed.Write(decompressor.Output, 0, decompressor.OutputSize);
+							}
+							else
+							{
+								var input = reader.ReadBytes(size);
+								stream.Seek(-size, SeekOrigin.Current);
+								int offset, outputOffset;
+								var output = ZeroDecompress(input, out offset, out outputOffset);
 
-						var flag = reader.ReadByte();
-						if (flag == 0)
-						{
-							break;
+								decompressed.Write(output, 0, outputOffset);
+								stream.Seek(offset, SeekOrigin.Current);
+							}
+
+							var flag = reader.ReadByte();
+							if (flag == 0)
+							{
+								break;
+							}
 						}
+					}
+					catch(Exception)
+					{
 					}
 				}
 

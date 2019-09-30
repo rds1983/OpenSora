@@ -17,10 +17,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using OpenSora;
 using OpenSora.Dir;
 using OpenSora.ModelLoading;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace OpenSora.Viewer
 {
@@ -45,6 +45,7 @@ namespace OpenSora.Viewer
 		private readonly State _state;
 		private static readonly List<DirectLight> _defaultLights = new List<DirectLight>();
 		private Queue<string> _statusMessages = new Queue<string>();
+		private readonly ConcurrentDictionary<string, Texture2D> _textures = new ConcurrentDictionary<string, Texture2D>();
 
 		static ViewerGame()
 		{
@@ -185,13 +186,29 @@ namespace OpenSora.Viewer
 			return data;
 		}
 
-		private Texture2D TextureFromEntry(string dataFilePath, DirEntry entry)
+		private unsafe Texture2D TextureFromEntry(string dataFilePath, DirEntry entry)
 		{
-			var data = LoadData(dataFilePath, entry);
+			Texture2D texture;
+			if (_textures.TryGetValue(entry.Name, out texture))
+			{
+				return texture;
+			}
 
-			var image = DDS.LoadImage(data);
-			var texture = new Texture2D(GraphicsDevice, image.Width, image.Height);
-			texture.SetData(image.Data);
+			var data = LoadData(dataFilePath, entry);
+			if (data[0] != 'D' || data[1] != 'D' || data[2] != 'S' || data[3] != ' ')
+			{
+				// Compressed
+				data = FalcomDecompressor.Decompress(data);
+			}
+
+			using (var stream = new MemoryStream(data))
+			{
+				var image = DDS.LoadImage(stream);
+				texture = new Texture2D(GraphicsDevice, image.Width, image.Height);
+				texture.SetData(image.Data);
+			}
+
+			_textures[entry.Name] = texture;
 
 			return texture;
 		}
@@ -282,6 +299,7 @@ namespace OpenSora.Viewer
 			{
 				case 0:
 					// Texture
+
 					var image = DDS.LoadImage(data);
 					_texture = new Texture2D(GraphicsDevice, image.Width, image.Height);
 					_texture.SetData(image.Data);
@@ -301,7 +319,7 @@ namespace OpenSora.Viewer
 					Frame frame;
 					using (var stream = new MemoryStream(decompressed))
 					{
-						frame = ModelLoader.Load(stream);
+						frame = ModelLoader.Load(stream, fileAndEntry.Entry.Name.EndsWith("_X2") ? 2 : 3);
 					}
 
 					var meshes = frame.Children[0].Meshes;
@@ -368,6 +386,7 @@ namespace OpenSora.Viewer
 
 		private void RefreshFiles()
 		{
+			_textures.Clear();
 			_mainPanel._listFiles.Items.Clear();
 			if (_entries == null)
 			{
@@ -381,7 +400,7 @@ namespace OpenSora.Viewer
 				{
 					var index = _mainPanel._comboResourceType.SelectedIndex;
 					var add = index == 0 && entry.Name.EndsWith("_DS") ||
-						index == 1 && entry.Name.EndsWith("_X2");
+						index == 1 && (entry.Name.EndsWith("_X2") || entry.Name.EndsWith("_X3"));
 
 					if (add)
 					{
@@ -484,7 +503,7 @@ namespace OpenSora.Viewer
 
 			var bounds = _mainPanel._panelViewer.Bounds;
 			var mouseState = Mouse.GetState();
-			if (bounds.Contains(mouseState.Position))
+			if (bounds.Contains(mouseState.Position) && !_desktop.IsMouseOverGUI)
 			{
 				_controller.SetTouchState(CameraInputController.TouchType.Move, mouseState.LeftButton == ButtonState.Pressed);
 				_controller.SetTouchState(CameraInputController.TouchType.Rotate, mouseState.RightButton == ButtonState.Pressed);

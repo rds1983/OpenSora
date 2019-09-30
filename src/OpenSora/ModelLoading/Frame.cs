@@ -5,6 +5,7 @@ namespace OpenSora.ModelLoading
 {
 	public class Frame
 	{
+		private readonly List<string> _materials = new List<string>();
 		private readonly List<Frame> _children = new List<Frame>();
 		private readonly List<MeshData> _meshes = new List<MeshData>();
 
@@ -27,45 +28,78 @@ namespace OpenSora.ModelLoading
 			}
 		}
 
-		public void LoadFromStream(BinaryReader reader)
+		public List<string> Materials
 		{
-			// 260 bytes is header size
-			reader.SkipBytes(260 - (Id.Length + 1));
-			Transform = reader.LoadTransform();
-
-			if (Id == "Frame_SCENE_ROOT")
+			get
 			{
-				reader.SkipBytes(51);
+				return _materials;
 			}
+		}
 
-			// Skip first two bytes
-			var count = reader.ReadInt16();
-
-			for (var i = 0; i < count; ++i)
+		public void LoadFromStream(ModelLoadContext context)
+		{
+			Frame oldParent = context.Parent;
+			try
 			{
-				int length = 0;
-				var id = reader.LoadZeroTerminatedString(out length);
+				context.Parent = this;
 
-				if (id.Contains("Frame"))
+				// 260 bytes is header size
+				var reader = context.Reader;
+				reader.SkipBytes(260 - (Id.Length + 1));
+				Transform = reader.LoadTransform();
+
+				if (Id == "Frame_SCENE_ROOT")
 				{
-					var child = new Frame
-					{
-						Id = id
-					};
-
-					child.LoadFromStream(reader);
-					Children.Add(child);
+					reader.SkipBytes(context.Version == 2 ? 51 : 53);
 				}
-				else if (id.Contains("Mesh"))
+				else if (context.Version == 3)
 				{
-					var mesh = new MeshData
+					var materialsCount = reader.ReadInt32();
+					for(var i = 0; i < materialsCount; ++i)
 					{
-						Id = id
-					};
-
-					mesh.LoadFromStream(reader);
-					Meshes.Add(mesh);
+						reader.SkipBytes(70);
+						var length = 0;
+						var material = reader.LoadZeroTerminatedString(out length);
+						reader.SkipBytes(780 - length);
+						if (i < materialsCount - 1)
+						{
+							reader.SkipBytes(2);
+						}
+						_materials.Add(material);
+					}
 				}
+
+				// Skip first two bytes
+				var count = reader.ReadInt16();
+				for (var i = 0; i < count; ++i)
+				{
+					int length = 0;
+					var id = reader.LoadZeroTerminatedString(out length);
+
+					if (id.Contains("Frame"))
+					{
+						var child = new Frame
+						{
+							Id = id
+						};
+
+						child.LoadFromStream(context);
+						Children.Add(child);
+					}
+					else if (id.Contains("Mesh"))
+					{
+						var mesh = new MeshData
+						{
+							Id = id
+						};
+
+						mesh.LoadFromStream(context);
+						Meshes.Add(mesh);
+					}
+				}
+			} finally
+			{
+				context.Parent = oldParent;
 			}
 		}
 	}

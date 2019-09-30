@@ -23,14 +23,12 @@
       <VerticalBox Spacing="8">
         <VerticalBox.Proportions>
           <Proportion Type="Auto" />
-          <Proportion Type="Auto" />
           <Proportion Type="Fill" />
         </VerticalBox.Proportions>
         <ComboBox Id="_comboResourceType" HorizontalAlignment="Stretch">
           <ListItem Text="Textures" />
           <ListItem Text="Models" />
         </ComboBox>
-        <CheckBox Text="Lightning" Id="_checkLightning" />
         <ListBox Id="_listFiles" VerticalAlignment="Stretch">
           <ListItem Text="TEXTURE1._DS" />
           <ListItem Text="TEXTURE2._DS" />

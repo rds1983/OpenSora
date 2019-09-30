@@ -43,30 +43,8 @@ namespace OpenSora.Viewer
 		private Scene _scene = new Scene();
 		private CameraInputController _controller;
 		private readonly State _state;
-		private static readonly List<DirectLight> _defaultLights = new List<DirectLight>();
 		private Queue<string> _statusMessages = new Queue<string>();
 		private readonly ConcurrentDictionary<string, Texture2D> _textures = new ConcurrentDictionary<string, Texture2D>();
-
-		static ViewerGame()
-		{
-			_defaultLights.Add(new DirectLight
-			{
-				Direction = new Vector3(-0.5265408f, -0.5735765f, -0.6275069f),
-				Color = new Color(1, 0.9607844f, 0.8078432f)
-			});
-
-			_defaultLights.Add(new DirectLight
-			{
-				Direction = new Vector3(0.7198464f, 0.3420201f, 0.6040227f),
-				Color = new Color(0.9647059f, 0.7607844f, 0.4078432f)
-			});
-
-			_defaultLights.Add(new DirectLight
-			{
-				Direction = new Vector3(0.4545195f, -0.7660444f, 0.4545195f),
-				Color = new Color(0.3231373f, 0.3607844f, 0.3937255f)
-			});
-		}
 
 		public ViewerGame()
 		{
@@ -119,8 +97,6 @@ namespace OpenSora.Viewer
 			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
 			_mainPanel._comboResourceType.SelectedIndex = 1;
 
-			_mainPanel._checkLightning.PressedChanged += _checkLightning_PressedChanged;
-
 			PushStatusMessage(string.Empty);
 
 			_desktop = new Desktop();
@@ -142,15 +118,6 @@ namespace OpenSora.Viewer
 			_renderer.BlendState = BlendState.Opaque;
 		}
 
-		private void _checkLightning_PressedChanged(object sender, EventArgs e)
-		{
-			_scene.Lights.Clear();
-			if (_mainPanel._checkLightning.IsPressed)
-			{
-				_scene.Lights.AddRange(_defaultLights);
-			}
-		}
-
 		private void OnAbout(object sender, EventArgs e)
 		{
 			var name = new AssemblyName(typeof(FalcomDecompressor).Assembly.FullName);
@@ -162,8 +129,6 @@ namespace OpenSora.Viewer
 		{
 			try
 			{
-				_mainPanel._checkLightning.Visible = _mainPanel._comboResourceType.SelectedIndex == 1;
-
 				RefreshFiles();
 			}
 			catch (Exception ex)
@@ -289,28 +254,20 @@ namespace OpenSora.Viewer
 				return;
 			}
 
-			var statusPrefix = string.Format("Loading '{0}'", fileAndEntry.Entry.Name);
-			PushStatusMessage(statusPrefix);
-			var data = LoadData(fileAndEntry.DataFilePath, fileAndEntry.Entry);
-
-			statusPrefix += ": ";
-
 			switch (_mainPanel._comboResourceType.SelectedIndex)
 			{
 				case 0:
 					// Texture
-
-					var image = DDS.LoadImage(data);
-					_texture = new Texture2D(GraphicsDevice, image.Width, image.Height);
-					_texture.SetData(image.Data);
-
-					/*						using (var output = File.OpenWrite(@"D:\Temp\" + fileAndEntry.Entry.Name + ".png"))
-											{
-												_texture.SaveAsPng(output, _texture.Width, _texture.Height);
-											}*/
+					_texture = TextureFromEntry(fileAndEntry.DataFilePath, fileAndEntry.Entry);
 					break;
 				case 1:
 					// Model
+					var statusPrefix = string.Format("Loading '{0}'", fileAndEntry.Entry.Name);
+					PushStatusMessage(statusPrefix);
+					var data = LoadData(fileAndEntry.DataFilePath, fileAndEntry.Entry);
+
+					statusPrefix += ": ";
+
 					PushStatusMessage(statusPrefix + "Decompressing");
 					var decompressed = FalcomDecompressor.Decompress(data);
 

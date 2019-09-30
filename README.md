@@ -3,7 +3,7 @@
 
 Various experiments with game "Trails in the sky".
 
-For now it consists only from OpenSora.Viewer, which is utility to view "Trails in the Sky FC" textures and models.
+For now it consists only from OpenSora.Viewer, which is utility to view "Trails in the Sky FC/SC" textures and models.
 
 ![](/images/OpenSora.png)
 
@@ -11,7 +11,7 @@ For now it consists only from OpenSora.Viewer, which is utility to view "Trails 
 1. Download latest binary release(OpenSora.v.v.v.v.zip) from https://github.com/rds1983/OpenSora/releases
 2. Unpack it
 3. Run "Viewer.exe"
-4. Click `Change...` button and choose folder with Sora FC(I.e. `D:\Games\Steam\steamapps\common\Trails in the Sky FC`)
+4. Click `Change...` button and choose folder with Sora FC/SC(I.e. `D:\Games\Steam\steamapps\common\Trails in the Sky SC`)
 5. Enjoy
 
 # Camera Controls

@@ -21,6 +21,7 @@ using OpenSora.Dir;
 using OpenSora.ModelLoading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using OpenSora.AtlasAnimations;
 
 namespace OpenSora.Viewer
 {
@@ -28,6 +29,12 @@ namespace OpenSora.Viewer
 	{
 		class FileAndEntry
 		{
+			public FileAndEntry(string dataFilePath, DirEntry entry)
+			{
+				DataFilePath = dataFilePath;
+				Entry = entry;
+			}
+
 			public string DataFilePath;
 			public DirEntry Entry;
 		}
@@ -45,6 +52,7 @@ namespace OpenSora.Viewer
 		private readonly State _state;
 		private Queue<string> _statusMessages = new Queue<string>();
 		private readonly ConcurrentDictionary<string, Texture2D> _textures = new ConcurrentDictionary<string, Texture2D>();
+		private Texture2D[] _animationTextures;
 
 		public ViewerGame()
 		{
@@ -95,7 +103,7 @@ namespace OpenSora.Viewer
 			_mainPanel._listFiles.SelectedIndexChanged += _listFiles_SelectedIndexChanged;
 
 			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
-			_mainPanel._comboResourceType.SelectedIndex = 1;
+			_mainPanel._comboResourceType.SelectedIndex = 2;
 
 			PushStatusMessage(string.Empty);
 
@@ -138,6 +146,22 @@ namespace OpenSora.Viewer
 			}
 		}
 
+		private FileAndEntry FindByName(string name)
+		{
+			foreach(var pair in _entries)
+			{
+				foreach(var entry in pair.Value)
+				{
+					if (entry.Name == name)
+					{
+						return new FileAndEntry(pair.Key, entry);
+					}
+				}
+			}
+
+			return null;
+		}
+
 		private byte[] LoadData(string dataFilePath, DirEntry entry)
 		{
 			byte[] data;
@@ -149,6 +173,11 @@ namespace OpenSora.Viewer
 			}
 
 			return data;
+		}
+
+		private byte[] LoadData(FileAndEntry fileAndEntry)
+		{
+			return LoadData(fileAndEntry.DataFilePath, fileAndEntry.Entry);
 		}
 
 		private unsafe Texture2D TextureFromEntry(string dataFilePath, DirEntry entry)
@@ -247,6 +276,49 @@ namespace OpenSora.Viewer
 			PushStatusMessage(string.Format(statusPrefix + "Meshed proceeded {0}/{1}", _model.Meshes.Count, meshCount));
 		}
 
+		private void LoadModel(FileAndEntry fileAndEntry)
+		{
+			var statusPrefix = string.Format("Loading '{0}'", fileAndEntry.Entry.Name);
+			PushStatusMessage(statusPrefix);
+			var data = LoadData(fileAndEntry.DataFilePath, fileAndEntry.Entry);
+
+			statusPrefix += ": ";
+
+			PushStatusMessage(statusPrefix + "Decompressing");
+			var decompressed = FalcomDecompressor.Decompress(data);
+
+			PushStatusMessage(statusPrefix + "Parsing mesh data");
+
+			Frame frame;
+			using (var stream = new MemoryStream(decompressed))
+			{
+				frame = ModelLoader.Load(stream, fileAndEntry.Entry.Name.EndsWith("_X2") ? 2 : 3);
+			}
+
+			var meshes = frame.Children[0].Meshes;
+
+			_model = new NursiaModel();
+
+			var tasks = new List<Task>();
+
+			var meshesCount = (from m in meshes select m.Materials.Count).Sum();
+			foreach (var meshData in meshes)
+			{
+				tasks.Add(Task.Factory.StartNew(() =>
+				{
+					ProcessMesh(statusPrefix, meshData, meshesCount);
+				}));
+			}
+
+			Task.WaitAll(tasks.ToArray());
+
+			var scene = new Scene();
+			scene.Models.Add(_model);
+			scene.Camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
+			_controller = new CameraInputController(scene.Camera);
+			_scene = scene;
+		}
+
 		private void LoadFile(FileAndEntry fileAndEntry)
 		{
 			if (fileAndEntry == null)
@@ -262,45 +334,25 @@ namespace OpenSora.Viewer
 					break;
 				case 1:
 					// Model
-					var statusPrefix = string.Format("Loading '{0}'", fileAndEntry.Entry.Name);
-					PushStatusMessage(statusPrefix);
-					var data = LoadData(fileAndEntry.DataFilePath, fileAndEntry.Entry);
-
-					statusPrefix += ": ";
-
-					PushStatusMessage(statusPrefix + "Decompressing");
-					var decompressed = FalcomDecompressor.Decompress(data);
-
-					PushStatusMessage(statusPrefix + "Parsing mesh data");
-
-					Frame frame;
-					using (var stream = new MemoryStream(decompressed))
+					LoadModel(fileAndEntry);
+					break;
+				case 2:
+					// Atlas Animation
+					var chFile = Path.GetFileNameWithoutExtension(fileAndEntry.Entry.Name);
+					if (chFile.EndsWith("P"))
 					{
-						frame = ModelLoader.Load(stream, fileAndEntry.Entry.Name.EndsWith("_X2") ? 2 : 3);
+						chFile = chFile.Substring(0, chFile.Length - 1) + " ";
 					}
+					chFile += "._CH";
+					var chFileEntry = FindByName(chFile);
 
-					var meshes = frame.Children[0].Meshes;
-
-					_model = new NursiaModel();
-
-					var tasks = new List<Task>();
-
-					var meshesCount = (from m in meshes select m.Materials.Count).Sum();
-					foreach (var meshData in meshes)
+					var chData = FalcomDecompressor.Decompress(LoadData(chFileEntry));
+					var cpData = FalcomDecompressor.Decompress(LoadData(fileAndEntry));
+					using (var cpStream = new MemoryStream(cpData))
+					using(var chStream = new MemoryStream(chData))
 					{
-						tasks.Add(Task.Factory.StartNew(() =>
-						{
-							ProcessMesh(statusPrefix, meshData, meshesCount);
-						}));
+						_animationTextures = AtlasAnimationLoader.LoadCPFile(GraphicsDevice, cpStream, chStream);
 					}
-
-					Task.WaitAll(tasks.ToArray());
-
-					var scene = new Scene();
-					scene.Models.Add(_model);
-					scene.Camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
-					_controller = new CameraInputController(scene.Camera);
-					_scene = scene;
 					break;
 			}
 
@@ -357,15 +409,12 @@ namespace OpenSora.Viewer
 				{
 					var index = _mainPanel._comboResourceType.SelectedIndex;
 					var add = index == 0 && entry.Name.EndsWith("_DS") ||
-						index == 1 && (entry.Name.EndsWith("_X2") || entry.Name.EndsWith("_X3"));
+						index == 1 && (entry.Name.EndsWith("_X2") || entry.Name.EndsWith("_X3")) ||
+						(index == 2 && entry.Name.EndsWith("_CP"));
 
 					if (add)
 					{
-						toAdd.Add(new FileAndEntry
-						{
-							DataFilePath = pair.Key,
-							Entry = entry
-						});
+						toAdd.Add(new FileAndEntry(pair.Key, entry));
 					}
 				}
 			}
@@ -471,6 +520,19 @@ namespace OpenSora.Viewer
 			_controller.Update();
 		}
 
+		private void DrawTexture(Texture2D texture)
+		{
+			_spriteBatch.Begin(blendState: BlendState.Opaque);
+
+			var location = _mainPanel._panelViewer.Bounds.Center;
+			location.X -= texture.Width / 2;
+			location.Y -= texture.Height / 2;
+
+			_spriteBatch.Draw(texture, location.ToVector2(), Color.White);
+
+			_spriteBatch.End();
+		}
+
 		protected override void Draw(GameTime gameTime)
 		{
 			base.Draw(gameTime);
@@ -481,15 +543,7 @@ namespace OpenSora.Viewer
 
 			if (_mainPanel._comboResourceType.SelectedIndex == 0 && _texture != null)
 			{
-				_spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
-
-				var location = _mainPanel._panelViewer.Bounds.Center;
-				location.X -= _texture.Width / 2;
-				location.Y -= _texture.Height / 2;
-
-				_spriteBatch.Draw(_texture, location.ToVector2(), Color.White);
-
-				_spriteBatch.End();
+				DrawTexture(_texture);
 			}
 			else if (_mainPanel._comboResourceType.SelectedIndex == 1 && _model != null)
 			{
@@ -506,6 +560,10 @@ namespace OpenSora.Viewer
 				{
 					device.Viewport = oldViewport;
 				}
+			}
+			else if(_mainPanel._comboResourceType.SelectedIndex == 2 && _animationTextures != null && _animationTextures.Length > 0)
+			{
+				DrawTexture(_animationTextures[0]);
 			}
 
 			lock (_statusMessages)

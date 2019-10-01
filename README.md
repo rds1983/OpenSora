@@ -5,8 +5,6 @@ Various experiments with game "Trails in the sky".
 
 For now it consists only from OpenSora.Viewer, which is utility to view "Trails in the Sky FC/SC" textures and models.
 
-![](/images/OpenSora.png)
-
 # Usage
 1. Download latest binary release(OpenSora.v.v.v.v.zip) from https://github.com/rds1983/OpenSora/releases
 2. Unpack it
@@ -22,6 +20,9 @@ Hold right button and move mouse to rotate it.
 1. `git clone https://github.com/rds1983/OpenSora.git`
 2. `git submodule update --init --recursive`
 3. Open solution from the build folder in VS 2017+
+
+# Screenshots
+![](/images/OpenSora.png)
 
 # Credits
 ## Games

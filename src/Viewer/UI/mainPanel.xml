@@ -28,7 +28,7 @@
         <ComboBox Id="_comboResourceType" HorizontalAlignment="Stretch">
           <ListItem Text="Textures" />
           <ListItem Text="Models" />
-          <ListItem Text="Atlas Animations" />
+          <ListItem Text="Images" />
         </ComboBox>
         <ListBox Id="_listFiles" VerticalAlignment="Stretch">
           <ListItem Text="TEXTURE1._DS" />

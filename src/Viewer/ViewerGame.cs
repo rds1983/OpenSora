@@ -169,7 +169,7 @@ namespace OpenSora.Viewer
 			using (var reader = new BinaryReader(stream))
 			{
 				stream.Seek(entry.Offset, SeekOrigin.Begin);
-				data = reader.ReadBytes(entry.CompressedSize);
+				data = reader.ReadBytes(entry.CompressedSize > 0?entry.CompressedSize:entry.DecompressedSize);
 			}
 
 			return data;
@@ -338,20 +338,35 @@ namespace OpenSora.Viewer
 					break;
 				case 2:
 					// Atlas Animation
-					var chFile = Path.GetFileNameWithoutExtension(fileAndEntry.Entry.Name);
-					if (chFile.EndsWith("P"))
+					var cpFile = Path.GetFileNameWithoutExtension(fileAndEntry.Entry.Name);
+					if (cpFile.EndsWith(" "))
 					{
-						chFile = chFile.Substring(0, chFile.Length - 1) + " ";
+						cpFile = cpFile.Substring(0, cpFile.Length - 1) + "P";
 					}
-					chFile += "._CH";
-					var chFileEntry = FindByName(chFile);
+					cpFile += "._CP";
+					var cpFileEntry = FindByName(cpFile);
 
-					var chData = FalcomDecompressor.Decompress(LoadData(chFileEntry));
-					var cpData = FalcomDecompressor.Decompress(LoadData(fileAndEntry));
-					using (var cpStream = new MemoryStream(cpData))
-					using(var chStream = new MemoryStream(chData))
+					Stream cpStream = null;
+					try
 					{
-						_animationTextures = AtlasAnimationLoader.LoadCPFile(GraphicsDevice, cpStream, chStream);
+						if (cpFileEntry != null)
+						{
+							var cpData = FalcomDecompressor.Decompress(LoadData(cpFileEntry));
+							cpStream = new MemoryStream(cpData);
+						}
+						var chData = FalcomDecompressor.Decompress(LoadData(fileAndEntry));
+						using (var chStream = new MemoryStream(chData))
+						{
+							_animationTextures = AtlasAnimationLoader.LoadCPFile(GraphicsDevice, chStream, cpStream);
+						}
+					}
+					finally
+					{
+						if (cpStream != null)
+						{
+							cpStream.Dispose();
+							cpStream = null;
+						}
 					}
 					break;
 			}
@@ -410,7 +425,7 @@ namespace OpenSora.Viewer
 					var index = _mainPanel._comboResourceType.SelectedIndex;
 					var add = index == 0 && entry.Name.EndsWith("_DS") ||
 						index == 1 && (entry.Name.EndsWith("_X2") || entry.Name.EndsWith("_X3")) ||
-						(index == 2 && entry.Name.EndsWith("_CP"));
+						(index == 2 && entry.Name.EndsWith("_CH"));
 
 					if (add)
 					{
@@ -522,11 +537,21 @@ namespace OpenSora.Viewer
 
 		private void DrawTexture(Texture2D texture)
 		{
-			_spriteBatch.Begin(blendState: BlendState.Opaque);
+			_spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
 
 			var location = _mainPanel._panelViewer.Bounds.Center;
 			location.X -= texture.Width / 2;
 			location.Y -= texture.Height / 2;
+
+			if (location.X < _mainPanel._panelViewer.Bounds.X)
+			{
+				location.X = _mainPanel._panelViewer.Bounds.X;
+			}
+
+			if (location.Y < _mainPanel._panelViewer.Bounds.Y)
+			{
+				location.Y = _mainPanel._panelViewer.Bounds.Y;
+			}
 
 			_spriteBatch.Draw(texture, location.ToVector2(), Color.White);
 

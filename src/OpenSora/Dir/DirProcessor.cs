@@ -62,6 +62,12 @@ namespace OpenSora.Dir
 						Offset = reader.ReadInt32()
 					};
 
+					if (entry.CompressedSize == 0)
+					{
+						// Broken file
+						continue;
+					}
+
 					result.Add(entry);
 				}
 			}

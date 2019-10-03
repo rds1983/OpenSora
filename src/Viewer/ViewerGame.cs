@@ -42,7 +42,8 @@ namespace OpenSora.Viewer
 		private MainPanel _mainPanel;
 		private SpriteBatch _spriteBatch;
 		private Texture2D _texture;
-		private Dictionary<string, List<DirEntry>> _entries;
+		private Dictionary<string, List<DirEntry>> _entries = null;
+		private List<FileAndEntry> _typeEntries = null;
 		private NursiaModel _model;
 		private readonly ForwardRenderer _renderer = new ForwardRenderer();
 		private Scene _scene = new Scene();
@@ -99,6 +100,8 @@ namespace OpenSora.Viewer
 			_mainPanel._buttonAbout.Click += OnAbout;
 			_mainPanel._listFiles.SelectedIndexChanged += _listFiles_SelectedIndexChanged;
 
+			_mainPanel._textFilter.TextChanged += _textFilter_TextChanged;
+
 			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
 			_mainPanel._comboResourceType.SelectedIndex = 2;
 
@@ -123,6 +126,11 @@ namespace OpenSora.Viewer
 			_renderer.BlendState = BlendState.Opaque;
 		}
 
+		private void _textFilter_TextChanged(object sender, Myra.Utility.ValueChangedEventArgs<string> e)
+		{
+			RefreshFilesSafe();
+		}
+
 		private void OnAbout(object sender, EventArgs e)
 		{
 			var name = new AssemblyName(typeof(FalcomDecompressor).Assembly.FullName);
@@ -132,15 +140,8 @@ namespace OpenSora.Viewer
 
 		private void _comboResourceType_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			try
-			{
-				RefreshFiles();
-			}
-			catch (Exception ex)
-			{
-				var msg = Dialog.CreateMessageBox("Error", ex.ToString());
-				msg.ShowModal(_desktop);
-			}
+			_typeEntries = null;
+			RefreshFilesSafe();
 		}
 
 		private FileAndEntry FindByName(string name)
@@ -427,34 +428,61 @@ namespace OpenSora.Viewer
 				return;
 			}
 
-			var toAdd = new List<FileAndEntry>();
-			foreach (var pair in _entries)
-			{
-				foreach (var entry in pair.Value)
-				{
-					var index = _mainPanel._comboResourceType.SelectedIndex;
-					var add = index == 0 && entry.Name.EndsWith("_DS") ||
-						index == 1 && (entry.Name.EndsWith("_X2") || entry.Name.EndsWith("_X3")) ||
-						(index == 2 && entry.Name.EndsWith("_CH") && !entry.Name.StartsWith("CH"));
+			var index = _mainPanel._comboResourceType.SelectedIndex;
 
-					if (add)
+			if (_typeEntries == null)
+			{
+				_typeEntries = new List<FileAndEntry>();
+				foreach (var pair in _entries)
+				{
+					foreach (var entry in pair.Value)
 					{
-						toAdd.Add(new FileAndEntry(pair.Key, entry));
+						var add = index == 0 && entry.Name.EndsWith("_DS") ||
+							index == 1 && (entry.Name.EndsWith("_X2") || entry.Name.EndsWith("_X3")) ||
+							(index == 2 && entry.Name.EndsWith("_CH") && !entry.Name.StartsWith("CH"));
+
+						if (add)
+						{
+							_typeEntries.Add(new FileAndEntry(pair.Key, entry));
+						}
 					}
 				}
+
+				// Sort
+				_typeEntries = (from FileAndEntry a in _typeEntries orderby a.Entry.Name select a).ToList();
 			}
 
-			// Sort
-			toAdd = (from FileAndEntry a in toAdd orderby a.Entry.Name select a).ToList();
 
 			// Add to listbox
-			foreach (var a in toAdd)
+			foreach (var a in _typeEntries)
 			{
+				if (!string.IsNullOrEmpty(_mainPanel._textFilter.Text))
+				{
+					var name = Path.GetFileNameWithoutExtension(a.Entry.Name);
+					if (name.IndexOf(_mainPanel._textFilter.Text, StringComparison.InvariantCultureIgnoreCase) == -1)
+					{
+						continue;
+					}
+				}
+
 				_mainPanel._listFiles.Items.Add(new ListItem
 				{
 					Text = a.Entry.Name,
 					Tag = a
 				});
+			}
+		}
+
+		private void RefreshFilesSafe()
+		{
+			try
+			{
+				RefreshFiles();
+			}
+			catch (Exception ex)
+			{
+				var msg = Dialog.CreateMessageBox("Error", ex.ToString());
+				msg.ShowModal(_desktop);
 			}
 		}
 
@@ -464,6 +492,7 @@ namespace OpenSora.Viewer
 			{
 				_mainPanel._textPath.Text = folder;
 				_entries = null;
+				_typeEntries = null;
 				if (!string.IsNullOrEmpty(folder))
 				{
 					_entries = DirProcessor.BuildEntries(folder);

@@ -20,8 +20,9 @@
         <Proportion Type="Auto" />
         <Proportion Type="Fill" />
       </HorizontalBox.Proportions>
-      <VerticalBox Spacing="8">
+      <VerticalBox Spacing="8" Width="150" >
         <VerticalBox.Proportions>
+          <Proportion Type="Auto" />
           <Proportion Type="Auto" />
           <Proportion Type="Fill" />
         </VerticalBox.Proportions>
@@ -30,7 +31,8 @@
           <ListItem Text="Models" />
           <ListItem Text="Images" />
         </ComboBox>
-        <ListBox Id="_listFiles" VerticalAlignment="Stretch">
+        <TextField Text="" Id="_textFilter" />
+        <ListBox Id="_listFiles" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
           <ListItem Text="TEXTURE1._DS" />
           <ListItem Text="TEXTURE2._DS" />
         </ListBox>

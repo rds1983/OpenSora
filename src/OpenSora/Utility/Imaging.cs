@@ -1,0 +1,52 @@
+﻿using Microsoft.Xna.Framework;
+
+namespace OpenSora.Utility
+{
+	internal static class Imaging
+	{
+		private static readonly byte[] g_by32to256 = new byte[]
+		{
+			0x00, 0x08, 0x10, 0x19, 0x21, 0x29, 0x31, 0x3A,
+			0x42, 0x4A, 0x52, 0x5A, 0x63, 0x6B, 0x73, 0x7B,
+			0x84, 0x8C, 0x94, 0x9C, 0xA5, 0xAD, 0xB5, 0xBD,
+			0xC5, 0xCE, 0xD6, 0xDE, 0xE6, 0xEF, 0xF7, 0xFF
+		};
+
+		private static readonly byte[] g_by16to256 = new byte[]
+		{
+			0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+			0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF
+		};
+
+		private static readonly byte[] g_by02to256 = new byte[]
+		{
+			0x00, 0xFF
+		};
+
+		public static Color Pixel1555To32(ushort src)
+		{
+			var c = new Color
+			{
+				B = g_by32to256[src & 0x1F],
+				G = g_by32to256[(src >> 5) & 0x1F],
+				R = g_by32to256[(src >> 10) & 0x1F],
+				A = g_by02to256[(src >> 15) & 0x01]
+			};
+
+			return c;
+		}
+
+		public static Color Pixel4444To32(ushort src)
+		{
+			var c = new Color
+			{
+				B = g_by16to256[src & 0x0F],
+				G = g_by16to256[(src >> 4) & 0x0F],
+				R = g_by16to256[(src >> 8) & 0x0F],
+				A = g_by16to256[(src >> 12) & 0x0F]
+			};
+
+			return c;
+		}
+	}
+}

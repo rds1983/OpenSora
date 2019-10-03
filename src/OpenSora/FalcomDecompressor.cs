@@ -292,7 +292,7 @@ namespace OpenSora
 				}
 
 				decompressed.Seek(0, SeekOrigin.Begin);
-				return decompressed.GetBuffer();
+				return decompressed.ToArray();
 			}
 		}
 	}

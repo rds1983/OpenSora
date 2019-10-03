@@ -8,7 +8,6 @@ using Myra.Graphics2D.UI.File;
 using Nursia;
 using Nursia.Graphics3D;
 using Nursia.Graphics3D.ForwardRendering;
-using Nursia.Graphics3D.Lights;
 using Nursia.Graphics3D.Modelling;
 using Nursia.Graphics3D.Utils;
 using OpenSora.Viewer.UI;
@@ -21,7 +20,6 @@ using OpenSora.Dir;
 using OpenSora.ModelLoading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
-using OpenSora.AtlasAnimations;
 
 namespace OpenSora.Viewer
 {
@@ -52,7 +50,6 @@ namespace OpenSora.Viewer
 		private readonly State _state;
 		private Queue<string> _statusMessages = new Queue<string>();
 		private readonly ConcurrentDictionary<string, Texture2D> _textures = new ConcurrentDictionary<string, Texture2D>();
-		private Texture2D[] _animationTextures;
 
 		public ViewerGame()
 		{
@@ -337,7 +334,18 @@ namespace OpenSora.Viewer
 					LoadModel(fileAndEntry);
 					break;
 				case 2:
-					// Atlas Animation
+				{
+					// Image
+					var chData = FalcomDecompressor.Decompress(LoadData(fileAndEntry));
+					using (var chStream = new MemoryStream(chData))
+					{
+						_texture = ChLoader.LoadImage(GraphicsDevice, fileAndEntry.DataFilePath, fileAndEntry.Entry.Name, chStream);
+					}
+				}
+					break;
+				case 3:
+				{
+					// TODO: Animation
 					var cpFile = Path.GetFileNameWithoutExtension(fileAndEntry.Entry.Name);
 					if (cpFile.EndsWith(" "))
 					{
@@ -357,7 +365,8 @@ namespace OpenSora.Viewer
 						var chData = FalcomDecompressor.Decompress(LoadData(fileAndEntry));
 						using (var chStream = new MemoryStream(chData))
 						{
-							_animationTextures = AtlasAnimationLoader.LoadCPFile(GraphicsDevice, chStream, cpStream);
+/*							_animationTextures = ChLoader.LoadCPFile(GraphicsDevice, fileAndEntry.DataFilePath,
+								fileAndEntry.Entry.Name, chStream, cpStream);*/
 						}
 					}
 					finally
@@ -368,6 +377,7 @@ namespace OpenSora.Viewer
 							cpStream = null;
 						}
 					}
+				}
 					break;
 			}
 
@@ -425,7 +435,7 @@ namespace OpenSora.Viewer
 					var index = _mainPanel._comboResourceType.SelectedIndex;
 					var add = index == 0 && entry.Name.EndsWith("_DS") ||
 						index == 1 && (entry.Name.EndsWith("_X2") || entry.Name.EndsWith("_X3")) ||
-						(index == 2 && entry.Name.EndsWith("_CH"));
+						(index == 2 && entry.Name.EndsWith("_CH") && !entry.Name.StartsWith("CH"));
 
 					if (add)
 					{
@@ -566,7 +576,9 @@ namespace OpenSora.Viewer
 
 			var bounds = _mainPanel._panelViewer.Bounds;
 
-			if (_mainPanel._comboResourceType.SelectedIndex == 0 && _texture != null)
+			if ((_mainPanel._comboResourceType.SelectedIndex == 0 ||
+				_mainPanel._comboResourceType.SelectedIndex == 2) && 
+				_texture != null)
 			{
 				DrawTexture(_texture);
 			}
@@ -585,10 +597,6 @@ namespace OpenSora.Viewer
 				{
 					device.Viewport = oldViewport;
 				}
-			}
-			else if(_mainPanel._comboResourceType.SelectedIndex == 2 && _animationTextures != null && _animationTextures.Length > 0)
-			{
-				DrawTexture(_animationTextures[0]);
 			}
 
 			lock (_statusMessages)

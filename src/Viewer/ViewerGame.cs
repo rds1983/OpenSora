@@ -25,6 +25,8 @@ namespace OpenSora.Viewer
 {
 	public class ViewerGame : Game
 	{
+		private const int ApplicationFrameChangeDelayInMs = 100;
+
 		class FileAndEntry
 		{
 			public FileAndEntry(string dataFilePath, DirEntry entry)
@@ -42,6 +44,9 @@ namespace OpenSora.Viewer
 		private MainPanel _mainPanel;
 		private SpriteBatch _spriteBatch;
 		private Texture2D _texture;
+		private ushort?[][,] _animationInfo;
+		private DateTime? _animationLastFrameRendered;
+		private int _animationFrameIndex = 0;
 		private Dictionary<string, List<DirEntry>> _entries = null;
 		private List<FileAndEntry> _typeEntries = null;
 		private NursiaModel _model;
@@ -103,7 +108,10 @@ namespace OpenSora.Viewer
 			_mainPanel._textFilter.TextChanged += _textFilter_TextChanged;
 
 			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
-			_mainPanel._comboResourceType.SelectedIndex = 2;
+			_mainPanel._comboResourceType.SelectedIndex = 3;
+
+			_mainPanel._numericAnimationStart.ValueChanged += _numericAnimationStart_ValueChanged;
+			_mainPanel._numericAnimationStep.ValueChanged += _numericAnimationStep_ValueChanged;
 
 			PushStatusMessage(string.Empty);
 
@@ -126,6 +134,46 @@ namespace OpenSora.Viewer
 			_renderer.BlendState = BlendState.Opaque;
 		}
 
+		private void ResetAnimation()
+		{
+			_animationFrameIndex = 0;
+			_animationLastFrameRendered = null;
+		}
+
+		private void HideAnimationBox()
+		{
+			if (!_mainPanel._boxTop.Widgets.Contains(_mainPanel._boxAnimation))
+			{
+				return;
+			}
+
+			_mainPanel._boxTop.Proportions.RemoveAt(2);
+			_mainPanel._boxTop.Widgets.Remove(_mainPanel._boxAnimation);
+		}
+
+		private void ShowAnimationBox()
+		{
+			if (_mainPanel._boxTop.Widgets.Contains(_mainPanel._boxAnimation))
+			{
+				return;
+			}
+
+			_mainPanel._boxTop.Proportions.Insert(2, new Proportion(ProportionType.Part, 1.0f));
+			_mainPanel._boxTop.Widgets.Insert(2, _mainPanel._boxAnimation);
+		}
+
+		private void _numericAnimationStep_ValueChanged(object sender, Myra.Utility.ValueChangedEventArgs<float?> e)
+		{
+			ResetAnimation();
+		}
+
+		private void _numericAnimationStart_ValueChanged(object sender, Myra.Utility.ValueChangedEventArgs<float?> e)
+		{
+			ResetAnimation();
+
+			_animationFrameIndex = (int)_mainPanel._numericAnimationStart.Value.Value;
+		}
+
 		private void _textFilter_TextChanged(object sender, Myra.Utility.ValueChangedEventArgs<string> e)
 		{
 			RefreshFilesSafe();
@@ -141,14 +189,26 @@ namespace OpenSora.Viewer
 		private void _comboResourceType_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			_typeEntries = null;
+			_animationInfo = null;
+			_texture = null;
+			ResetAnimation();
 			RefreshFilesSafe();
+
+			if (_mainPanel._comboResourceType.SelectedIndex < 3)
+			{
+				HideAnimationBox();
+			}
+			else
+			{
+				ShowAnimationBox();
+			}
 		}
 
 		private FileAndEntry FindByName(string name)
 		{
-			foreach(var pair in _entries)
+			foreach (var pair in _entries)
 			{
-				foreach(var entry in pair.Value)
+				foreach (var entry in pair.Value)
 				{
 					if (entry.Name == name)
 					{
@@ -167,7 +227,7 @@ namespace OpenSora.Viewer
 			using (var reader = new BinaryReader(stream))
 			{
 				stream.Seek(entry.Offset, SeekOrigin.Begin);
-				data = reader.ReadBytes(entry.CompressedSize > 0?entry.CompressedSize:entry.DecompressedSize);
+				data = reader.ReadBytes(entry.CompressedSize > 0 ? entry.CompressedSize : entry.DecompressedSize);
 			}
 
 			return data;
@@ -226,7 +286,7 @@ namespace OpenSora.Viewer
 
 		private void PushStatusMessage(string text)
 		{
-			lock(_statusMessages)
+			lock (_statusMessages)
 			{
 				_statusMessages.Enqueue(text);
 			}
@@ -343,10 +403,17 @@ namespace OpenSora.Viewer
 						_texture = ChLoader.LoadImage(GraphicsDevice, fileAndEntry.DataFilePath, fileAndEntry.Entry.Name, chStream);
 					}
 				}
-					break;
+				break;
 				case 3:
 				{
-					// TODO: Animation
+					Texture2D texture;
+					var chData = FalcomDecompressor.Decompress(LoadData(fileAndEntry));
+					using (var chStream = new MemoryStream(chData))
+					{
+						texture = AnimationLoader.LoadImage(GraphicsDevice, chStream);
+					}
+
+					ushort?[][,] animationInfo;
 					var cpFile = Path.GetFileNameWithoutExtension(fileAndEntry.Entry.Name);
 					if (cpFile.EndsWith(" "))
 					{
@@ -354,35 +421,23 @@ namespace OpenSora.Viewer
 					}
 					cpFile += "._CP";
 					var cpFileEntry = FindByName(cpFile);
+					var cpData = FalcomDecompressor.Decompress(LoadData(cpFileEntry));
+					using (var cpStream = new MemoryStream(cpData))
+					{
+						animationInfo = AnimationLoader.LoadInfo(cpStream);
+					}
 
-					Stream cpStream = null;
-					try
-					{
-						if (cpFileEntry != null)
-						{
-							var cpData = FalcomDecompressor.Decompress(LoadData(cpFileEntry));
-							cpStream = new MemoryStream(cpData);
-						}
-						var chData = FalcomDecompressor.Decompress(LoadData(fileAndEntry));
-						using (var chStream = new MemoryStream(chData))
-						{
-/*							_animationTextures = ChLoader.LoadCPFile(GraphicsDevice, fileAndEntry.DataFilePath,
-								fileAndEntry.Entry.Name, chStream, cpStream);*/
-						}
-					}
-					finally
-					{
-						if (cpStream != null)
-						{
-							cpStream.Dispose();
-							cpStream = null;
-						}
-					}
+					_texture = texture;
+					_animationInfo = animationInfo;
+					ResetAnimation();
+
+					_mainPanel._numericAnimationStart.Maximum = (_animationInfo != null ? _animationInfo.Length : 0);
+					_mainPanel._textAnimationTotal.Text = "Total: " + (_animationInfo != null ? _animationInfo.Length : 0).ToString();
 				}
-					break;
+				break;
 			}
 
-			lock(_statusMessages)
+			lock (_statusMessages)
 			{
 				_statusMessages.Clear();
 			}
@@ -439,7 +494,8 @@ namespace OpenSora.Viewer
 					{
 						var add = index == 0 && entry.Name.EndsWith("_DS") ||
 							index == 1 && (entry.Name.EndsWith("_X2") || entry.Name.EndsWith("_X3")) ||
-							(index == 2 && entry.Name.EndsWith("_CH") && !entry.Name.StartsWith("CH"));
+							(index == 2 && entry.Name.EndsWith("_CH") && !entry.Name.StartsWith("CH")) ||
+							(index == 3 && entry.Name.EndsWith("_CH") && entry.Name.StartsWith("CH"));
 
 						if (add)
 						{
@@ -576,6 +632,11 @@ namespace OpenSora.Viewer
 
 		private void DrawTexture(Texture2D texture)
 		{
+			if(texture == null)
+			{
+				return;
+			}
+
 			_spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
 
 			var location = _mainPanel._panelViewer.Bounds.Center;
@@ -597,17 +658,79 @@ namespace OpenSora.Viewer
 			_spriteBatch.End();
 		}
 
+		private void DrawAnimation()
+		{
+			if (_texture == null || _animationInfo == null || _animationInfo.Length == 0)
+			{
+				return;
+			}
+
+			_spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
+
+			var location = _mainPanel._panelViewer.Bounds.Center;
+			location.X -= 128;
+			location.Y -= 128;
+
+			if (location.X < _mainPanel._panelViewer.Bounds.X)
+			{
+				location.X = _mainPanel._panelViewer.Bounds.X;
+			}
+
+			if (location.Y < _mainPanel._panelViewer.Bounds.Y)
+			{
+				location.Y = _mainPanel._panelViewer.Bounds.Y;
+			}
+
+			var now = DateTime.Now;
+			if (_animationLastFrameRendered == null ||
+				(_animationLastFrameRendered != null &&
+				(now - _animationLastFrameRendered.Value).TotalMilliseconds >= ApplicationFrameChangeDelayInMs))
+			{
+				_animationFrameIndex += (int)_mainPanel._numericAnimationStep.Value.Value;
+				_animationLastFrameRendered = now;
+			}
+
+			if (_animationFrameIndex >= _animationInfo.Length)
+			{
+				_animationFrameIndex = Math.Min((int)_mainPanel._numericAnimationStart.Value.Value, _animationInfo.Length - 1);
+			}
+
+			ushort?[,] data = _animationInfo[_animationFrameIndex];
+			for(var y = 0; y <  data.GetLength(0); ++y)
+			{
+				for(var x = 0; x < data.GetLength(1); ++x)
+				{
+					var val = data[y, x];
+					if (val == null)
+					{
+						continue;
+					}
+
+					var tileX = val.Value % AnimationLoader.ChunksPerRow;
+					var tileY = val.Value / AnimationLoader.ChunksPerRow;
+
+					var loc = new Vector2(location.X + (x * AnimationLoader.ChunkSize),
+										  location.Y + (y * AnimationLoader.ChunkSize));
+					var rect = new Rectangle(tileX * AnimationLoader.ChunkSize,
+						tileY * AnimationLoader.ChunkSize,
+						AnimationLoader.ChunkSize, AnimationLoader.ChunkSize);
+					_spriteBatch.Draw(_texture, loc, rect, Color.White);
+				}
+			}
+
+			_spriteBatch.End();
+		}
+
 		protected override void Draw(GameTime gameTime)
 		{
 			base.Draw(gameTime);
 
-			GraphicsDevice.Clear(Color.CornflowerBlue);
+			GraphicsDevice.Clear(Color.Black);
 
 			var bounds = _mainPanel._panelViewer.Bounds;
 
-			if ((_mainPanel._comboResourceType.SelectedIndex == 0 ||
-				_mainPanel._comboResourceType.SelectedIndex == 2) && 
-				_texture != null)
+			if (_mainPanel._comboResourceType.SelectedIndex == 0 ||
+				_mainPanel._comboResourceType.SelectedIndex == 2)
 			{
 				DrawTexture(_texture);
 			}
@@ -626,6 +749,9 @@ namespace OpenSora.Viewer
 				{
 					device.Viewport = oldViewport;
 				}
+			} else if (_mainPanel._comboResourceType.SelectedIndex == 3)
+			{
+				DrawAnimation();
 			}
 
 			lock (_statusMessages)

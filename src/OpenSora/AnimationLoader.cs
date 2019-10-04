@@ -8,19 +8,16 @@ namespace OpenSora
 {
 	public static class AnimationLoader
 	{
-		private const int ImageWidth = 256;
-		private const int ImageHeight = 256;
-		public const int ChunkSize = 16;
 		private const int BytesPerColor = 2;
 
 		private const int TextureSize = 1024;
+		public const int ChunkSize = 16;
+		public const int ChunksPerRow = TextureSize / ChunkSize;
 
-
-		public static Texture2D[] LoadCPFile(GraphicsDevice device, Stream chStream, Stream cpStream)
+		public static Texture2D LoadImage(GraphicsDevice device, Stream chStream)
 		{
-			var colorResult = new List<Color[]>();
-			var result = new List<Texture2D>();
-
+			var colorBuffer = new Color[TextureSize * TextureSize];
+			var chunkBuffer = new Color[ChunkSize * ChunkSize];
 			using (var chReader = new BinaryReader(chStream))
 			{
 				var chunksCount = chReader.ReadUInt16();
@@ -31,49 +28,66 @@ namespace OpenSora
 				}
 
 				var chunksPerSize = TextureSize / ChunkSize;
-				Color[] texture = null;
-				var colorBuffer = new Color[ChunkSize * ChunkSize];
 				for (var i = 0; i < chunks.Count; ++i)
 				{
-					var textureChunkIndex = i % (chunksPerSize * chunksPerSize);
-					if (textureChunkIndex == 0)
-					{
-						// New texture
-						texture = new Color[TextureSize * TextureSize];
-						colorResult.Add(texture);
-					}
-
-					var tileX = textureChunkIndex % chunksPerSize;
-					var tileY = textureChunkIndex / chunksPerSize;
+					var tileX = i % chunksPerSize;
+					var tileY = i / chunksPerSize;
 
 					var chunk = chunks[i];
-					for (var j = 0; j < colorBuffer.Length; ++j)
+					for (var j = 0; j < chunkBuffer.Length; ++j)
 					{
 						var b1 = chunk[j * BytesPerColor];
 						var b2 = chunk[j * BytesPerColor + 1];
 						ushort val = (ushort)((b2 << 8) + b1);
 
-						colorBuffer[j] = Imaging.Pixel4444To32(val);
+						chunkBuffer[j] = Imaging.Pixel4444To32(val);
 					}
 
 					for (var y = 0; y < ChunkSize; ++y)
 					{
 						for (var x = 0; x < ChunkSize; ++x)
 						{
-							texture[(tileY * ChunkSize + y) * TextureSize + tileX * ChunkSize + x] = colorBuffer[y * ChunkSize + x];
+							colorBuffer[(tileY * ChunkSize + y) * TextureSize + tileX * ChunkSize + x] = chunkBuffer[y * ChunkSize + x];
+						}
+					}
+				}
+			}
+			var texture = new Texture2D(device, TextureSize, TextureSize);
+			texture.SetData(colorBuffer);
+
+			return texture;
+		}
+
+		public static ushort?[][,] LoadInfo(Stream cpStream)
+		{
+			ushort?[][,] result = null;
+
+			using (var cpReader = new BinaryReader(cpStream))
+			{
+				var infoCount = cpReader.ReadUInt16();
+				result = new ushort?[infoCount][,];
+
+				for (var i = 0; i < infoCount; ++i)
+				{
+					result[i] = new ushort?[ChunkSize, ChunkSize];
+					for (var y = 0; y < ChunkSize; ++y)
+					{
+						for (var x = 0; x < ChunkSize; ++x)
+						{
+							var data = cpReader.ReadUInt16();
+							if (data == 0xffff)
+							{
+								// Skip
+								continue;
+							}
+
+							result[i][y, x] = data;
 						}
 					}
 				}
 			}
 
-			foreach (var colorBuffer in colorResult)
-			{
-				var texture = new Texture2D(device, TextureSize, TextureSize);
-				texture.SetData(colorBuffer);
-				result.Add(texture);
-			}
-
-			return result.ToArray();
+			return result;
 		}
 	}
 }

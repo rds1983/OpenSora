@@ -32,6 +32,7 @@ Hold right button and move mouse to rotate it.
 
 ## People
 * [uyjulian](https://github.com/uyjulian)
+* [JuusanKoubou](https://github.com/Ouroboros/JuusanKoubou)
 
 ## Libraries
 * [JuusanKoubou](https://github.com/Ouroboros/JuusanKoubou)

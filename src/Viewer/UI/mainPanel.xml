@@ -1,55 +1,55 @@
 <Project>
   <Project.ExportOptions Namespace="OpenSora.Viewer.UI" Class="MainPanel" OutputPath="D:\Projects\OpenSora\src\Viewer\UI" />
-  <VerticalBox Spacing="8">
-    <VerticalBox.Proportions>
+  <VerticalStackPanel Spacing="8">
+    <VerticalStackPanel.Proportions>
       <Proportion Type="Auto" />
       <Proportion Type="Fill" />
-    </VerticalBox.Proportions>
-    <HorizontalBox Spacing="8" Id="_boxTop">
-      <HorizontalBox.Proportions>
+    </VerticalStackPanel.Proportions>
+    <HorizontalStackPanel Spacing="8" Id="_boxTop">
+      <HorizontalStackPanel.Proportions>
         <Proportion Type="Auto" />
         <Proportion Type="Auto" />
         <Proportion Type="Part" />
         <Proportion Type="Part" />
-      </HorizontalBox.Proportions>
-      <TextField Text="" Readonly="True" Id="_textPath" Width="300" />
+      </HorizontalStackPanel.Proportions>
+      <TextBox Text="" Readonly="True" Id="_textPath" Width="300" />
       <TextButton Text="Change..." Id="_buttonChange" />
-      <HorizontalBox Spacing="8" HorizontalAlignment="Center" Id="_boxAnimation">
-        <TextBlock Text="Start" />
+      <HorizontalStackPanel Spacing="8" HorizontalAlignment="Center" Id="_boxAnimation">
+        <Label Text="Start" />
         <SpinButton Minimum="0" Integer="True" Id="_numericAnimationStart" Width="32" />
-        <TextBlock Text="Step" />
+        <Label Text="Step" />
         <SpinButton Maximum="8" Minimum="0" Value="8" Integer="True" Id="_numericAnimationStep" Width="32" />
-        <TextBlock Text="Total: 64" Id="_textAnimationTotal" />
-      </HorizontalBox>
+        <Label Text="Total: 64" Id="_textAnimationTotal" />
+      </HorizontalStackPanel>
       <TextButton Text="About" Id="_buttonAbout" HorizontalAlignment="Right" />
-    </HorizontalBox>
-    <HorizontalBox Spacing="8">
-      <HorizontalBox.Proportions>
+    </HorizontalStackPanel>
+    <HorizontalStackPanel Spacing="8">
+      <HorizontalStackPanel.Proportions>
         <Proportion Type="Auto" />
         <Proportion Type="Fill" />
-      </HorizontalBox.Proportions>
-      <VerticalBox Spacing="8" Width="150">
-        <VerticalBox.Proportions>
+      </HorizontalStackPanel.Proportions>
+      <VerticalStackPanel Spacing="8" Width="150">
+        <VerticalStackPanel.Proportions>
           <Proportion Type="Auto" />
           <Proportion Type="Auto" />
           <Proportion Type="Fill" />
-        </VerticalBox.Proportions>
+        </VerticalStackPanel.Proportions>
         <ComboBox Id="_comboResourceType" HorizontalAlignment="Stretch">
           <ListItem Text="Textures" />
           <ListItem Text="Models" />
           <ListItem Text="Images" />
           <ListItem Text="Animations" />
         </ComboBox>
-        <TextField Text="" Id="_textFilter" />
+        <TextBox Text="" Id="_textFilter" />
         <ListBox Id="_listFiles" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
           <ListItem Text="TEXTURE1._DS" />
           <ListItem Text="TEXTURE2._DS" />
         </ListBox>
-      </VerticalBox>
+      </VerticalStackPanel>
       <Panel>
         <Panel Id="_panelViewer" />
-        <TextBlock Text="Processing mesh 23/40..." Id="_textStatus" VerticalAlignment="Bottom" />
+        <Label Text="Processing mesh 23/40..." Id="_textStatus" VerticalAlignment="Bottom" />
       </Panel>
-    </HorizontalBox>
-  </VerticalBox>
+    </HorizontalStackPanel>
+  </VerticalStackPanel>
 </Project>

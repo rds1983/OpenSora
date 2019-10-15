@@ -136,7 +136,7 @@ namespace OpenSora.Viewer
 
 		private void ResetAnimation()
 		{
-			_animationFrameIndex = 0;
+			_animationFrameIndex = (int)_mainPanel._numericAnimationStart.Value.Value;
 			_animationLastFrameRendered = null;
 		}
 
@@ -170,8 +170,6 @@ namespace OpenSora.Viewer
 		private void _numericAnimationStart_ValueChanged(object sender, Myra.Utility.ValueChangedEventArgs<float?> e)
 		{
 			ResetAnimation();
-
-			_animationFrameIndex = (int)_mainPanel._numericAnimationStart.Value.Value;
 		}
 
 		private void _textFilter_TextChanged(object sender, Myra.Utility.ValueChangedEventArgs<string> e)

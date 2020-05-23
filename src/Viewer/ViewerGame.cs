@@ -40,7 +40,6 @@ namespace OpenSora.Viewer
 		}
 
 		private readonly GraphicsDeviceManager _graphics;
-		private Desktop _desktop = null;
 		private MainPanel _mainPanel;
 		private SpriteBatch _spriteBatch;
 		private Texture2D _texture;
@@ -115,8 +114,7 @@ namespace OpenSora.Viewer
 
 			PushStatusMessage(string.Empty);
 
-			_desktop = new Desktop();
-			_desktop.Widgets.Add(_mainPanel);
+			Desktop.Root = _mainPanel;
 
 			if (_state != null)
 			{
@@ -181,7 +179,7 @@ namespace OpenSora.Viewer
 		{
 			var name = new AssemblyName(typeof(FalcomDecompressor).Assembly.FullName);
 			var messageBox = Dialog.CreateMessageBox("About", "OpenSora.Viewer " + name.Version.ToString());
-			messageBox.ShowModal(_desktop);
+			messageBox.ShowModal();
 		}
 
 		private void _comboResourceType_SelectedIndexChanged(object sender, EventArgs e)
@@ -536,7 +534,7 @@ namespace OpenSora.Viewer
 			catch (Exception ex)
 			{
 				var msg = Dialog.CreateMessageBox("Error", ex.ToString());
-				msg.ShowModal(_desktop);
+				msg.ShowModal();
 			}
 		}
 
@@ -557,7 +555,7 @@ namespace OpenSora.Viewer
 			catch (Exception ex)
 			{
 				var msg = Dialog.CreateMessageBox("Error", ex.ToString());
-				msg.ShowModal(_desktop);
+				msg.ShowModal();
 			}
 		}
 
@@ -591,7 +589,7 @@ namespace OpenSora.Viewer
 				SetFolder(dlg.FilePath);
 			};
 
-			dlg.ShowModal(_desktop);
+			dlg.ShowModal();
 		}
 
 		protected override void Update(GameTime gameTime)
@@ -617,7 +615,7 @@ namespace OpenSora.Viewer
 
 			var bounds = _mainPanel._panelViewer.Bounds;
 			var mouseState = Mouse.GetState();
-			if (bounds.Contains(mouseState.Position) && !_desktop.IsMouseOverGUI)
+			if (bounds.Contains(mouseState.Position) && !Desktop.IsMouseOverGUI)
 			{
 				_controller.SetTouchState(CameraInputController.TouchType.Move, mouseState.LeftButton == ButtonState.Pressed);
 				_controller.SetTouchState(CameraInputController.TouchType.Rotate, mouseState.RightButton == ButtonState.Pressed);
@@ -760,7 +758,7 @@ namespace OpenSora.Viewer
 				}
 			}
 
-			_desktop.Render();
+			Desktop.Render();
 		}
 
 		protected override void EndRun()

@@ -36,6 +36,7 @@ Hold right button and move mouse to rotate it.
 ## Libraries
 * [JuusanKoubou](https://github.com/Ouroboros/JuusanKoubou)
 * [Kiseki-Texture-Tool](https://github.com/Sewer56/Kiseki-Texture-Tool)
+* [EDDecompiler](https://github.com/ZhenjianYang/EDDecompiler)
 * [MonoGame](http://www.monogame.net/)
 * [Myra](https://github.com/rds1983/Myra)
 * [Nursia](https://github.com/rds1983/Nursia)

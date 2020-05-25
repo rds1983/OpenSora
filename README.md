@@ -39,4 +39,3 @@ Hold right button and move mouse to rotate it.
 * [EDDecompiler](https://github.com/ZhenjianYang/EDDecompiler)
 * [MonoGame](http://www.monogame.net/)
 * [Myra](https://github.com/rds1983/Myra)
-* [Nursia](https://github.com/rds1983/Nursia)

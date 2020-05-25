@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net45</TargetFramework>
@@ -9,7 +8,6 @@
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.7.1.189" />
     <PackageReference Include="Myra" Version="0.9.9.202" />
-    <PackageReference Include="Nursia" Version="0.2.0.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,5 +16,20 @@
   
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Update="Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Update="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

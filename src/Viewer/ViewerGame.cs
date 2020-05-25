@@ -5,11 +5,6 @@ using Microsoft.Xna.Framework.Input;
 using Myra;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.File;
-using Nursia;
-using Nursia.Graphics3D;
-using Nursia.Graphics3D.ForwardRendering;
-using Nursia.Graphics3D.Modelling;
-using Nursia.Graphics3D.Utils;
 using OpenSora.Viewer.UI;
 using System;
 using System.Collections.Generic;
@@ -21,12 +16,21 @@ using OpenSora.ModelLoading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using OpenSora.Scenarios;
+using Viewer;
 
 namespace OpenSora.Viewer
 {
 	public class ViewerGame : Game
 	{
 		private const int ApplicationFrameChangeDelayInMs = 100;
+		public float NearPlaneDistance = 0.1f;
+		public float FarPlaneDistance = 1000.0f;
+
+		class MeshPartTag
+		{
+			public BoundingSphere BoundingSphere;
+			public Texture2D Texture;
+		}
 
 		class FileAndEntry
 		{
@@ -49,13 +53,14 @@ namespace OpenSora.Viewer
 		private int _animationFrameIndex = 0;
 		private Dictionary<string, List<DirEntry>> _entries = null;
 		private List<FileAndEntry> _typeEntries = null;
-		private NursiaModel _model;
-		private readonly ForwardRenderer _renderer = new ForwardRenderer();
-		private Scene _scene = new Scene();
+		private List<ModelMeshPart> _meshes;
+		private readonly Camera _camera = new Camera();
 		private CameraInputController _controller;
 		private readonly State _state;
 		private Queue<string> _statusMessages = new Queue<string>();
 		private readonly ConcurrentDictionary<string, Texture2D> _textures = new ConcurrentDictionary<string, Texture2D>();
+		private DefaultEffect _defaultEffect;
+		private readonly RenderContext _renderContext = new RenderContext();
 
 		public ViewerGame()
 		{
@@ -122,15 +127,12 @@ namespace OpenSora.Viewer
 				SetFolder(_state.LastFolder);
 			}
 
-			// Nursia
-			Nrs.Game = this;
+			// Default Effect
+			_defaultEffect = new DefaultEffect(GraphicsDevice);
 
 			// Set camera
-			_scene.Camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
-			_controller = new CameraInputController(_scene.Camera);
-
-			_renderer.RasterizerState = RasterizerState.CullCounterClockwise;
-			_renderer.BlendState = BlendState.Opaque;
+			_camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
+			_controller = new CameraInputController(_camera);
 		}
 
 		private void ResetAnimation()
@@ -289,9 +291,20 @@ namespace OpenSora.Viewer
 			}
 		}
 
-		private void ProcessMesh(string statusPrefix, MeshData meshData, int meshCount)
+		private void ProcessMesh(List<ModelMeshPart> meshes, string statusPrefix, MeshData meshData, int meshCount)
 		{
-			var mesh = Mesh.Create(meshData.Vertices.ToArray(), meshData.Indices.ToArray());
+			var vertexBuffer = new VertexBuffer(GraphicsDevice,
+						VertexPositionNormalTexture.VertexDeclaration,
+						meshData.Vertices.Count,
+						BufferUsage.None);
+			vertexBuffer.SetData(meshData.Vertices.ToArray());
+
+			var indexBuffer = new IndexBuffer(GraphicsDevice,
+				IndexElementSize.SixteenBits,
+				meshData.Indices.Count,
+				BufferUsage.None);
+			indexBuffer.SetData(meshData.Indices.ToArray());
+
 			foreach (var md in meshData.Materials)
 			{
 				if (md.PrimitivesCount == 0 || md.VerticesCount == 0)
@@ -299,38 +312,30 @@ namespace OpenSora.Viewer
 					continue;
 				}
 
-				var meshNode = new MeshNode
+				var tag = new MeshPartTag
 				{
-					Id = meshData.Id,
-					BoundingSphere = BoundingSphere.CreateFromPoints(from v in meshData.Vertices select v.Position)
-				};
-
-				var material = new Material
-				{
-					DiffuseColor = Color.White,
+					BoundingSphere = BoundingSphere.CreateFromPoints(from v in meshData.Vertices select v.Position),
 					Texture = LoadTexture(md.TextureName)
 				};
 
-				Model m;
-
-				var part = new MeshPart
+				var meshPart = new ModelMeshPart
 				{
-					BoundingSphere = meshNode.BoundingSphere,
-					Mesh = mesh,
-					Material = material,
-					VertexCount = md.VerticesCount,
+					IndexBuffer = indexBuffer,
+					NumVertices = md.VerticesCount,
+					PrimitiveCount = md.PrimitivesCount,
 					StartIndex = md.PrimitivesStart * 3,
-					PrimitiveCount = md.PrimitivesCount
+					VertexBuffer = vertexBuffer,
+					VertexOffset = 0,
+					Tag = tag
 				};
-				meshNode.Parts.Add(part);
 
-				lock (_model)
+				lock (meshes)
 				{
-					_model.Meshes.Add(meshNode);
+					meshes.Add(meshPart);
 				}
 			}
 
-			PushStatusMessage(string.Format(statusPrefix + "Meshed proceeded {0}/{1}", _model.Meshes.Count, meshCount));
+			PushStatusMessage(string.Format(statusPrefix + "Meshed proceeded {0}/{1}", meshes.Count, meshCount));
 		}
 
 		private void LoadModel(FileAndEntry fileAndEntry)
@@ -354,7 +359,7 @@ namespace OpenSora.Viewer
 
 			var meshes = frame.Children[0].Meshes;
 
-			_model = new NursiaModel();
+			var modelMeshes = new List<ModelMeshPart>();
 
 			var tasks = new List<Task>();
 
@@ -363,17 +368,15 @@ namespace OpenSora.Viewer
 			{
 				tasks.Add(Task.Factory.StartNew(() =>
 				{
-					ProcessMesh(statusPrefix, meshData, meshesCount);
+					ProcessMesh(modelMeshes, statusPrefix, meshData, meshesCount);
 				}));
 			}
 
 			Task.WaitAll(tasks.ToArray());
 
-			var scene = new Scene();
-			scene.Models.Add(_model);
-			scene.Camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
-			_controller = new CameraInputController(scene.Camera);
-			_scene = scene;
+			_camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
+			_controller = new CameraInputController(_camera);
+			_meshes = modelMeshes;
 		}
 
 		private void LoadFile(FileAndEntry fileAndEntry)
@@ -614,7 +617,7 @@ namespace OpenSora.Viewer
 
 			//			_fpsCounter.Update(gameTime);
 
-			if (_mainPanel._comboResourceType.SelectedIndex != 1 || _model == null)
+			if (_mainPanel._comboResourceType.SelectedIndex != 1 || _meshes == null)
 			{
 				return;
 			}
@@ -746,20 +749,58 @@ namespace OpenSora.Viewer
 			{
 				DrawTexture(_texture);
 			}
-			else if (_mainPanel._comboResourceType.SelectedIndex == 1 && _model != null)
+			else if (_mainPanel._comboResourceType.SelectedIndex == 1 && _meshes != null)
 			{
 				var device = GraphicsDevice;
+
 				var oldViewport = device.Viewport;
+				var oldDepthStencilState = device.DepthStencilState;
+				var oldRasterizerState = device.RasterizerState;
+				var oldBlendState = device.BlendState;
+				var oldSamplerState = device.SamplerStates[0];
 				try
 				{
 					device.Viewport = new Viewport(bounds.X, bounds.Y, bounds.Width, bounds.Height);
-					_renderer.Begin();
-					_renderer.DrawScene(_scene);
-					_renderer.End();
+					device.DepthStencilState = DepthStencilState.Default;
+					device.RasterizerState = RasterizerState.CullCounterClockwise;
+					device.BlendState = BlendState.Opaque;
+					device.SamplerStates[0] = SamplerState.LinearWrap;
+
+					_renderContext.View = _camera.View;
+					_renderContext.Projection = Matrix.CreatePerspectiveFieldOfView(
+						MathHelper.ToRadians(_camera.ViewAngle),
+						device.Viewport.AspectRatio,
+						NearPlaneDistance, FarPlaneDistance);
+
+					_defaultEffect.WorldViewProjection = _renderContext.ViewProjection;
+					foreach (var mesh in _meshes)
+					{
+						var tag = (MeshPartTag)mesh.Tag;
+
+						if (_renderContext.Frustrum.Contains(tag.BoundingSphere) == ContainmentType.Disjoint)
+						{
+							continue;
+						}
+
+						_defaultEffect.Texture = tag.Texture;
+						foreach (var pass in _defaultEffect.CurrentTechnique.Passes)
+						{
+							pass.Apply();
+
+							device.SetVertexBuffer(mesh.VertexBuffer);
+							device.Indices = mesh.IndexBuffer;
+
+							device.DrawIndexedPrimitives(PrimitiveType.TriangleList, mesh.VertexOffset, mesh.StartIndex, mesh.PrimitiveCount);
+						}
+					}
 				}
 				finally
 				{
 					device.Viewport = oldViewport;
+					device.DepthStencilState = oldDepthStencilState;
+					device.RasterizerState = oldRasterizerState;
+					device.BlendState = oldBlendState;
+					device.SamplerStates[0] = oldSamplerState;
 				}
 			} else if (_mainPanel._comboResourceType.SelectedIndex == 3)
 			{

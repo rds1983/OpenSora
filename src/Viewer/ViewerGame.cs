@@ -20,6 +20,7 @@ using OpenSora.Dir;
 using OpenSora.ModelLoading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using OpenSora.Scenarios;
 
 namespace OpenSora.Viewer
 {
@@ -107,7 +108,7 @@ namespace OpenSora.Viewer
 			_mainPanel._textFilter.TextChanged += _textFilter_TextChanged;
 
 			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
-			_mainPanel._comboResourceType.SelectedIndex = 3;
+			_mainPanel._comboResourceType.SelectedIndex = 4;
 
 			_mainPanel._numericAnimationStart.ValueChanged += _numericAnimationStart_ValueChanged;
 			_mainPanel._numericAnimationStep.ValueChanged += _numericAnimationStep_ValueChanged;
@@ -310,6 +311,8 @@ namespace OpenSora.Viewer
 					Texture = LoadTexture(md.TextureName)
 				};
 
+				Model m;
+
 				var part = new MeshPart
 				{
 					BoundingSphere = meshNode.BoundingSphere,
@@ -391,46 +394,58 @@ namespace OpenSora.Viewer
 					LoadModel(fileAndEntry);
 					break;
 				case 2:
-				{
-					// Image
-					var chData = FalcomDecompressor.Decompress(LoadData(fileAndEntry));
-					using (var chStream = new MemoryStream(chData))
 					{
-						_texture = ChLoader.LoadImage(GraphicsDevice, fileAndEntry.DataFilePath, fileAndEntry.Entry.Name, chStream);
+						// Image
+						var chData = FalcomDecompressor.Decompress(LoadData(fileAndEntry));
+						using (var chStream = new MemoryStream(chData))
+						{
+							_texture = ChLoader.LoadImage(GraphicsDevice, fileAndEntry.DataFilePath, fileAndEntry.Entry.Name, chStream);
+						}
 					}
-				}
-				break;
+					break;
 				case 3:
-				{
-					Texture2D texture;
-					var chData = FalcomDecompressor.Decompress(LoadData(fileAndEntry));
-					using (var chStream = new MemoryStream(chData))
 					{
-						texture = AnimationLoader.LoadImage(GraphicsDevice, chStream);
-					}
+						Texture2D texture;
+						var chData = FalcomDecompressor.Decompress(LoadData(fileAndEntry));
+						using (var chStream = new MemoryStream(chData))
+						{
+							texture = AnimationLoader.LoadImage(GraphicsDevice, chStream);
+						}
 
-					ushort?[][,] animationInfo;
-					var cpFile = Path.GetFileNameWithoutExtension(fileAndEntry.Entry.Name);
-					if (cpFile.EndsWith(" "))
+						ushort?[][,] animationInfo;
+						var cpFile = Path.GetFileNameWithoutExtension(fileAndEntry.Entry.Name);
+						if (cpFile.EndsWith(" "))
+						{
+							cpFile = cpFile.Substring(0, cpFile.Length - 1) + "P";
+						}
+						cpFile += "._CP";
+						var cpFileEntry = FindByName(cpFile);
+						var cpData = FalcomDecompressor.Decompress(LoadData(cpFileEntry));
+						using (var cpStream = new MemoryStream(cpData))
+						{
+							animationInfo = AnimationLoader.LoadInfo(cpStream);
+						}
+
+						_texture = texture;
+						_animationInfo = animationInfo;
+						ResetAnimation();
+
+						_mainPanel._numericAnimationStart.Maximum = (_animationInfo != null ? _animationInfo.Length : 0);
+						_mainPanel._textAnimationTotal.Text = "Total: " + (_animationInfo != null ? _animationInfo.Length : 0).ToString();
+					}
+					break;
+				case 4:
 					{
-						cpFile = cpFile.Substring(0, cpFile.Length - 1) + "P";
-					}
-					cpFile += "._CP";
-					var cpFileEntry = FindByName(cpFile);
-					var cpData = FalcomDecompressor.Decompress(LoadData(cpFileEntry));
-					using (var cpStream = new MemoryStream(cpData))
-					{
-						animationInfo = AnimationLoader.LoadInfo(cpStream);
-					}
+						var data = FalcomDecompressor.Decompress(LoadData(fileAndEntry));
+						Scenario scenario;
+						using (var stream = new MemoryStream(data))
+						{
+							scenario = Scenario.FromFCStream(stream);
+						}
 
-					_texture = texture;
-					_animationInfo = animationInfo;
-					ResetAnimation();
-
-					_mainPanel._numericAnimationStart.Maximum = (_animationInfo != null ? _animationInfo.Length : 0);
-					_mainPanel._textAnimationTotal.Text = "Total: " + (_animationInfo != null ? _animationInfo.Length : 0).ToString();
-				}
-				break;
+						var k = 5;
+					}
+					break;
 			}
 
 			lock (_statusMessages)
@@ -491,7 +506,8 @@ namespace OpenSora.Viewer
 						var add = index == 0 && entry.Name.EndsWith("_DS") ||
 							index == 1 && (entry.Name.EndsWith("_X2") || entry.Name.EndsWith("_X3")) ||
 							(index == 2 && entry.Name.EndsWith("_CH") && !entry.Name.StartsWith("CH")) ||
-							(index == 3 && entry.Name.EndsWith("_CH") && entry.Name.StartsWith("CH"));
+							(index == 3 && entry.Name.EndsWith("_CH") && entry.Name.StartsWith("CH")) ||
+							(index == 4 && entry.Name.EndsWith("_SN"));
 
 						if (add)
 						{

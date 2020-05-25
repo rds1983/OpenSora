@@ -1,5 +1,5 @@
 <Project>
-  <Project.ExportOptions Namespace="OpenSora.Viewer.UI" Class="MainPanel" OutputPath="D:\Projects\OpenSora\src\Viewer\UI" />
+  <Project.ExportOptions Namespace="OpenSora.Viewer.UI" Class="MainPanel" OutputPath="C:\Projects\OpenSora\src\Viewer\UI" />
   <VerticalStackPanel Spacing="8">
     <VerticalStackPanel.Proportions>
       <Proportion Type="Auto" />
@@ -12,16 +12,16 @@
         <Proportion Type="Part" />
         <Proportion Type="Part" />
       </HorizontalStackPanel.Proportions>
-      <TextBox Text="" Readonly="True" Id="_textPath" Width="300" />
+      <TextBox Readonly="True" Width="300" Id="_textPath" />
       <TextButton Text="Change..." Id="_buttonChange" />
       <HorizontalStackPanel Spacing="8" HorizontalAlignment="Center" Id="_boxAnimation">
         <Label Text="Start" />
-        <SpinButton Minimum="0" Integer="True" Id="_numericAnimationStart" Width="32" />
+        <SpinButton Minimum="0" Integer="True" Width="32" Id="_numericAnimationStart" />
         <Label Text="Step" />
-        <SpinButton Maximum="8" Minimum="0" Value="8" Integer="True" Id="_numericAnimationStep" Width="32" />
+        <SpinButton Maximum="8" Minimum="0" Value="8" Integer="True" Width="32" Id="_numericAnimationStep" />
         <Label Text="Total: 64" Id="_textAnimationTotal" />
       </HorizontalStackPanel>
-      <TextButton Text="About" Id="_buttonAbout" HorizontalAlignment="Right" />
+      <TextButton Text="About" HorizontalAlignment="Right" Id="_buttonAbout" />
     </HorizontalStackPanel>
     <HorizontalStackPanel Spacing="8">
       <HorizontalStackPanel.Proportions>
@@ -34,21 +34,22 @@
           <Proportion Type="Auto" />
           <Proportion Type="Fill" />
         </VerticalStackPanel.Proportions>
-        <ComboBox Id="_comboResourceType" HorizontalAlignment="Stretch">
+        <ComboBox HorizontalAlignment="Stretch" Id="_comboResourceType">
           <ListItem Text="Textures" />
           <ListItem Text="Models" />
           <ListItem Text="Images" />
           <ListItem Text="Animations" />
+          <ListItem Text="Scenes" />
         </ComboBox>
-        <TextBox Text="" Id="_textFilter" />
-        <ListBox Id="_listFiles" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <TextBox Id="_textFilter" />
+        <ListBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Id="_listFiles">
           <ListItem Text="TEXTURE1._DS" />
           <ListItem Text="TEXTURE2._DS" />
         </ListBox>
       </VerticalStackPanel>
       <Panel>
         <Panel Id="_panelViewer" />
-        <Label Text="Processing mesh 23/40..." Id="_textStatus" VerticalAlignment="Bottom" />
+        <Label Text="Processing mesh 23/40..." VerticalAlignment="Bottom" Id="_textStatus" />
       </Panel>
     </HorizontalStackPanel>
   </VerticalStackPanel>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenSora.Utility;
+using System;
 using System.IO;
 
 namespace OpenSora.ModelLoading

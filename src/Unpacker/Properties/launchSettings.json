@@ -2,7 +2,7 @@
   "profiles": {
     "Unpacker": {
       "commandName": "Project",
-      "commandLineArgs": "\"D:\\Games\\Steam\\steamapps\\common\\Trails in the Sky FC\" \"D:\\temp\\sora\""
+      "commandLineArgs": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Trails in the Sky FC\" \"C:\\temp\\soraFc\""
     }
   }
 }

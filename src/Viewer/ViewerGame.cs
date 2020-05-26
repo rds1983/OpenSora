@@ -16,21 +16,12 @@ using OpenSora.ModelLoading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using OpenSora.Scenarios;
-using Viewer;
 
 namespace OpenSora.Viewer
 {
 	public class ViewerGame : Game
 	{
 		private const int ApplicationFrameChangeDelayInMs = 100;
-		public float NearPlaneDistance = 0.1f;
-		public float FarPlaneDistance = 1000.0f;
-
-		class MeshPartTag
-		{
-			public BoundingSphere BoundingSphere;
-			public Texture2D Texture;
-		}
 
 		class FileAndEntry
 		{
@@ -53,14 +44,10 @@ namespace OpenSora.Viewer
 		private int _animationFrameIndex = 0;
 		private Dictionary<string, List<DirEntry>> _entries = null;
 		private List<FileAndEntry> _typeEntries = null;
-		private List<ModelMeshPart> _meshes;
-		private readonly Camera _camera = new Camera();
-		private CameraInputController _controller;
 		private readonly State _state;
 		private Queue<string> _statusMessages = new Queue<string>();
 		private readonly ConcurrentDictionary<string, Texture2D> _textures = new ConcurrentDictionary<string, Texture2D>();
-		private DefaultEffect _defaultEffect;
-		private readonly RenderContext _renderContext = new RenderContext();
+		private SceneRenderer _renderer;
 
 		public ViewerGame()
 		{
@@ -127,12 +114,7 @@ namespace OpenSora.Viewer
 				SetFolder(_state.LastFolder);
 			}
 
-			// Default Effect
-			_defaultEffect = new DefaultEffect(GraphicsDevice);
-
-			// Set camera
-			_camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
-			_controller = new CameraInputController(_camera);
+			_renderer = new SceneRenderer(GraphicsDevice);
 		}
 
 		private void ResetAnimation()
@@ -293,47 +275,7 @@ namespace OpenSora.Viewer
 
 		private void ProcessMesh(List<ModelMeshPart> meshes, string statusPrefix, MeshData meshData, int meshCount)
 		{
-			var vertexBuffer = new VertexBuffer(GraphicsDevice,
-						VertexPositionNormalTexture.VertexDeclaration,
-						meshData.Vertices.Count,
-						BufferUsage.None);
-			vertexBuffer.SetData(meshData.Vertices.ToArray());
-
-			var indexBuffer = new IndexBuffer(GraphicsDevice,
-				IndexElementSize.SixteenBits,
-				meshData.Indices.Count,
-				BufferUsage.None);
-			indexBuffer.SetData(meshData.Indices.ToArray());
-
-			foreach (var md in meshData.Materials)
-			{
-				if (md.PrimitivesCount == 0 || md.VerticesCount == 0)
-				{
-					continue;
-				}
-
-				var tag = new MeshPartTag
-				{
-					BoundingSphere = BoundingSphere.CreateFromPoints(from v in meshData.Vertices select v.Position),
-					Texture = LoadTexture(md.TextureName)
-				};
-
-				var meshPart = new ModelMeshPart
-				{
-					IndexBuffer = indexBuffer,
-					NumVertices = md.VerticesCount,
-					PrimitiveCount = md.PrimitivesCount,
-					StartIndex = md.PrimitivesStart * 3,
-					VertexBuffer = vertexBuffer,
-					VertexOffset = 0,
-					Tag = tag
-				};
-
-				lock (meshes)
-				{
-					meshes.Add(meshPart);
-				}
-			}
+			SceneRenderer.AddMeshData(GraphicsDevice, meshes, meshData, LoadTexture);
 
 			PushStatusMessage(string.Format(statusPrefix + "Meshed proceeded {0}/{1}", meshes.Count, meshCount));
 		}
@@ -374,9 +316,7 @@ namespace OpenSora.Viewer
 
 			Task.WaitAll(tasks.ToArray());
 
-			_camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
-			_controller = new CameraInputController(_camera);
-			_meshes = modelMeshes;
+			_renderer.Meshes = modelMeshes;
 		}
 
 		private void LoadFile(FileAndEntry fileAndEntry)
@@ -542,6 +482,24 @@ namespace OpenSora.Viewer
 					Tag = a
 				});
 			}
+
+			if (index == 4)
+			{
+				int? idx = null;
+				for(var i = 0; i < _mainPanel._listFiles.Items.Count; ++i)
+				{
+					if (_mainPanel._listFiles.Items[i].Text.Contains("T0310"))
+					{
+						idx = i;
+						break;
+					}
+				}
+
+				if (idx != null)
+				{
+					_mainPanel._listFiles.SelectedIndex = idx.Value;
+				}
+			}
 		}
 
 		private void RefreshFilesSafe()
@@ -617,7 +575,7 @@ namespace OpenSora.Viewer
 
 			//			_fpsCounter.Update(gameTime);
 
-			if (_mainPanel._comboResourceType.SelectedIndex != 1 || _meshes == null)
+			if (_mainPanel._comboResourceType.SelectedIndex != 1 || _renderer.Meshes == null)
 			{
 				return;
 			}
@@ -625,24 +583,24 @@ namespace OpenSora.Viewer
 			var keyboardState = Keyboard.GetState();
 
 			// Manage camera input controller
-			_controller.SetControlKeyState(CameraInputController.ControlKeys.Left, keyboardState.IsKeyDown(Keys.A));
-			_controller.SetControlKeyState(CameraInputController.ControlKeys.Right, keyboardState.IsKeyDown(Keys.D));
-			_controller.SetControlKeyState(CameraInputController.ControlKeys.Forward, keyboardState.IsKeyDown(Keys.W));
-			_controller.SetControlKeyState(CameraInputController.ControlKeys.Backward, keyboardState.IsKeyDown(Keys.S));
-			_controller.SetControlKeyState(CameraInputController.ControlKeys.Up, keyboardState.IsKeyDown(Keys.Up));
-			_controller.SetControlKeyState(CameraInputController.ControlKeys.Down, keyboardState.IsKeyDown(Keys.Down));
+			_renderer.Controller.SetControlKeyState(CameraInputController.ControlKeys.Left, keyboardState.IsKeyDown(Keys.A));
+			_renderer.Controller.SetControlKeyState(CameraInputController.ControlKeys.Right, keyboardState.IsKeyDown(Keys.D));
+			_renderer.Controller.SetControlKeyState(CameraInputController.ControlKeys.Forward, keyboardState.IsKeyDown(Keys.W));
+			_renderer.Controller.SetControlKeyState(CameraInputController.ControlKeys.Backward, keyboardState.IsKeyDown(Keys.S));
+			_renderer.Controller.SetControlKeyState(CameraInputController.ControlKeys.Up, keyboardState.IsKeyDown(Keys.Up));
+			_renderer.Controller.SetControlKeyState(CameraInputController.ControlKeys.Down, keyboardState.IsKeyDown(Keys.Down));
 
 			var bounds = _mainPanel._panelViewer.Bounds;
 			var mouseState = Mouse.GetState();
 			if (bounds.Contains(mouseState.Position) && !Desktop.IsMouseOverGUI)
 			{
-				_controller.SetTouchState(CameraInputController.TouchType.Move, mouseState.LeftButton == ButtonState.Pressed);
-				_controller.SetTouchState(CameraInputController.TouchType.Rotate, mouseState.RightButton == ButtonState.Pressed);
+				_renderer.Controller.SetTouchState(CameraInputController.TouchType.Move, mouseState.LeftButton == ButtonState.Pressed);
+				_renderer.Controller.SetTouchState(CameraInputController.TouchType.Rotate, mouseState.RightButton == ButtonState.Pressed);
 
-				_controller.SetMousePosition(new Point(mouseState.X, mouseState.Y));
+				_renderer.Controller.SetMousePosition(new Point(mouseState.X, mouseState.Y));
 			}
 
-			_controller.Update();
+			_renderer.Controller.Update();
 		}
 
 		private void DrawTexture(Texture2D texture)
@@ -742,66 +700,14 @@ namespace OpenSora.Viewer
 
 			GraphicsDevice.Clear(Color.Black);
 
-			var bounds = _mainPanel._panelViewer.Bounds;
-
 			if (_mainPanel._comboResourceType.SelectedIndex == 0 ||
 				_mainPanel._comboResourceType.SelectedIndex == 2)
 			{
 				DrawTexture(_texture);
 			}
-			else if (_mainPanel._comboResourceType.SelectedIndex == 1 && _meshes != null)
+			else if (_mainPanel._comboResourceType.SelectedIndex == 1)
 			{
-				var device = GraphicsDevice;
-
-				var oldViewport = device.Viewport;
-				var oldDepthStencilState = device.DepthStencilState;
-				var oldRasterizerState = device.RasterizerState;
-				var oldBlendState = device.BlendState;
-				var oldSamplerState = device.SamplerStates[0];
-				try
-				{
-					device.Viewport = new Viewport(bounds.X, bounds.Y, bounds.Width, bounds.Height);
-					device.DepthStencilState = DepthStencilState.Default;
-					device.RasterizerState = RasterizerState.CullCounterClockwise;
-					device.BlendState = BlendState.Opaque;
-					device.SamplerStates[0] = SamplerState.LinearWrap;
-
-					_renderContext.View = _camera.View;
-					_renderContext.Projection = Matrix.CreatePerspectiveFieldOfView(
-						MathHelper.ToRadians(_camera.ViewAngle),
-						device.Viewport.AspectRatio,
-						NearPlaneDistance, FarPlaneDistance);
-
-					_defaultEffect.WorldViewProjection = _renderContext.ViewProjection;
-					foreach (var mesh in _meshes)
-					{
-						var tag = (MeshPartTag)mesh.Tag;
-
-						if (_renderContext.Frustrum.Contains(tag.BoundingSphere) == ContainmentType.Disjoint)
-						{
-							continue;
-						}
-
-						_defaultEffect.Texture = tag.Texture;
-						foreach (var pass in _defaultEffect.CurrentTechnique.Passes)
-						{
-							pass.Apply();
-
-							device.SetVertexBuffer(mesh.VertexBuffer);
-							device.Indices = mesh.IndexBuffer;
-
-							device.DrawIndexedPrimitives(PrimitiveType.TriangleList, mesh.VertexOffset, mesh.StartIndex, mesh.PrimitiveCount);
-						}
-					}
-				}
-				finally
-				{
-					device.Viewport = oldViewport;
-					device.DepthStencilState = oldDepthStencilState;
-					device.RasterizerState = oldRasterizerState;
-					device.BlendState = oldBlendState;
-					device.SamplerStates[0] = oldSamplerState;
-				}
+				_renderer.Render(_mainPanel._panelViewer.Bounds);
 			} else if (_mainPanel._comboResourceType.SelectedIndex == 3)
 			{
 				DrawAnimation();

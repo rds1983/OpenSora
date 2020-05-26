@@ -3,6 +3,8 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net45</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>Viewer</AssemblyName>
+    <RootNamespace>OpenSora.Viewer</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

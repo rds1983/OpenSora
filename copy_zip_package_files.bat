@@ -11,7 +11,7 @@ set "CONFIGURATION=bin\Release\net45"
 rem Copy output files
 copy "src\Viewer\%CONFIGURATION%\Viewer.exe" ZipPackage /Y
 copy "src\Viewer\%CONFIGURATION%\Myra.dll" "ZipPackage" /Y
-copy "src\Viewer\%CONFIGURATION%\Nursia.dll" "ZipPackage" /Y
+copy "src\Viewer\%CONFIGURATION%\XNAssets.dll" "ZipPackage" /Y
 copy "src\Viewer\%CONFIGURATION%\OpenSora.dll" "ZipPackage" /Y
 copy "src\Viewer\%CONFIGURATION%\MonoGame.Framework.dll" "ZipPackage" /Y
 copy "src\Viewer\%CONFIGURATION%\MonoGame.Framework.dll.config" "ZipPackage" /Y
@@ -25,5 +25,3 @@ copy "src\Viewer\%CONFIGURATION%\x86\SDL2.dll" "ZipPackage\x86" /Y
 copy "src\Viewer\%CONFIGURATION%\x86\soft_oal.dll" "ZipPackage\x86" /Y
 copy "src\Viewer\%CONFIGURATION%\libSDL2-2.0.0.dylib" "ZipPackage" /Y
 copy "src\Viewer\%CONFIGURATION%\libopenal.1.dylib" "ZipPackage" /Y
-
-xcopy "samples\models\*.*" "ZipPackage\samples\*.*" /s

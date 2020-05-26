@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using System.Collections.Generic;
 
 namespace OpenSora.Viewer
 {
@@ -8,8 +7,6 @@ namespace OpenSora.Viewer
 		private Matrix? _viewProjection;
 		private BoundingFrustum _frustrum;
 		private Matrix _projection = Matrix.Identity, _view = Matrix.Identity;
-
-		public Plane? ClipPlane;
 
 		public Matrix Projection
 		{

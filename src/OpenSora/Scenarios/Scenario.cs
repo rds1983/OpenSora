@@ -1,4 +1,5 @@
 ﻿using OpenSora.Utility;
+using System.Collections.Generic;
 using System.IO;
 
 namespace OpenSora.Scenarios
@@ -19,7 +20,7 @@ namespace OpenSora.Scenarios
 		public int StringTableOffset { get; private set; }
 		public int HeaderEndOffset { get; private set; }
 
-		public  ScenarioEntry[] ScnInfoOffset { get; private set; }
+		public  ScenarioEntry[] Entries { get; private set; }
 		public ScenarioEntry ScenaFunctionTable { get; private set; }
 
 		public int ChipFrameInfoOffset { get; private set; }
@@ -29,6 +30,8 @@ namespace OpenSora.Scenarios
 		public int PlaceNameNumber { get; private set; }
 
 		public int PreInitFunctionIndex { get; private set; }
+
+		public ScenarioEntryPoint[] EntryPoints { get; private set; }
 
 		private Scenario()
 		{
@@ -49,16 +52,60 @@ namespace OpenSora.Scenarios
 				result.IncludedScenario = reader.ReadBytes(NUMBER_OF_INCLUDE_FILE * 4);
 				result.Reserved = reader.ReadInt16();
 
-				result.ScnInfoOffset = new ScenarioEntry[SCN_INFO_MAXIMUM];
-				for(var i = 0; i < result.ScnInfoOffset.Length; ++i)
+				result.Entries = new ScenarioEntry[SCN_INFO_MAXIMUM];
+				for(var i = 0; i < result.Entries.Length; ++i)
 				{
-					result.ScnInfoOffset[i] = new ScenarioEntry(reader.ReadInt16(), reader.ReadInt16());
+					result.Entries[i] = new ScenarioEntry(reader.ReadInt16(), reader.ReadInt16());
 				}
 
 				result.StringTableOffset = reader.ReadInt16();
 				result.HeaderEndOffset = reader.ReadInt32();
 				result.ScenaFunctionTable = new ScenarioEntry(reader.ReadInt16(), reader.ReadInt16());
 
+				var entryPointsCount = (result.Entries[0].Offset - stream.Position) / 0x44;
+				var entryPoints = new List<ScenarioEntryPoint>();
+				for(var i = 0; i < entryPointsCount; ++i)
+				{
+					entryPoints.Add(ScenarioEntryPoint.FromBinaryReader(reader));
+				}
+				result.EntryPoints = entryPoints.ToArray();
+
+				for(var i = 0; i < result.Entries.Length; ++i)
+				{
+					var se = result.Entries[i];
+
+					stream.Seek(se.Offset, SeekOrigin.Begin);
+
+					var infos = new List<ScenarioBaseInfo>();
+
+					for (var j = 0; j < se.Size; ++j)
+					{
+						ScenarioBaseInfo scenarioBaseInfo = null;
+						switch (i)
+						{
+							case 0:
+							case 1:
+								scenarioBaseInfo = ScenarioChipInfo.FromBinaryReader(reader);
+								break;
+							case 2:
+								scenarioBaseInfo = ScenarioNpcInfo.FromBinaryReader(reader);
+								break;
+							case 3:
+								scenarioBaseInfo = ScenarioMonsterInfo.FromBinaryReader(reader);
+								break;
+							case 4:
+								scenarioBaseInfo = ScenarioEventInfo.FromBinaryReader(reader);
+								break;
+							case 5:
+								scenarioBaseInfo = ScenarioActorInfo.FromBinaryReader(reader);
+								break;
+						}
+
+						infos.Add(scenarioBaseInfo);
+					}
+
+					se.ScenarioInfo = infos.ToArray();
+				}
 			}
 
 			return result;

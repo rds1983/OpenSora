@@ -16,6 +16,7 @@ using OpenSora.ModelLoading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using OpenSora.Scenarios;
+using System.Diagnostics;
 
 namespace OpenSora.Viewer
 {
@@ -102,6 +103,8 @@ namespace OpenSora.Viewer
 			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
 			_mainPanel._comboResourceType.SelectedIndex = 4;
 
+			_mainPanel._comboFunctions.SelectedIndexChanged += _comboFunctions_SelectedIndexChanged;
+
 			_mainPanel._numericAnimationStart.ValueChanged += _numericAnimationStart_ValueChanged;
 			_mainPanel._numericAnimationStep.ValueChanged += _numericAnimationStep_ValueChanged;
 
@@ -145,6 +148,28 @@ namespace OpenSora.Viewer
 			_mainPanel._boxTop.Widgets.Insert(2, _mainPanel._boxAnimation);
 		}
 
+		private void HideFunctionsBox()
+		{
+			if (!_mainPanel._boxTop.Widgets.Contains(_mainPanel._boxScenarios))
+			{
+				return;
+			}
+
+			_mainPanel._boxTop.Proportions.RemoveAt(2);
+			_mainPanel._boxTop.Widgets.Remove(_mainPanel._boxScenarios);
+		}
+
+		private void ShowFunctionsBox()
+		{
+			if (_mainPanel._boxTop.Widgets.Contains(_mainPanel._boxScenarios))
+			{
+				return;
+			}
+
+			_mainPanel._boxTop.Proportions.Insert(2, new Proportion(ProportionType.Part, 1.0f));
+			_mainPanel._boxTop.Widgets.Insert(2, _mainPanel._boxScenarios);
+		}
+
 		private void _numericAnimationStep_ValueChanged(object sender, Myra.Utility.ValueChangedEventArgs<float?> e)
 		{
 			ResetAnimation();
@@ -175,25 +200,46 @@ namespace OpenSora.Viewer
 			ResetAnimation();
 			RefreshFilesSafe();
 
-			if (_mainPanel._comboResourceType.SelectedIndex < 3)
+			var idx = _mainPanel._comboResourceType.SelectedIndex;
+			if (idx != 3)
 			{
 				HideAnimationBox();
-			}
-			else
+			} else
 			{
 				ShowAnimationBox();
 			}
+
+			if (idx != 4)
+			{
+				HideFunctionsBox();
+			} else
+			{
+				ShowFunctionsBox();
+			}
 		}
 
-		private FileAndEntry FindByName(string name)
+		private FileAndEntry FindByName(string nameFilter, string extFilter)
 		{
+			nameFilter = nameFilter.ToLower();
+			extFilter = extFilter.ToLower();
 			foreach (var pair in _entries)
 			{
 				foreach (var entry in pair.Value)
 				{
-					if (entry.Name == name)
+					var ename = entry.Name;
+					if (entry.Name.Contains("."))
 					{
-						return new FileAndEntry(pair.Key, entry);
+						var parts = entry.Name.Split('.');
+						if(parts[0].ToLower().Contains(nameFilter) && parts[1].ToLower().Contains(extFilter))
+						{
+							return new FileAndEntry(pair.Key, entry);
+						}
+					} else
+					{
+						if (ename.ToLower().Contains(nameFilter))
+						{
+							return new FileAndEntry(pair.Key, entry);
+						}
 					}
 				}
 			}
@@ -361,8 +407,7 @@ namespace OpenSora.Viewer
 						{
 							cpFile = cpFile.Substring(0, cpFile.Length - 1) + "P";
 						}
-						cpFile += "._CP";
-						var cpFileEntry = FindByName(cpFile);
+						var cpFileEntry = FindByName(cpFile, "_CP");
 						var cpData = FalcomDecompressor.Decompress(LoadData(cpFileEntry));
 						using (var cpStream = new MemoryStream(cpData))
 						{
@@ -386,7 +431,24 @@ namespace OpenSora.Viewer
 							scenario = Scenario.FromFCStream(stream);
 						}
 
-						var k = 5;
+						_mainPanel._textScenarioLocation.Text = "Location: " + scenario.Location;
+
+						_mainPanel._comboFunctions.Items.Clear();
+						foreach(var idx in scenario.Funtions)
+						{
+							_mainPanel._comboFunctions.Items.Add(new ListItem
+							{
+								Text = string.Format("0x{0:X}", idx),
+								Tag = idx
+							});
+						}
+
+						var parts = scenario.Location.Split('.');
+						var modelEntry = FindByName(parts[0], parts[1]);
+						if (modelEntry != null)
+						{
+							LoadModel(modelEntry);
+						}
 					}
 					break;
 			}
@@ -463,6 +525,10 @@ namespace OpenSora.Viewer
 				_typeEntries = (from FileAndEntry a in _typeEntries orderby a.Entry.Name select a).ToList();
 			}
 
+			if (!string.IsNullOrEmpty(_mainPanel._textFilter.Text))
+			{
+				Debug.WriteLine(_mainPanel._textFilter.Text);
+			}
 
 			// Add to listbox
 			foreach (var a in _typeEntries)
@@ -513,6 +579,11 @@ namespace OpenSora.Viewer
 				var msg = Dialog.CreateMessageBox("Error", ex.ToString());
 				msg.ShowModal();
 			}
+		}
+
+		private void _comboFunctions_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			var k = _mainPanel._comboFunctions.SelectedIndex;
 		}
 
 		private void SetFolder(string folder)
@@ -700,15 +771,16 @@ namespace OpenSora.Viewer
 
 			GraphicsDevice.Clear(Color.Black);
 
-			if (_mainPanel._comboResourceType.SelectedIndex == 0 ||
-				_mainPanel._comboResourceType.SelectedIndex == 2)
+			var idx = _mainPanel._comboResourceType.SelectedIndex;
+			if (idx == 0 || idx == 2)
 			{
 				DrawTexture(_texture);
 			}
-			else if (_mainPanel._comboResourceType.SelectedIndex == 1)
+			else if (idx == 1 || idx == 4)
 			{
 				_renderer.Render(_mainPanel._panelViewer.Bounds);
-			} else if (_mainPanel._comboResourceType.SelectedIndex == 3)
+			}
+			else if (idx == 3)
 			{
 				DrawAnimation();
 			}

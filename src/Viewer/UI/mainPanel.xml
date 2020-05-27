@@ -11,6 +11,7 @@
         <Proportion Type="Auto" />
         <Proportion Type="Part" />
         <Proportion Type="Part" />
+        <Proportion Type="Part" />
       </HorizontalStackPanel.Proportions>
       <TextBox Readonly="True" Width="300" Id="_textPath" />
       <TextButton Text="Change..." Id="_buttonChange" />
@@ -20,6 +21,17 @@
         <Label Text="Step" />
         <SpinButton Maximum="8" Minimum="0" Value="8" Integer="True" Width="32" Id="_numericAnimationStep" />
         <Label Text="Total: 64" Id="_textAnimationTotal" />
+      </HorizontalStackPanel>
+      <HorizontalStackPanel Spacing="8" HorizontalAlignment="Center" Id="_boxScenarios">
+        <Label Text="Location:" Id="_textScenarioLocation" />
+        <Label Text="Functions" />
+        <ComboBox HorizontalAlignment="Stretch" Id="_comboFunctions">
+          <ListItem Text="0x3AA" />
+          <ListItem Text="0x77B" />
+          <ListItem Text="0x7B3" />
+          <ListItem Text="0x7C9" />
+          <ListItem Text="0x1DFD" />
+        </ComboBox>
       </HorizontalStackPanel>
       <TextButton Text="About" HorizontalAlignment="Right" Id="_buttonAbout" />
     </HorizontalStackPanel>

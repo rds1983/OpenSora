@@ -1,4 +1,5 @@
 ﻿using OpenSora.Utility;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -32,6 +33,7 @@ namespace OpenSora.Scenarios
 		public int PreInitFunctionIndex { get; private set; }
 
 		public ScenarioEntryPoint[] EntryPoints { get; private set; }
+		public int[] Funtions { get; private set; }
 
 		private Scenario()
 		{
@@ -106,6 +108,15 @@ namespace OpenSora.Scenarios
 
 					se.ScenarioInfo = infos.ToArray();
 				}
+
+				stream.Seek(result.ScenaFunctionTable.Offset, SeekOrigin.Begin);
+				var functions = new List<int>();
+				for (var i = 0; i < result.ScenaFunctionTable.Size / 2; ++i)
+				{
+					functions.Add(reader.ReadInt16());
+				}
+
+				result.Funtions = functions.ToArray();
 			}
 
 			return result;

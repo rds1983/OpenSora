@@ -434,12 +434,12 @@ namespace OpenSora.Viewer
 						_mainPanel._textScenarioLocation.Text = "Location: " + scenario.Location;
 
 						_mainPanel._comboFunctions.Items.Clear();
-						foreach(var idx in scenario.Funtions)
+						foreach(var function in scenario.Functions)
 						{
 							_mainPanel._comboFunctions.Items.Add(new ListItem
 							{
-								Text = string.Format("0x{0:X}", idx),
-								Tag = idx
+								Text = string.Format("0x{0:X}", function.Offset),
+								Tag = function
 							});
 						}
 

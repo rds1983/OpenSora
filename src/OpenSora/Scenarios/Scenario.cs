@@ -33,7 +33,7 @@ namespace OpenSora.Scenarios
 		public int PreInitFunctionIndex { get; private set; }
 
 		public ScenarioEntryPoint[] EntryPoints { get; private set; }
-		public int[] Funtions { get; private set; }
+		public ScenarioFunctionInfo[] Functions { get; private set; }
 
 		private Scenario()
 		{
@@ -110,13 +110,20 @@ namespace OpenSora.Scenarios
 				}
 
 				stream.Seek(result.ScenaFunctionTable.Offset, SeekOrigin.Begin);
-				var functions = new List<int>();
+				var functionOffsets = new List<int>();
 				for (var i = 0; i < result.ScenaFunctionTable.Size / 2; ++i)
 				{
-					functions.Add(reader.ReadInt16());
+					functionOffsets.Add(reader.ReadInt16());
 				}
 
-				result.Funtions = functions.ToArray();
+				var functions = new List<ScenarioFunctionInfo>();
+				foreach(var offset in functionOffsets)
+				{
+					var function = ScenarioFunctionInfo.FromBinaryReader(reader, offset);
+					functions.Add(function);
+				}
+
+				result.Functions = functions.ToArray();
 			}
 
 			return result;

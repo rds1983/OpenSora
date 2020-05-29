@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 
-namespace OpenSora.Viewer
+namespace OpenSora.Rendering
 {
 	public class Camera
 	{

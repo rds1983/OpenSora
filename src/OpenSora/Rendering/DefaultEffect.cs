@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace OpenSora.Viewer
+namespace OpenSora.Rendering
 {
 	internal class DefaultEffect: Effect
 	{

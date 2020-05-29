@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace OpenSora.Viewer
+namespace OpenSora.Rendering
 {
 	internal class RenderContext
 	{

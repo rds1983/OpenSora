@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 
-namespace OpenSora.Viewer
+namespace OpenSora.Rendering
 {
 	public class CameraInputController
 	{

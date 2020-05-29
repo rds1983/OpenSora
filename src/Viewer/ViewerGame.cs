@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using OpenSora.Scenarios;
 using System.Diagnostics;
+using OpenSora.Rendering;
 
 namespace OpenSora.Viewer
 {
@@ -739,28 +740,7 @@ namespace OpenSora.Viewer
 				_animationFrameIndex = Math.Min((int)_mainPanel._numericAnimationStart.Value.Value, _animationInfo.Length - 1);
 			}
 
-			ushort?[,] data = _animationInfo[_animationFrameIndex];
-			for(var y = 0; y <  data.GetLength(0); ++y)
-			{
-				for(var x = 0; x < data.GetLength(1); ++x)
-				{
-					var val = data[y, x];
-					if (val == null)
-					{
-						continue;
-					}
-
-					var tileX = val.Value % AnimationLoader.ChunksPerRow;
-					var tileY = val.Value / AnimationLoader.ChunksPerRow;
-
-					var loc = new Vector2(location.X + (x * AnimationLoader.ChunkSize),
-										  location.Y + (y * AnimationLoader.ChunkSize));
-					var rect = new Rectangle(tileX * AnimationLoader.ChunkSize,
-						tileY * AnimationLoader.ChunkSize,
-						AnimationLoader.ChunkSize, AnimationLoader.ChunkSize);
-					_spriteBatch.Draw(_texture, loc, rect, Color.White);
-				}
-			}
+			AnimationRenderer.DrawAnimation(_spriteBatch, location, _texture, _animationInfo[_animationFrameIndex]);
 
 			_spriteBatch.End();
 		}

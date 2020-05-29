@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using OpenSora.Utility;
 using System.Collections.Generic;
 using System.IO;
 
@@ -40,7 +39,7 @@ namespace OpenSora
 						var b2 = chunk[j * BytesPerColor + 1];
 						ushort val = (ushort)((b2 << 8) + b1);
 
-						chunkBuffer[j] = Imaging.Pixel4444To32(val);
+						chunkBuffer[j] = Utility.Imaging.Pixel4444To32(val);
 					}
 
 					for (var y = 0; y < ChunkSize; ++y)

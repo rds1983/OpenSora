@@ -1,12 +1,66 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace OpenSora.Rendering
 {
+	public class Animation
+	{
+		private const int ApplicationFrameChangeDelayInMs = 100;
+
+		public ushort?[][,] Info { get; private set; }
+		public Texture2D Texture { get; private set; }
+
+		public DateTime? LastFrameRendered;
+		public int FrameIndex;
+
+		public ushort?[,] FrameData
+		{
+			get
+			{
+				return Info[FrameIndex];
+			}
+		}
+
+		public Animation(ushort?[][,] info, Texture2D texture)
+		{
+			if (info == null)
+			{
+				throw new ArgumentNullException(nameof(info));
+			}
+
+			if (texture == null)
+			{
+				throw new ArgumentNullException(nameof(texture));
+			}
+
+			Info = info;
+			Texture = texture;
+		}
+
+		public void Animate(int start, int step)
+		{
+			var now = DateTime.Now;
+			if (LastFrameRendered == null ||
+				(LastFrameRendered != null &&
+				(now - LastFrameRendered.Value).TotalMilliseconds >= ApplicationFrameChangeDelayInMs))
+			{
+				FrameIndex += step;
+				LastFrameRendered = now;
+			}
+
+			if (FrameIndex >= Info.Length)
+			{
+				FrameIndex = Math.Min(start, Info.Length - 1);
+			}
+		}
+	}
+
 	public class AnimationRenderer
 	{
-		public static void DrawAnimation(SpriteBatch batch, Point location, Texture2D texture, ushort?[,]  data)
+		public static void DrawAnimation(SpriteBatch batch, Point location, Animation animation)
 		{
+			var data = animation.FrameData;
 			for (var y = 0; y < data.GetLength(0); ++y)
 			{
 				for (var x = 0; x < data.GetLength(1); ++x)
@@ -25,7 +79,7 @@ namespace OpenSora.Rendering
 					var rect = new Rectangle(tileX * AnimationLoader.ChunkSize,
 						tileY * AnimationLoader.ChunkSize,
 						AnimationLoader.ChunkSize, AnimationLoader.ChunkSize);
-					batch.Draw(texture, loc, rect, Color.White);
+					batch.Draw(animation.Texture, loc, rect, Color.White);
 				}
 			}
 		}

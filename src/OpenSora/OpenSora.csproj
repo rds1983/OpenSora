@@ -4,6 +4,7 @@
     <OutputType>Library</OutputType>
     <TargetFramework>net45</TargetFramework>
     <Version>1.0.0.0</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   
   <ItemGroup>
@@ -12,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.Portable" Version="3.7.1.189" />
+    <PackageReference Include="Myra" Version="0.9.9.202" />
   </ItemGroup>
 
   <ItemGroup>

@@ -164,7 +164,7 @@ namespace OpenSora
 							var b1 = data[i * 2];
 							var b2 = data[i * 2 + 1];
 							ushort val = (ushort)((b2 << 8) + b1);
-							colorBuffer[i] = Imaging.Pixel4444To32(val);
+							colorBuffer[i] = Utility.Imaging.Pixel4444To32(val);
 						}
 						break;
 						case ChFormat.BGRA1555:
@@ -172,7 +172,7 @@ namespace OpenSora
 							var b1 = data[i * 2];
 							var b2 = data[i * 2 + 1];
 							ushort val = (ushort)((b2 << 8) + b1);
-							colorBuffer[i] = Imaging.Pixel1555To32(val);
+							colorBuffer[i] = Utility.Imaging.Pixel1555To32(val);
 						}
 						break;
 						case ChFormat.BGRA8888:

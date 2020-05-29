@@ -2,6 +2,7 @@
 {
 	public class DirEntry
 	{
+		public string DatFilePath;
 		public string Name;
 		public int Timestamp2;
 		public int CompressedSize;

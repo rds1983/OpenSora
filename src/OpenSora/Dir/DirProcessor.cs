@@ -23,7 +23,7 @@ namespace OpenSora.Dir
 			return Encoding.UTF8.GetString(data);
 		}
 
-		static List<DirEntry> ProcessDirFile(string dirFile)
+		static List<DirEntry> ProcessDirFile(string dirFile, string datFile)
 		{
 			Log("Processing file '{0}'", dirFile);
 
@@ -53,6 +53,7 @@ namespace OpenSora.Dir
 				{
 					var entry = new DirEntry
 					{
+						DatFilePath = datFile,
 						Name = ToString(reader.ReadBytes(12)),
 						Timestamp2 = reader.ReadInt32(),
 						CompressedSize = reader.ReadInt32(),
@@ -84,8 +85,8 @@ namespace OpenSora.Dir
 			{
 				try
 				{
-					var entries = ProcessDirFile(dirFile);
 					var datFile = dirFile.Substring(0, dirFile.Length - 4) + ".dat";
+					var entries = ProcessDirFile(dirFile, datFile);
 					if (!File.Exists(datFile))
 					{
 						GenerateError("Could not find file '{0}'", datFile);

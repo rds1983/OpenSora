@@ -17,34 +17,6 @@ namespace OpenSora.Scenarios
 
 	public partial class Decompiler
 	{
-		class DecompilerTableEntry
-		{
-			public Type InstructionType { get; private set; }
-			public string Name { get; private set; }
-			public string Operand { get; private set; }
-			public InstructionFlags Flags { get; private set; }
-
-			public DecompilerTableEntry(Type instructionType, string operand, InstructionFlags flags)
-			{
-				if (instructionType == null)
-				{
-					throw new ArgumentNullException(nameof(instructionType));
-				}
-
-				InstructionType = instructionType;
-				Operand = operand;
-				Flags = flags;
-			}
-
-			public DecompilerTableEntry(string name, string operand, InstructionFlags flags)
-			{
-				Name = name;
-				Operand = operand;
-				Flags = flags;
-			}
-		}
-
-
 		private readonly DecompilerContext _context;
 
 		public BinaryReader Reader
@@ -57,14 +29,12 @@ namespace OpenSora.Scenarios
 
 		public Decompiler(BinaryReader reader)
 		{
-			_context = new DecompilerContext(reader);
+			_context = new DecompilerContext(reader, DecompilerTableFC);
 		}
 
 		public void DecompileBlock()
 		{
-			var op = Reader.ReadByte();
-
-			var entry = DecompilerTableFC[op];
+			_context.DecompileBlock();
 		}
 
 		private static DecompilerTableEntry CreateEntry<T>(string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_SWITCH) where T : BaseInstruction

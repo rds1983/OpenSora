@@ -1,10 +1,18 @@
-﻿namespace OpenSora.Scenarios.Instructions
+﻿using OpenSora.Scenarios.Expressions;
+
+namespace OpenSora.Scenarios.Instructions
 {
 	public class Jc: BaseInstruction
 	{
-		public override void Load(DecompilerContext context)
+		public Expression[] Expressions { get; private set; }
+		public int Offset { get; private set; }
+
+		public override void Decompile(DecompilerContext context)
 		{
-			base.Load(context);
+			base.Decompile(context);
+
+			Expressions = context.DecompileExpression();
+			Offset = context.Reader.ReadUInt16();
 		}
 	}
 }

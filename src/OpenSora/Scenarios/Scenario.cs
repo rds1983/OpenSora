@@ -47,22 +47,22 @@ namespace OpenSora.Scenarios
 			{
 				result.MapName = reader.LoadSizedString(10);
 				result.Location = reader.LoadSizedString(14);
-				result.MapIndex = reader.ReadInt16();
-				result.MapDefaultBgm = reader.ReadInt16();
-				result.Flags = reader.ReadInt16();
-				result.EntryFunctionIndex = reader.ReadInt16();
+				result.MapIndex = reader.ReadUInt16();
+				result.MapDefaultBgm = reader.ReadUInt16();
+				result.Flags = reader.ReadUInt16();
+				result.EntryFunctionIndex = reader.ReadUInt16();
 				result.IncludedScenario = reader.ReadBytes(NUMBER_OF_INCLUDE_FILE * 4);
-				result.Reserved = reader.ReadInt16();
+				result.Reserved = reader.ReadUInt16();
 
 				result.Entries = new ScenarioEntry[SCN_INFO_MAXIMUM];
 				for(var i = 0; i < result.Entries.Length; ++i)
 				{
-					result.Entries[i] = new ScenarioEntry(reader.ReadInt16(), reader.ReadInt16());
+					result.Entries[i] = new ScenarioEntry(reader.ReadUInt16(), reader.ReadUInt16());
 				}
 
-				result.StringTableOffset = reader.ReadInt16();
+				result.StringTableOffset = reader.ReadUInt16();
 				result.HeaderEndOffset = reader.ReadInt32();
-				result.ScenaFunctionTable = new ScenarioEntry(reader.ReadInt16(), reader.ReadInt16());
+				result.ScenaFunctionTable = new ScenarioEntry(reader.ReadUInt16(), reader.ReadUInt16());
 
 				var entryPointsCount = (result.Entries[0].Offset - stream.Position) / 0x44;
 				var entryPoints = new List<ScenarioEntryPoint>();
@@ -113,7 +113,7 @@ namespace OpenSora.Scenarios
 				var functionOffsets = new List<int>();
 				for (var i = 0; i < result.ScenaFunctionTable.Size / 2; ++i)
 				{
-					functionOffsets.Add(reader.ReadInt16());
+					functionOffsets.Add(reader.ReadUInt16());
 				}
 
 				var functions = new List<ScenarioFunctionInfo>();

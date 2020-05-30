@@ -23,14 +23,14 @@ namespace OpenSora.Scenarios
 				X = reader.ReadInt32(),
 				Z = reader.ReadInt32(),
 				Y = reader.ReadInt32(),
-				Unknown_0C = reader.ReadInt16(),
-				Unknown_0E = reader.ReadInt16(),
+				Unknown_0C = reader.ReadUInt16(),
+				Unknown_0E = reader.ReadUInt16(),
 				Unknown_10 = reader.ReadByte(),
 				Unknown_11 = reader.ReadByte(),
 				Unknown_12 = reader.ReadInt32(),
-				BattleIndex = reader.ReadInt16(),
-				Unknown_18 = reader.ReadInt16(),
-				Unknown_1A = reader.ReadInt16(),
+				BattleIndex = reader.ReadUInt16(),
+				Unknown_18 = reader.ReadUInt16(),
+				Unknown_1A = reader.ReadUInt16(),
 			};
 		}
 	}

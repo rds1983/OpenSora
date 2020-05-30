@@ -70,7 +70,7 @@ namespace OpenSora.ModelLoading
 				}
 
 				// Skip first two bytes
-				var count = reader.ReadInt16();
+				var count = reader.ReadUInt16();
 				for (var i = 0; i < count; ++i)
 				{
 					int length = 0;

@@ -24,15 +24,15 @@ namespace OpenSora.Scenarios
 				X = reader.ReadInt32(),
 				Z = reader.ReadInt32(),
 				Y = reader.ReadInt32(),
-				Direction = reader.ReadInt16(),
-				Unknown2 = reader.ReadInt16(),
+				Direction = reader.ReadUInt16(),
+				Unknown2 = reader.ReadUInt16(),
 				Unknown3 = reader.ReadInt32(),
-				ChipIndex = reader.ReadInt16(),
-				NpcIndex = reader.ReadInt16(),
-				InitFunctionIndex = reader.ReadInt16(),
-				InitScenaIndex = reader.ReadInt16(),
-				TalkFunctionIndex = reader.ReadInt16(),
-				TalkScenaIndex = reader.ReadInt16(),
+				ChipIndex = reader.ReadUInt16(),
+				NpcIndex = reader.ReadUInt16(),
+				InitFunctionIndex = reader.ReadUInt16(),
+				InitScenaIndex = reader.ReadUInt16(),
+				TalkFunctionIndex = reader.ReadUInt16(),
+				TalkScenaIndex = reader.ReadUInt16(),
 			};
 		}
 	}

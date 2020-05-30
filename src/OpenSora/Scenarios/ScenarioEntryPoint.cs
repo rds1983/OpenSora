@@ -35,8 +35,8 @@ namespace OpenSora.Scenarios
 				Unknown_00 = reader.ReadInt32(),
 				Unknown_04 = reader.ReadInt32(),
 				Unknown_08 = reader.ReadInt32(),
-				Unknown_0C = reader.ReadInt16(),
-				Unknown_0E = reader.ReadInt16(),
+				Unknown_0C = reader.ReadUInt16(),
+				Unknown_0E = reader.ReadUInt16(),
 				Unknown_10 = reader.ReadInt32(),
 				Unknown_14 = reader.ReadInt32(),
 				Unknown_18 = reader.ReadInt32(),
@@ -45,16 +45,16 @@ namespace OpenSora.Scenarios
 				Unknown_24 = reader.ReadInt32(),
 				Unknown_28 = reader.ReadInt32(),
 				Unknown_2C = reader.ReadInt32(),
-				Unknown_30 = reader.ReadInt16(),
-				Unknown_32 = reader.ReadInt16(),
-				Unknown_34 = reader.ReadInt16(),
-				Unknown_36 = reader.ReadInt16(),
-				Unknown_38 = reader.ReadInt16(),
-				Unknown_3A = reader.ReadInt16(),
-				InitScenaIndex = reader.ReadInt16(),
-				InitFunctionIndex = reader.ReadInt16(),
-				EntryScenaIndex = reader.ReadInt16(),
-				EntryFunctionIndex = reader.ReadInt16()
+				Unknown_30 = reader.ReadUInt16(),
+				Unknown_32 = reader.ReadUInt16(),
+				Unknown_34 = reader.ReadUInt16(),
+				Unknown_36 = reader.ReadUInt16(),
+				Unknown_38 = reader.ReadUInt16(),
+				Unknown_3A = reader.ReadUInt16(),
+				InitScenaIndex = reader.ReadUInt16(),
+				InitFunctionIndex = reader.ReadUInt16(),
+				EntryScenaIndex = reader.ReadUInt16(),
+				EntryFunctionIndex = reader.ReadUInt16()
 			};
 		}
 	}

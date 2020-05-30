@@ -27,10 +27,10 @@ namespace OpenSora.Scenarios
 				ActorX = reader.ReadInt32(),
 				ActorZ = reader.ReadInt32(),
 				ActorY = reader.ReadInt32(),
-				Flags = reader.ReadInt16(),
-				TalkScenaIndex = reader.ReadInt16(),
-				TalkFunctionIndex = reader.ReadInt16(),
-				Unknown_22 = reader.ReadInt16()
+				Flags = reader.ReadUInt16(),
+				TalkScenaIndex = reader.ReadUInt16(),
+				TalkFunctionIndex = reader.ReadUInt16(),
+				Unknown_22 = reader.ReadUInt16()
 			};
 		}
 	}

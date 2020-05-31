@@ -4,13 +4,11 @@ namespace OpenSora.Scenarios
 {
 	public class BaseInstruction
 	{
-		public int Offset { get; private set; }
-		public object[] Operands { get; protected set; }
+		public int Offset { get; set; }
+		public object[] Operands { get; set; }
 
 		public virtual void Decompile(DecompilerContext context, out int[] branchTargets)
 		{
-			Offset = (int)context.Reader.BaseStream.Position;
-
 			branchTargets = null;
 
 			var branchTargetsList = new List<int>();

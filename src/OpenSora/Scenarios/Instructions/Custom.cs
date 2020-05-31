@@ -2,8 +2,6 @@
 {
 	public class Custom: BaseInstruction
 	{
-		public string Name { get; private set; }
-
-
+		public string Name { get; set; }
 	}
 }

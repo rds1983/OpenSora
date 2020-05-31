@@ -1,4 +1,5 @@
 ﻿using OpenSora.Scenarios.Instructions;
+using System.Collections.Generic;
 
 namespace OpenSora.Scenarios
 {
@@ -28,7 +29,7 @@ namespace OpenSora.Scenarios
 			CreateEntry<SetPlaceName>("W"),
 			CreateEntry<BlurSwitch>(),
 			CreateCustomEntry("OP_15"),
-			CreateCustomEntry("OP_16"),
+			CreateCustomEntry("OP_16", customDecompiler: DecompileOp16),
 			CreateEntry<ShowSaveMenu>(),
 			CreateCustomEntry("OP_18"),
 			CreateEntry<EventBegin>("B"),
@@ -46,9 +47,9 @@ namespace OpenSora.Scenarios
 			CreateEntry<SoundDistance>("WLLLLLBL"),
 			CreateEntry<SoundLoad>("H"),
 			CreateEntry<Yield>(),
-			CreateCustomEntry("OP_28"),
-			CreateCustomEntry("OP_29"),
-			CreateCustomEntry("OP_2A"),
+			CreateCustomEntry("OP_28", customDecompiler: DecompileOp28),
+			CreateCustomEntry("OP_29", customDecompiler: DecompileOp29),
+			CreateCustomEntry("OP_2A", customDecompiler: DecompileOp2a),
 			CreateCustomEntry("OP_2B","WW"),
 			CreateCustomEntry("OP_2C","WW"),
 			CreateEntry<AddParty>("BB"),
@@ -71,7 +72,7 @@ namespace OpenSora.Scenarios
 			CreateCustomEntry("OP_3E","Wh"),
 			CreateCustomEntry("OP_3F","Wh"),
 			CreateCustomEntry("OP_40","W"),
-			CreateCustomEntry("OP_41"),
+			CreateCustomEntry("OP_41", customDecompiler: DecompileOp41),
 			CreateCustomEntry("OP_42","B"),
 			CreateCustomEntry("OP_43","WBBW"),
 			CreateCustomEntry("OP_44","WB"),
@@ -85,9 +86,9 @@ namespace OpenSora.Scenarios
 			CreateCustomEntry("OP_4C"),
 			CreateEntry<RunExpression>(string.Empty),
 			CreateCustomEntry("OP_4E"),
-			CreateCustomEntry("OP_4F"),
+			CreateCustomEntry("OP_4F", customDecompiler: DecompileOp4f),
 			CreateCustomEntry("OP_50"),
-			CreateCustomEntry("OP_51"),
+			CreateCustomEntry("OP_51", customDecompiler: DecompileOp51),
 			CreateEntry<TalkBegin>("W"),
 			CreateEntry<TalkEnd>("W"),
 			CreateEntry<AnonymousTalk>("S"),
@@ -196,5 +197,39 @@ namespace OpenSora.Scenarios
 			CreateCustomEntry("OP_BB","BB"),
 			CreateEntry<SaveClearData>(),
 		};
+		private static void DecompileOp16(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		{
+			var k = 5;
+		}
+
+		private static void DecompileOp28(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		{
+			var k = 5;
+		}
+
+		private static void DecompileOp29(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		{
+			var k = 5;
+		}
+		private static void DecompileOp2a(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		{
+			var k = 5;
+		}
+
+		private static void DecompileOp41(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		{
+			var k = 5;
+		}
+
+		private static void DecompileOp4f(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		{
+			operands.Add(context.ReadByte());
+			operands.Add(context.DecompileExpression());
+		}
+
+		private static void DecompileOp51(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		{
+			var k = 5;
+		}
 	}
 }

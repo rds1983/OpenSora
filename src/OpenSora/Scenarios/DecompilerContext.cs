@@ -5,30 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Linq;
+using OpenSora.Scenarios.Instructions;
 
 namespace OpenSora.Scenarios
 {
-	public class DecompilerTableEntry
-	{
-		public Type InstructionType { get; }
-		public string Name { get; }
-		public string Operand { get; }
-		public InstructionFlags Flags { get; }
-
-		public DecompilerTableEntry(Type instructionType, string name, string operand, InstructionFlags flags)
-		{
-			if (instructionType == null)
-			{
-				throw new ArgumentNullException(nameof(instructionType));
-			}
-
-			InstructionType = instructionType;
-			Name = name;
-			Operand = operand;
-			Flags = flags;
-		}
-	}
-
 	public class DecompilerContext
 	{
 		private readonly HashSet<int> _disasmTable = new HashSet<int>();
@@ -59,7 +39,6 @@ namespace OpenSora.Scenarios
 			var result = new List<BaseInstruction>();
 			var blockRef = new Dictionary<int, BaseInstruction>();
 
-			BaseInstruction lastInstruction = null;
 			while (!Reader.IsEOF())
 			{
 				if (_disasmTable.Contains((int)Reader.BaseStream.Position))
@@ -67,17 +46,47 @@ namespace OpenSora.Scenarios
 					break;
 				}
 
+				int offset = (int)Reader.BaseStream.Position;
 				var op = Reader.ReadByte();
 
 				Entry = _entriesTable[op];
 
-				lastInstruction = (BaseInstruction)Activator.CreateInstance(Entry.InstructionType);
+				BaseInstruction instruction = null;
+				instruction = (BaseInstruction)Activator.CreateInstance(Entry.InstructionType);
+				instruction.Offset = offset;
 
 				int[] branchTargets;
-				lastInstruction.Decompile(this, out branchTargets);
-				_disasmTable.Add(lastInstruction.Offset);
+				instruction.Decompile(this, out branchTargets);
 
-				result.Add(lastInstruction);
+				var asCustom = instruction as Custom;
+				if (asCustom != null)
+				{
+					asCustom.Name = Entry.Name;
+				}
+
+				if (Entry.CustomDecompiler != null)
+				{
+					var targetsList = new List<int>();
+					if (branchTargets != null)
+					{
+						targetsList.AddRange(branchTargets);
+					}
+
+					var operandsList = new List<object>();
+					if (instruction.Operands != null)
+					{
+						operandsList.AddRange(instruction.Operands);
+					}
+
+					Entry.CustomDecompiler.Invoke(this, ref operandsList, ref targetsList);
+
+					branchTargets = targetsList.ToArray();
+					instruction.Operands = operandsList.ToArray();
+				}
+
+				_disasmTable.Add(instruction.Offset);
+
+				result.Add(instruction);
 
 				if (!Entry.Flags.HasFlag(InstructionFlags.INSTRUCTION_END_BLOCK) && !Entry.Flags.HasFlag(InstructionFlags.INSTRUCTION_START_BLOCK))
 				{
@@ -88,7 +97,7 @@ namespace OpenSora.Scenarios
 				{
 					foreach (var target in branchTargets)
 					{
-						blockRef[target] = lastInstruction;
+						blockRef[target] = instruction;
 					}
 				}
 
@@ -113,7 +122,7 @@ namespace OpenSora.Scenarios
 
 				_globalLabelTable.Add(newBlock[0].Offset);
 
-				if (offset >= lastInstruction.Offset || offset < result[0].Offset)
+				if (offset >= result[result.Count - 1].Offset || offset < result[0].Offset)
 				{
 					result.AddRange(newBlock);
 				} else
@@ -183,6 +192,36 @@ namespace OpenSora.Scenarios
 			return result.ToArray();
 		}
 
+		public int ReadSByte()
+		{
+			return Reader.ReadSByte();
+		}
+
+		public int ReadByte()
+		{
+			return Reader.ReadByte();
+		}
+
+		public int ReadInt16()
+		{
+			return Reader.ReadInt16();
+		}
+
+		public int ReadUInt16()
+		{
+			return Reader.ReadUInt16();
+		}
+
+		public int ReadInt32()
+		{
+			return Reader.ReadInt32();
+		}
+
+		public long ReadUInt32()
+		{
+			return Reader.ReadUInt32();
+		}
+
 		public object DecompileOperand(char operand)
 		{
 			object op;
@@ -191,42 +230,42 @@ namespace OpenSora.Scenarios
 
 				case 'c':
 				case 'b':
-					op = (int)Reader.ReadSByte();
+					op = ReadSByte();
 					break;
 				case 'C':
 				case 'B':
-					op = (int)Reader.ReadByte();
+					op = ReadByte();
 					break;
 				case 'h':
 				case 'w':
-					op = (int)Reader.ReadInt16();
+					op = ReadInt16();
 					break;
 
 				case 'H':
 				case 'W':
 				case 'o':
-					op = (int)Reader.ReadUInt16();
+					op = ReadUInt16();
 					break;
 
 				case 'i':
 				case 'l':
-					op = Reader.ReadInt32();
+					op = ReadInt32();
 					break;
 
 				case 'I':
 				case 'L':
-					op = (long)Reader.ReadUInt32();
+					op = ReadUInt32();
 					break;
 
 				case 'S':
 					op = ReadString();
 					break;
 				case 'M':
-					op = (int)Reader.ReadInt16();
+					op = ReadInt16();
 					break;
 				case 'T':
 				case 'O':
-					op = (int)Reader.ReadUInt16();
+					op = ReadUInt16();
 					break;
 				default:
 					throw new Exception(string.Format("Unknown operand '{0}'", operand));

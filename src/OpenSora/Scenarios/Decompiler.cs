@@ -1,5 +1,6 @@
 ﻿using OpenSora.Scenarios.Instructions;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace OpenSora.Scenarios
@@ -13,6 +14,32 @@ namespace OpenSora.Scenarios
 		INSTRUCTION_JUMP = (1 << 3) | INSTRUCTION_END_BLOCK,
 		INSTRUCTION_SWITCH = 0,
 		INSTRUCTION_NONE = 0,
+	}
+
+	public delegate void CustomDecompilerDelegate(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets);
+
+	public class DecompilerTableEntry
+	{
+		public Type InstructionType { get; }
+		public string Name { get; }
+		public string Operand { get; }
+		public InstructionFlags Flags { get; }
+
+		public CustomDecompilerDelegate CustomDecompiler { get; }
+
+		public DecompilerTableEntry(Type instructionType, string name, string operand, InstructionFlags flags, CustomDecompilerDelegate customDecompiler)
+		{
+			if (instructionType == null)
+			{
+				throw new ArgumentNullException(nameof(instructionType));
+			}
+
+			InstructionType = instructionType;
+			Name = name;
+			Operand = operand;
+			Flags = flags;
+			CustomDecompiler = customDecompiler;
+		}
 	}
 
 	public partial class Decompiler
@@ -39,12 +66,12 @@ namespace OpenSora.Scenarios
 
 		private static DecompilerTableEntry CreateEntry<T>(string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_SWITCH) where T : BaseInstruction
 		{
-			return new DecompilerTableEntry(typeof(T), string.Empty, operand, flags);
+			return new DecompilerTableEntry(typeof(T), string.Empty, operand, flags, null);
 		}
 
-		private static DecompilerTableEntry CreateCustomEntry(string name, string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_NONE)
+		private static DecompilerTableEntry CreateCustomEntry(string name, string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_NONE, CustomDecompilerDelegate customDecompiler = null)
 		{
-			return new DecompilerTableEntry(typeof(Custom), name, operand, flags);
+			return new DecompilerTableEntry(typeof(Custom), name, operand, flags, customDecompiler);
 		}
 	}
 }

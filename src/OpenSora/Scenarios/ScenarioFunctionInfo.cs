@@ -4,22 +4,25 @@ namespace OpenSora.Scenarios
 {
 	public class ScenarioFunctionInfo
 	{
-		public int Offset;
+		public int Offset { get; }
+		public BaseInstruction[] Instructions { get; }
+
+		private ScenarioFunctionInfo(int offset, BaseInstruction[] instructions)
+		{
+			Offset = offset;
+			Instructions = instructions;
+		}
+
 
 		public static ScenarioFunctionInfo FromBinaryReader(BinaryReader reader, int offset)
 		{
-			var result = new ScenarioFunctionInfo
-			{
-				Offset = offset
-			};
-
 			reader.BaseStream.Seek(offset, SeekOrigin.Begin);
 
 			var decompiler = new Decompiler(reader);
 
-			decompiler.DecompileBlock();
+			var instructions = decompiler.DecompileBlock();
 
-			return result;
+			return new ScenarioFunctionInfo(offset, instructions);
 		}
 	}
 }

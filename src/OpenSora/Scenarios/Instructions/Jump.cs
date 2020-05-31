@@ -2,9 +2,9 @@
 {
 	public class Jump: BaseInstruction
 	{
-		public override void Decompile(DecompilerContext context)
+		public override void Decompile(DecompilerContext context, out int[] branchTargets)
 		{
-			base.Decompile(context);
+			base.Decompile(context, out branchTargets);
 		}
 	}
 }

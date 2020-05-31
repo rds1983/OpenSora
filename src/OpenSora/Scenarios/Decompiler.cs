@@ -32,19 +32,19 @@ namespace OpenSora.Scenarios
 			_context = new DecompilerContext(reader, DecompilerTableFC);
 		}
 
-		public void DecompileBlock()
+		public BaseInstruction[] DecompileBlock()
 		{
-			_context.DecompileBlock();
+			return _context.DecompileBlock();
 		}
 
 		private static DecompilerTableEntry CreateEntry<T>(string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_SWITCH) where T : BaseInstruction
 		{
-			return new DecompilerTableEntry(typeof(T), operand, flags);
+			return new DecompilerTableEntry(typeof(T), string.Empty, operand, flags);
 		}
 
-		private static DecompilerTableEntry CreateCustomEntry(string name, string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_SWITCH)
+		private static DecompilerTableEntry CreateCustomEntry(string name, string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_NONE)
 		{
-			return new DecompilerTableEntry(name, operand, flags);
+			return new DecompilerTableEntry(typeof(Custom), name, operand, flags);
 		}
 	}
 }

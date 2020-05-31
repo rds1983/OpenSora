@@ -7,10 +7,10 @@ namespace OpenSora.Scenarios
 		private static readonly DecompilerTableEntry[] DecompilerTableFC = new DecompilerTableEntry[]
 		{
 			CreateEntry<ExitThread>(),
-			CreateEntry<Return>(string.Empty,InstructionFlags.INSTRUCTION_END_BLOCK),
-			CreateEntry<Jc>(string.Empty,InstructionFlags.INSTRUCTION_START_BLOCK),
-			CreateEntry<Jump>("O",InstructionFlags.INSTRUCTION_JUMP),
-			CreateEntry<Switch>(string.Empty,InstructionFlags.INSTRUCTION_END_BLOCK),
+			CreateEntry<Return>(string.Empty, InstructionFlags.INSTRUCTION_END_BLOCK),
+			CreateEntry<Jc>(string.Empty, InstructionFlags.INSTRUCTION_START_BLOCK),
+			CreateEntry<Jump>("O", InstructionFlags.INSTRUCTION_JUMP),
+			CreateEntry<Switch>(string.Empty, InstructionFlags.INSTRUCTION_END_BLOCK),
 			CreateEntry<Call>("CH"),
 			CreateEntry<NewScene>(string.Empty),
 			CreateEntry<IdleLoop>(),

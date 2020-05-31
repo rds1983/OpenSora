@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 
 namespace OpenSora.Utility
@@ -8,7 +7,6 @@ namespace OpenSora.Utility
 	{
 		public static string LoadZeroTerminatedString(this BinaryReader reader, out int length)
 		{
-			var result = new List<char>();
 			length = 0;
 
 			var sb = new StringBuilder();
@@ -44,7 +42,7 @@ namespace OpenSora.Utility
 			reader.BaseStream.Seek(size, SeekOrigin.Current);
 		}
 
-		public static int ReadInt16Be(this BinaryReader reader)
+		public static int ReadUInt16Be(this BinaryReader reader)
 		{
 			var b1 = reader.ReadByte();
 			var b2 = reader.ReadByte();
@@ -68,6 +66,11 @@ namespace OpenSora.Utility
 			}
 
 			return sb.ToString();
+		}
+
+		public static bool IsEOF(this BinaryReader reader)
+		{
+			return reader.BaseStream.Position >= reader.BaseStream.Length;
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using OpenSora.Scenarios.Instructions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenSora.Scenarios
 {
@@ -13,7 +14,7 @@ namespace OpenSora.Scenarios
 			CreateEntry<Jump>("O", InstructionFlags.INSTRUCTION_JUMP),
 			CreateEntry<Switch>(string.Empty, InstructionFlags.INSTRUCTION_END_BLOCK),
 			CreateEntry<Call>("CH"),
-			CreateEntry<NewScene>(string.Empty),
+			CreateEntry<NewScene>("LCCC"),
 			CreateEntry<IdleLoop>(),
 			CreateEntry<Sleep>("I"),
 			CreateEntry<SetMapFlags>("L"),
@@ -199,26 +200,80 @@ namespace OpenSora.Scenarios
 		};
 		private static void DecompileOp16(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
 		{
-			var k = 5;
+			var b = context.ReadByte();
+
+			operands.Add(b);
+			if (b == 2)
+			{
+				operands.AddRange(context.DecompileOperands("LLLL"));
+			}
 		}
 
 		private static void DecompileOp28(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
 		{
-			var k = 5;
+			var oprs = context.DecompileOperands("WB");
+
+			operands.AddRange(oprs);
+
+			var op = (int)oprs[1];
+			if (op == 1 || op == 2)
+			{
+				operands.Add(context.DecompileOperand('W'));
+			}
+			else if (op == 3 || op == 4)
+			{
+				operands.Add(context.DecompileOperand('B'));
+			}
 		}
 
 		private static void DecompileOp29(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
 		{
-			var k = 5;
+			var oprs = context.DecompileOperands("WB");
+
+			operands.AddRange(oprs);
+
+			var op = (int)oprs[1];
+			if (op == 2)
+			{
+				operands.Add(context.DecompileOperand('W'));
+			}
+			else
+			{
+				operands.Add(context.DecompileOperand('B'));
+			}
 		}
 		private static void DecompileOp2a(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
 		{
-			var k = 5;
+			for (var i = 0; i < 0xc; ++i)
+			{
+				var opr = context.ReadUInt16();
+				operands.Add(opr);
+				if (opr == 0xffff)
+				{
+					break;
+				}
+			}
 		}
+
+		private static readonly int[] Op41Values =
+		{
+			0x258, 0x259, 0x25A, 0x25B, 0x25C, 0x25D, 0x25E, 0x25F, 0x260, 0x261, 0x262, 0x263, 0x264, 0x265, 0x266, 0x267, 0x268, 0x269, 0x26A, 0x26B, 0x26C, 0x26D, 0x26E, 0x26F, 0x270, 0x271,
+			0x272, 0x273, 0x274, 0x275, 0x276, 0x27D, 0x27E, 0x27F, 0x280, 0x281, 0x282, 0x283, 0x284, 0x285, 0x286, 0x287, 0x28A, 0x28B, 0x28E, 0x28F, 0x291, 0x2C1, 0x2C2, 0x2C3, 0x2C6, 0x2C7,
+			0x2C8, 0x2C9, 0x2CA, 0x2D0, 0x2D1, 0x2D2, 0x2D3, 0x2D4, 0x315, 0x316, 0x317, 0x318, 0x319, 0x31A, 0x31B, 0x31C, 0x31D, 0x31E, 0x31F
+		};
 
 		private static void DecompileOp41(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
 		{
-			var k = 5;
+			var oprs = context.DecompileOperands("WB");
+
+			operands.AddRange(oprs);
+
+			var op = (int)oprs[1];
+
+			if (Op41Values.Contains(op))
+			{
+				operands.Add(context.DecompileOperand('B'));
+			}
 		}
 
 		private static void DecompileOp4f(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)

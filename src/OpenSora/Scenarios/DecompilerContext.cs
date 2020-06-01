@@ -274,6 +274,21 @@ namespace OpenSora.Scenarios
 			return op;
 		}
 
+		public object[] DecompileOperands(string operands)
+		{
+			var result = new List<object>();
+
+			if (!string.IsNullOrEmpty(operands))
+			{
+				for(var i = 0; i < operands.Length; ++i)
+				{
+					result.Add(DecompileOperand(operands[i]));
+				}
+			}
+
+			return result.ToArray();
+		}
+
 		public Expression[] DecompileExpression()
 		{
 			return Expression.Decompile(Reader);

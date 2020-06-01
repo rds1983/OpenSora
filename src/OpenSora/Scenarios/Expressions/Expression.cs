@@ -47,21 +47,23 @@ namespace OpenSora.Scenarios.Expressions
 			Operands = operands;
 		}
 
-		public static Expression[] Decompile(BinaryReader reader)
+		public static Expression[] Decompile(DecompilerContext context)
 		{
 			var result = new List<Expression>();
-			while (!reader.IsEOF())
+			while (!context.IsEOF())
 			{
-				var type = (ExpressionType)reader.ReadByte();
+				var type = (ExpressionType)context.ReadByte();
 				var operands = new List<object>();
+				var finish = false;
 
 				switch (type)
 				{
 					case ExpressionType.EXPR_PUSH_LONG:
-						operands.Add(reader.ReadInt32());
+						operands.Add(context.ReadUInt32());
 						break;
 					case ExpressionType.EXPR_END:
-						goto end;
+						finish = true;
+						break;
 					case ExpressionType.EXPR_EQU:
 					case ExpressionType.EXPR_NEQ:
 					case ExpressionType.EXPR_LSS:
@@ -95,27 +97,30 @@ namespace OpenSora.Scenarios.Expressions
 						throw new NotImplementedException();
 					case ExpressionType.EXPR_TEST_SCENA_FLAGS:
 					case ExpressionType.EXPR_GET_RESULT:
-						operands.Add(reader.ReadUInt16());
+						operands.Add(context.ReadUInt16());
 						break;
 					case ExpressionType.EXPR_PUSH_VALUE_INDEX:
-						operands.Add(reader.ReadByte());
+						operands.Add(context.ReadByte());
 						break;
 					case ExpressionType.EXPR_GET_CHR_WORK:
-						operands.Add(reader.ReadUInt16());
-						operands.Add(reader.ReadByte());
+						operands.Add(context.ReadUInt16());
+						operands.Add(context.ReadByte());
 						break;
 					case ExpressionType.EXPR_RAND:
 						// pass
 						break;
 					case ExpressionType.EXPR_23:
-						operands.Add(reader.ReadByte());
+						operands.Add(context.ReadByte());
 						break;
 				}
 
 				var expr = new Expression(type, operands.ToArray());
 				result.Add(expr);
+				if (finish)
+				{
+					break;
+				}
 			}
-		end:;
 
 			return result.ToArray();
 		}

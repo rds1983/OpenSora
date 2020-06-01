@@ -1,43 +1,10 @@
 ﻿using OpenSora.Utility;
-using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace OpenSora.Scenarios.Expressions
 {
 	public class Expression
 	{
-		private static readonly ExpressionType[] _passTypes = new ExpressionType[]
-		{
-			ExpressionType.EXPR_EQU,
-			ExpressionType.EXPR_NEQ,
-			ExpressionType.EXPR_LSS,
-			ExpressionType.EXPR_GTR,
-			ExpressionType.EXPR_LEQ,
-			ExpressionType.EXPR_GE,
-			ExpressionType.EXPR_EQUZ,
-			ExpressionType.EXPR_NEQUZ_I64,
-			ExpressionType.EXPR_AND,
-			ExpressionType.EXPR_OR,
-			ExpressionType.EXPR_ADD,
-			ExpressionType.EXPR_SUB,
-			ExpressionType.EXPR_NEG,
-			ExpressionType.EXPR_XOR,
-			ExpressionType.EXPR_IMUL,
-			ExpressionType.EXPR_IDIV,
-			ExpressionType.EXPR_IMOD,
-			ExpressionType.EXPR_STUB,
-			ExpressionType.EXPR_IMUL_SAVE,
-			ExpressionType.EXPR_IDIV_SAVE,
-			ExpressionType.EXPR_IMOD_SAVE,
-			ExpressionType.EXPR_ADD_SAVE,
-			ExpressionType.EXPR_SUB_SAVE,
-			ExpressionType.EXPR_AND_SAVE,
-			ExpressionType.EXPR_XOR_SAVE,
-			ExpressionType.EXPR_OR_SAVE,
-			ExpressionType.EXPR_NOT
-		};
-
 		public ExpressionType Type { get; private set; }
 		public object[] Operands { get; private set; }
 
@@ -50,7 +17,7 @@ namespace OpenSora.Scenarios.Expressions
 		public static Expression[] Decompile(DecompilerContext context)
 		{
 			var result = new List<Expression>();
-			while (!context.IsEOF())
+			while (!context.Reader.IsEOF())
 			{
 				var type = (ExpressionType)context.ReadByte();
 				var operands = new List<object>();
@@ -94,7 +61,10 @@ namespace OpenSora.Scenarios.Expressions
 						// pass
 						break;
 					case ExpressionType.EXPR_EXEC_OP:
-						throw new NotImplementedException();
+						int[] branchTargets;
+						var inst = context.DecompileInstruction(out branchTargets);
+						operands.Add(inst);
+						break;
 					case ExpressionType.EXPR_TEST_SCENA_FLAGS:
 					case ExpressionType.EXPR_GET_RESULT:
 						operands.Add(context.ReadUInt16());

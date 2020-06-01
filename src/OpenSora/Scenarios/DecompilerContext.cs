@@ -34,6 +34,47 @@ namespace OpenSora.Scenarios
 			_entriesTable = entriesTable;
 		}
 
+		public BaseInstruction DecompileInstruction(out int[] branchTargets)
+		{
+			int offset = (int)Reader.BaseStream.Position;
+			var op = Reader.ReadByte();
+
+			Entry = _entriesTable[op];
+			var instruction = (BaseInstruction)Activator.CreateInstance(Entry.InstructionType);
+			instruction.Offset = offset;
+
+			branchTargets = null;
+			instruction.Decompile(this, out branchTargets);
+
+			var asCustom = instruction as Custom;
+			if (asCustom != null)
+			{
+				asCustom.Name = Entry.Name;
+			}
+
+			if (Entry.CustomDecompiler != null)
+			{
+				var targetsList = new List<int>();
+				if (branchTargets != null)
+				{
+					targetsList.AddRange(branchTargets);
+				}
+
+				var operandsList = new List<object>();
+				if (instruction.Operands != null)
+				{
+					operandsList.AddRange(instruction.Operands);
+				}
+
+				Entry.CustomDecompiler.Invoke(this, ref operandsList, ref targetsList);
+
+				branchTargets = targetsList.ToArray();
+				instruction.Operands = operandsList.ToArray();
+			}
+
+			return instruction;
+		}
+
 		public BaseInstruction[] DecompileBlock()
 		{
 			var result = new List<BaseInstruction>();
@@ -46,43 +87,8 @@ namespace OpenSora.Scenarios
 					break;
 				}
 
-				int offset = (int)Reader.BaseStream.Position;
-				var op = Reader.ReadByte();
-
-				Entry = _entriesTable[op];
-
-				BaseInstruction instruction = null;
-				instruction = (BaseInstruction)Activator.CreateInstance(Entry.InstructionType);
-				instruction.Offset = offset;
-
-				int[] branchTargets;
-				instruction.Decompile(this, out branchTargets);
-
-				var asCustom = instruction as Custom;
-				if (asCustom != null)
-				{
-					asCustom.Name = Entry.Name;
-				}
-
-				if (Entry.CustomDecompiler != null)
-				{
-					var targetsList = new List<int>();
-					if (branchTargets != null)
-					{
-						targetsList.AddRange(branchTargets);
-					}
-
-					var operandsList = new List<object>();
-					if (instruction.Operands != null)
-					{
-						operandsList.AddRange(instruction.Operands);
-					}
-
-					Entry.CustomDecompiler.Invoke(this, ref operandsList, ref targetsList);
-
-					branchTargets = targetsList.ToArray();
-					instruction.Operands = operandsList.ToArray();
-				}
+				int[] branchTargets = null;
+				var instruction = DecompileInstruction(out branchTargets);
 
 				_disasmTable.Add(instruction.Offset);
 
@@ -291,7 +297,7 @@ namespace OpenSora.Scenarios
 
 		public Expression[] DecompileExpression()
 		{
-			return Expression.Decompile(Reader);
+			return Expression.Decompile(this);
 		}
 	}
 }

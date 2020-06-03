@@ -1,18 +1,29 @@
 ﻿using OpenSora.Scenarios.Expressions;
+using System.Collections.Generic;
 
 namespace OpenSora.Scenarios.Instructions
 {
 	public class RunExpression: BaseInstruction
 	{
-		public int Address { get; private set; }
-		public Expression[] Expression { get; private set; }
-
-		public override void Decompile(DecompilerContext context, out int[] branchTargets)
+		public int Address
 		{
-			base.Decompile(context, out branchTargets);
+			get
+			{
+				return (int)Operands[0];
+			}
+		}
+		public Expression[] Expression
+		{
+			get
+			{
+				return (Expression[])Operands[1];
+			}
+		}
 
-			Address = context.ReadUInt16();
-			Expression = context.DecompileExpression();
+		internal static void Decompile(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		{
+			operands.Add(context.ReadUInt16());
+			operands.Add(context.DecompileExpression());
 		}
 	}
 }

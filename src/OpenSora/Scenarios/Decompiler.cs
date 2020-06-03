@@ -64,9 +64,9 @@ namespace OpenSora.Scenarios
 			return _context.DecompileBlock();
 		}
 
-		private static DecompilerTableEntry CreateEntry<T>(string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_SWITCH) where T : BaseInstruction
+		private static DecompilerTableEntry CreateEntry<T>(string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_SWITCH, CustomDecompilerDelegate customDecompiler = null) where T : BaseInstruction
 		{
-			return new DecompilerTableEntry(typeof(T), string.Empty, operand, flags, null);
+			return new DecompilerTableEntry(typeof(T), string.Empty, operand, flags, customDecompiler);
 		}
 
 		private static DecompilerTableEntry CreateCustomEntry(string name, string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_NONE, CustomDecompilerDelegate customDecompiler = null)

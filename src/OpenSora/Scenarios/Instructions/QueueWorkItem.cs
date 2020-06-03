@@ -1,27 +1,50 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 
 namespace OpenSora.Scenarios.Instructions
 {
-	public class QueueWorkItem: BaseInstruction
+	public class QueueWorkItem : BaseInstruction
 	{
-		public int Target { get; private set; }
-		public int TargetId { get; private set; }
-		public int Length { get; private set; }
-		public BaseInstruction[] Block { get; private set; }
-
-		public override void Decompile(DecompilerContext context, out int[] branchTargets)
+		public int Target
 		{
-			base.Decompile(context, out branchTargets);
+			get
+			{
+				return (int)Operands[0];
+			}
+		}
 
-			Target = context.ReadUInt16();
-			TargetId = context.ReadUInt16();
-			Length = context.ReadByte();
+		public int TargetId
+		{
+			get
+			{
+				return (int)Operands[1];
+			}
+		}
 
-			Length += 1;
+		public BaseInstruction[] Block
+		{
+			get
+			{
+				return (BaseInstruction[])Operands[2];
+			}
+		}
+
+		internal static void InternalDecompile(DecompilerContext context, ref List<object> operands, int extraLength)
+		{
+			operands.Add(context.ReadUInt16());
+			operands.Add(context.ReadUInt16());
+			var length = context.ReadByte();
+
+			length += extraLength;
 
 			var pos = context.Reader.BaseStream.Position;
-			Block = context.DecompileBlock();
-			context.Reader.BaseStream.Seek(pos + Length, SeekOrigin.Begin);
+			operands.Add(context.DecompileBlock());
+			context.Reader.BaseStream.Seek(pos + length, SeekOrigin.Begin);
+		}
+
+		internal static void Decompile(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		{
+			InternalDecompile(context, ref operands, 1);
 		}
 	}
 }

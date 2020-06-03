@@ -1,19 +1,34 @@
 ﻿using OpenSora.Scenarios.Expressions;
+using System.Collections.Generic;
 
 namespace OpenSora.Scenarios.Instructions
 {
 	public class Jc: BaseInstruction
 	{
-		public Expression[] Expressions { get; private set; }
-		public int JcOffset { get; private set; }
-
-		public override void Decompile(DecompilerContext context, out int[] branchTargets)
+		public Expression[] Expressions
 		{
-			base.Decompile(context, out branchTargets);
+			get
+			{
+				return (Expression[])Operands[0];
+			}
+		}
 
-			Expressions = context.DecompileExpression();
-			JcOffset = context.Reader.ReadUInt16();
-			branchTargets = new int[] { JcOffset };
+		public int JcOffset
+		{
+			get
+			{
+				return (int)Operands[1];
+			}
+		}
+
+		internal static void Decompile(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		{
+			operands.Add(context.DecompileExpression());
+
+			var offset = context.ReadUInt16();
+			operands.Add(offset);
+
+			branchTargets.Add(offset);
 		}
 	}
 }

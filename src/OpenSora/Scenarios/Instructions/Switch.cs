@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace OpenSora.Scenarios.Instructions
 {
-	public class Switch: BaseInstruction
+	public class Switch : BaseInstruction
 	{
 		public class Option
 		{
@@ -17,33 +17,50 @@ namespace OpenSora.Scenarios.Instructions
 			}
 		}
 
-		public Expression[] Expression { get; private set; }
-		public Option[] Options { get; private set; }
-		public int DefaultOffset { get; private set; }
-
-
-		public override void Decompile(DecompilerContext context, out int[] branchTargets)
+		public Expression[] Expression
 		{
-			base.Decompile(context, out branchTargets);
+			get
+			{
+				return (Expression[])Operands[0];
+			}
+		}
 
-			Expression = context.DecompileExpression();
+		public Option[] Options
+		{
+			get
+			{
+				return (Option[])Operands[1];
+			}
+		}
+
+		public int DefaultOffset
+		{
+			get
+			{
+				return (int)Operands[2];
+			}
+		}
+
+		internal static void Decompile(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		{
+			operands.Add(context.DecompileExpression());
 
 			var optionsCount = (int)context.Reader.ReadUInt16();
 
 			var options = new List<Option>();
-			var targets = new List<int>();
-			for(var i = 0; i < optionsCount; ++i)
+			for (var i = 0; i < optionsCount; ++i)
 			{
 				var option = new Option(context.Reader.ReadUInt16(), context.Reader.ReadUInt16());
 				options.Add(option);
-				targets.Add(option.Offset);
+				branchTargets.Add(option.Offset);
 			}
 
-			Options = options.ToArray();
-			DefaultOffset = context.Reader.ReadUInt16();
-			targets.Add(DefaultOffset);
+			operands.Add(options.ToArray());
 
-			branchTargets = targets.ToArray();
+			var offset = context.Reader.ReadUInt16();
+			operands.Add(offset);
+
+			branchTargets.Add(offset);
 		}
 	}
 }

@@ -10,9 +10,9 @@ namespace OpenSora.Scenarios
 		{
 			CreateEntry<ExitThread>(),
 			CreateEntry<Return>(string.Empty, InstructionFlags.INSTRUCTION_END_BLOCK),
-			CreateEntry<Jc>(string.Empty, InstructionFlags.INSTRUCTION_START_BLOCK),
+			CreateEntry<Jc>(string.Empty, InstructionFlags.INSTRUCTION_START_BLOCK, customDecompiler: Jc.Decompile),
 			CreateEntry<Jump>("O", InstructionFlags.INSTRUCTION_JUMP),
-			CreateEntry<Switch>(string.Empty, InstructionFlags.INSTRUCTION_END_BLOCK),
+			CreateEntry<Switch>(string.Empty, InstructionFlags.INSTRUCTION_END_BLOCK, customDecompiler: Switch.Decompile),
 			CreateEntry<Call>("CH"),
 			CreateEntry<NewScene>("LCCC"),
 			CreateEntry<IdleLoop>(),
@@ -77,15 +77,15 @@ namespace OpenSora.Scenarios
 			CreateCustomEntry("OP_42","B"),
 			CreateCustomEntry("OP_43","WBBW"),
 			CreateCustomEntry("OP_44","WB"),
-			CreateEntry<QueueWorkItem>(string.Empty),
-			CreateEntry<QueueWorkItem2>(string.Empty),
+			CreateEntry<QueueWorkItem>(customDecompiler:QueueWorkItem.Decompile),
+			CreateEntry<QueueWorkItem2>(customDecompiler:QueueWorkItem2.Decompile),
 			CreateEntry<WaitChrThread>("WW"),
 			CreateCustomEntry("OP_48"),
 			CreateEntry<Event>("CH"),
 			CreateCustomEntry("OP_4A","WC"),
 			CreateCustomEntry("OP_4B","WC"),
 			CreateCustomEntry("OP_4C"),
-			CreateEntry<RunExpression>(string.Empty),
+			CreateEntry<RunExpression>(customDecompiler:RunExpression.Decompile),
 			CreateCustomEntry("OP_4E"),
 			CreateCustomEntry("OP_4F", customDecompiler: DecompileOp4f),
 			CreateCustomEntry("OP_50"),
@@ -198,6 +198,7 @@ namespace OpenSora.Scenarios
 			CreateCustomEntry("OP_BB","BB"),
 			CreateEntry<SaveClearData>(),
 		};
+
 		private static void DecompileOp16(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
 		{
 			var b = context.ReadByte();

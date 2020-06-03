@@ -44,7 +44,6 @@ namespace OpenSora.Scenarios
 			instruction.Offset = offset;
 
 			branchTargets = null;
-			instruction.Decompile(this, out branchTargets);
 
 			var asCustom = instruction as Custom;
 			if (asCustom != null)
@@ -52,25 +51,24 @@ namespace OpenSora.Scenarios
 				asCustom.Name = Entry.Name;
 			}
 
-			if (Entry.CustomDecompiler != null)
+			var decompiler = Entry.CustomDecompiler ?? BaseInstruction.DecompileDefault;
+
+			var targetsList = new List<int>();
+			if (branchTargets != null)
 			{
-				var targetsList = new List<int>();
-				if (branchTargets != null)
-				{
-					targetsList.AddRange(branchTargets);
-				}
-
-				var operandsList = new List<object>();
-				if (instruction.Operands != null)
-				{
-					operandsList.AddRange(instruction.Operands);
-				}
-
-				Entry.CustomDecompiler.Invoke(this, ref operandsList, ref targetsList);
-
-				branchTargets = targetsList.ToArray();
-				instruction.Operands = operandsList.ToArray();
+				targetsList.AddRange(branchTargets);
 			}
+
+			var operandsList = new List<object>();
+			if (instruction.Operands != null)
+			{
+				operandsList.AddRange(instruction.Operands);
+			}
+
+			decompiler.Invoke(this, ref operandsList, ref targetsList);
+
+			branchTargets = targetsList.ToArray();
+			instruction.Operands = operandsList.ToArray();
 
 			return instruction;
 		}

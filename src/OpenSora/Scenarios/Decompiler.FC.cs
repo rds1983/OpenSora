@@ -285,7 +285,10 @@ namespace OpenSora.Scenarios
 
 		private static void DecompileOp51(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
 		{
-			var k = 5;
+			var oprs = context.DecompileOperands("WB");
+			operands.AddRange(oprs);
+			var exp = context.DecompileExpression();
+			operands.Add(exp);
 		}
 	}
 }

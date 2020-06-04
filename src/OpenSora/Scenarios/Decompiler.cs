@@ -16,7 +16,7 @@ namespace OpenSora.Scenarios
 		INSTRUCTION_NONE = 0,
 	}
 
-	public delegate void CustomDecompilerDelegate(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets);
+	public delegate void CustomDecompilerDelegate(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets);
 
 	public class DecompilerTableEntry
 	{
@@ -26,8 +26,9 @@ namespace OpenSora.Scenarios
 		public InstructionFlags Flags { get; }
 
 		public CustomDecompilerDelegate CustomDecompiler { get; }
+		public int? Id { get; }
 
-		public DecompilerTableEntry(Type instructionType, string name, string operand, InstructionFlags flags, CustomDecompilerDelegate customDecompiler)
+		public DecompilerTableEntry(Type instructionType, string name, string operand, InstructionFlags flags, CustomDecompilerDelegate customDecompiler, int? id)
 		{
 			if (instructionType == null)
 			{
@@ -39,6 +40,7 @@ namespace OpenSora.Scenarios
 			Operand = operand;
 			Flags = flags;
 			CustomDecompiler = customDecompiler;
+			Id = id;
 		}
 	}
 
@@ -64,14 +66,14 @@ namespace OpenSora.Scenarios
 			return _context.DecompileBlock();
 		}
 
-		private static DecompilerTableEntry CreateEntry<T>(string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_SWITCH, CustomDecompilerDelegate customDecompiler = null) where T : BaseInstruction
+		private static DecompilerTableEntry CreateEntry<T>(string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_SWITCH, CustomDecompilerDelegate customDecompiler = null, int? id = null) where T : BaseInstruction
 		{
-			return new DecompilerTableEntry(typeof(T), string.Empty, operand, flags, customDecompiler);
+			return new DecompilerTableEntry(typeof(T), string.Empty, operand, flags, customDecompiler, id);
 		}
 
-		private static DecompilerTableEntry CreateCustomEntry(string name, string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_NONE, CustomDecompilerDelegate customDecompiler = null)
+		private static DecompilerTableEntry CreateCustomEntry(string name, string operand = "", InstructionFlags flags = InstructionFlags.INSTRUCTION_NONE, CustomDecompilerDelegate customDecompiler = null, int? id = null)
 		{
-			return new DecompilerTableEntry(typeof(Custom), name, operand, flags, customDecompiler);
+			return new DecompilerTableEntry(typeof(Custom), name, operand, flags, customDecompiler, id);
 		}
 	}
 }

@@ -6,7 +6,7 @@ namespace OpenSora.Scenarios
 {
 	partial class Decompiler
 	{
-		private static readonly DecompilerTableEntry[] DecompilerTableFC = new DecompilerTableEntry[]
+		private static readonly DecompilerTableEntry[] DecompilerArrayFC = new DecompilerTableEntry[]
 		{
 			CreateEntry<ExitThread>(),
 			CreateEntry<Return>(string.Empty, InstructionFlags.INSTRUCTION_END_BLOCK),
@@ -196,10 +196,28 @@ namespace OpenSora.Scenarios
 			CreateCustomEntry("OP_B9","WW"),
 			CreateCustomEntry("OP_BA","BW"),
 			CreateCustomEntry("OP_BB","BB"),
-			CreateEntry<SaveClearData>(),
+			CreateEntry<SaveClearData>(id: 222),
 		};
 
-		private static void DecompileOp16(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		private readonly static Dictionary<int, DecompilerTableEntry> DecompilerTableFC = new Dictionary<int, DecompilerTableEntry>();
+
+		static Decompiler()
+		{
+			var id = 0;
+			foreach (var entry in DecompilerArrayFC)
+			{
+				if (entry.Id != null)
+				{
+					id = entry.Id.Value;
+				}
+
+				DecompilerTableFC[id] = entry;
+
+				++id;
+			}
+		}
+
+		private static void DecompileOp16(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
 		{
 			var b = context.ReadByte();
 
@@ -210,7 +228,7 @@ namespace OpenSora.Scenarios
 			}
 		}
 
-		private static void DecompileOp28(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		private static void DecompileOp28(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
 		{
 			var oprs = context.DecompileOperands("WB");
 
@@ -227,14 +245,14 @@ namespace OpenSora.Scenarios
 			}
 		}
 
-		private static void DecompileOp29(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		private static void DecompileOp29(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
 		{
 			var oprs = context.DecompileOperands("WB");
 
 			operands.AddRange(oprs);
 
 			var op = (int)oprs[1];
-			if (op == 2)
+			if (op == 1)
 			{
 				operands.Add(context.DecompileOperand('W'));
 			}
@@ -243,7 +261,7 @@ namespace OpenSora.Scenarios
 				operands.Add(context.DecompileOperand('B'));
 			}
 		}
-		private static void DecompileOp2a(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		private static void DecompileOp2a(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
 		{
 			for (var i = 0; i < 0xc; ++i)
 			{
@@ -263,9 +281,9 @@ namespace OpenSora.Scenarios
 			0x2C8, 0x2C9, 0x2CA, 0x2D0, 0x2D1, 0x2D2, 0x2D3, 0x2D4, 0x315, 0x316, 0x317, 0x318, 0x319, 0x31A, 0x31B, 0x31C, 0x31D, 0x31E, 0x31F
 		};
 
-		private static void DecompileOp41(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		private static void DecompileOp41(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
 		{
-			var oprs = context.DecompileOperands("WB");
+			var oprs = context.DecompileOperands("BW");
 
 			operands.AddRange(oprs);
 
@@ -277,13 +295,13 @@ namespace OpenSora.Scenarios
 			}
 		}
 
-		private static void DecompileOp4f(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		private static void DecompileOp4f(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
 		{
 			operands.Add(context.ReadByte());
 			operands.Add(context.DecompileExpression());
 		}
 
-		private static void DecompileOp51(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		private static void DecompileOp51(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
 		{
 			var oprs = context.DecompileOperands("WB");
 			operands.AddRange(oprs);

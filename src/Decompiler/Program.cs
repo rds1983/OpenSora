@@ -36,6 +36,11 @@ namespace Unpacker
 							continue;
 						}
 
+/*						if (!entry.Name.StartsWith("T2130"))
+						{
+							continue;
+						}*/
+
 						Console.WriteLine("Processing script '{0}'", entry.Name);
 
 						try

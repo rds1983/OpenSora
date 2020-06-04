@@ -38,11 +38,11 @@ namespace OpenSora.Scenarios.Instructions
 			length += extraLength;
 
 			var pos = context.Reader.BaseStream.Position;
-			operands.Add(context.DecompileBlock());
+			operands.Add(context.DecompileBlock(length));
 			context.Reader.BaseStream.Seek(pos + length, SeekOrigin.Begin);
 		}
 
-		internal static void Decompile(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		internal static void Decompile(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
 		{
 			InternalDecompile(context, ref operands, 1);
 		}

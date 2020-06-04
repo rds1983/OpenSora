@@ -27,9 +27,9 @@ namespace OpenSora.Scenarios.Instructions
 				return (BaseInstruction[])Operands[2];
 			}
 		}
-		internal static void Decompile(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		internal static void Decompile(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
 		{
-			QueueWorkItem.InternalDecompile(context, ref operands, 3);
+			QueueWorkItem.InternalDecompile(context, ref operands, 4);
 		}
 	}
 }

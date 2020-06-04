@@ -30,16 +30,17 @@ namespace Unpacker
 							continue;
 						}
 
-												if (!entry.Name.EndsWith("_SN"))
-												{
-													continue;
-												}
+						if (!entry.Name.EndsWith("_SN"))
+						{
+							continue;
+						}
 
 						var unpack = !entry.Name.EndsWith("_DT");
 						if (unpack)
 						{
 							Console.WriteLine("Unpacking '{0}'", entry.Name);
-						} else
+						}
+						else
 						{
 							Console.WriteLine("Saving '{0}'", entry.Name);
 						}

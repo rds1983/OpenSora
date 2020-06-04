@@ -587,8 +587,7 @@ namespace OpenSora.Viewer
 			}
 
 			_animation.Animate((int)_mainPanel._numericAnimationStart.Value.Value, (int)_mainPanel._numericAnimationStep.Value.Value);
-
-			AnimationRenderer.DrawAnimation(_spriteBatch, location, _animation);
+			_animation.Render(_spriteBatch, location);
 
 			_spriteBatch.End();
 		}

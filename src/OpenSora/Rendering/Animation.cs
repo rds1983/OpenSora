@@ -54,13 +54,10 @@ namespace OpenSora.Rendering
 				FrameIndex = Math.Min(start, Info.Length - 1);
 			}
 		}
-	}
 
-	public class AnimationRenderer
-	{
-		public static void DrawAnimation(SpriteBatch batch, Point location, Animation animation)
+		public void Render(SpriteBatch batch, Point location)
 		{
-			var data = animation.FrameData;
+			var data = FrameData;
 			for (var y = 0; y < data.GetLength(0); ++y)
 			{
 				for (var x = 0; x < data.GetLength(1); ++x)
@@ -79,7 +76,7 @@ namespace OpenSora.Rendering
 					var rect = new Rectangle(tileX * AnimationLoader.ChunkSize,
 						tileY * AnimationLoader.ChunkSize,
 						AnimationLoader.ChunkSize, AnimationLoader.ChunkSize);
-					batch.Draw(animation.Texture, loc, rect, Color.White);
+					batch.Draw(Texture, loc, rect, Color.White);
 				}
 			}
 		}

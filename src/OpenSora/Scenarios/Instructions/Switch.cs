@@ -41,7 +41,7 @@ namespace OpenSora.Scenarios.Instructions
 			}
 		}
 
-		internal static void Decompile(DecompilerContext context, ref List<object> operands, ref List<int> branchTargets)
+		internal static void Decompile(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
 		{
 			operands.Add(context.DecompileExpression());
 

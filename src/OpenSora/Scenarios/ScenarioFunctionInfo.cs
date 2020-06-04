@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 
 namespace OpenSora.Scenarios
 {
@@ -23,6 +24,23 @@ namespace OpenSora.Scenarios
 			var instructions = decompiler.DecompileBlock();
 
 			return new ScenarioFunctionInfo(offset, instructions);
+		}
+
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+
+			sb.AppendFormat("void function_{0:X}()\n", Offset);
+			sb.Append("{\n");
+
+			foreach(var instruction in Instructions)
+			{
+				sb.AppendLine(instruction.ToString());
+			}
+
+			sb.Append("}\n");
+
+			return sb.ToString();
 		}
 	}
 }

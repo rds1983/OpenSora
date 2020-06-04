@@ -12,13 +12,12 @@ namespace OpenSora.Scenarios
 	public class DecompilerContext
 	{
 		private readonly HashSet<int> _disasmTable = new HashSet<int>();
-		private readonly DecompilerTableEntry[] _entriesTable;
+		private readonly Dictionary<int, DecompilerTableEntry> _entriesTable;
 		private readonly HashSet<int> _globalLabelTable = new HashSet<int>();
 
 		public BinaryReader Reader { get; }
-		public DecompilerTableEntry Entry { get; private set; }
 
-		public DecompilerContext(BinaryReader reader, DecompilerTableEntry[] entriesTable)
+		public DecompilerContext(BinaryReader reader, Dictionary<int, DecompilerTableEntry> entriesTable)
 		{
 			if (reader == null)
 			{
@@ -39,33 +38,24 @@ namespace OpenSora.Scenarios
 			int offset = (int)Reader.BaseStream.Position;
 			var op = Reader.ReadByte();
 
-			Entry = _entriesTable[op];
-			var instruction = (BaseInstruction)Activator.CreateInstance(Entry.InstructionType);
+			var entry = _entriesTable[op];
+			var instruction = (BaseInstruction)Activator.CreateInstance(entry.InstructionType);
 			instruction.Offset = offset;
+			instruction.Entry = entry;
 
 			branchTargets = null;
 
 			var asCustom = instruction as Custom;
 			if (asCustom != null)
 			{
-				asCustom.Name = Entry.Name;
+				asCustom.Name = entry.Name;
 			}
 
-			var decompiler = Entry.CustomDecompiler ?? BaseInstruction.DecompileDefault;
+			var decompiler = entry.CustomDecompiler ?? BaseInstruction.DecompileDefault;
 
 			var targetsList = new List<int>();
-			if (branchTargets != null)
-			{
-				targetsList.AddRange(branchTargets);
-			}
-
 			var operandsList = new List<object>();
-			if (instruction.Operands != null)
-			{
-				operandsList.AddRange(instruction.Operands);
-			}
-
-			decompiler.Invoke(this, ref operandsList, ref targetsList);
+			decompiler.Invoke(this, entry, ref operandsList, ref targetsList);
 
 			branchTargets = targetsList.ToArray();
 			instruction.Operands = operandsList.ToArray();
@@ -73,14 +63,21 @@ namespace OpenSora.Scenarios
 			return instruction;
 		}
 
-		public BaseInstruction[] DecompileBlock()
+		public BaseInstruction[] DecompileBlock(int? length = null)
 		{
 			var result = new List<BaseInstruction>();
 			var blockRef = new Dictionary<int, BaseInstruction>();
 
+			var start = (int)Reader.BaseStream.Position;
+
 			while (!Reader.IsEOF())
 			{
 				if (_disasmTable.Contains((int)Reader.BaseStream.Position))
+				{
+					break;
+				}
+
+				if (length != null && Reader.BaseStream.Position - start >= length.Value)
 				{
 					break;
 				}
@@ -92,7 +89,8 @@ namespace OpenSora.Scenarios
 
 				result.Add(instruction);
 
-				if (!Entry.Flags.HasFlag(InstructionFlags.INSTRUCTION_END_BLOCK) && !Entry.Flags.HasFlag(InstructionFlags.INSTRUCTION_START_BLOCK))
+				var entry = instruction.Entry;
+				if (!entry.Flags.HasFlag(InstructionFlags.INSTRUCTION_END_BLOCK) && !entry.Flags.HasFlag(InstructionFlags.INSTRUCTION_START_BLOCK))
 				{
 					continue;
 				}
@@ -105,7 +103,7 @@ namespace OpenSora.Scenarios
 					}
 				}
 
-				if (Entry.Flags.HasFlag(InstructionFlags.INSTRUCTION_END_BLOCK))
+				if (entry.Flags.HasFlag(InstructionFlags.INSTRUCTION_END_BLOCK))
 				{
 					break;
 				}
@@ -163,6 +161,7 @@ namespace OpenSora.Scenarios
 					if (sb.Length != 0)
 					{
 						result.Add(new ScpString(sb.ToString()));
+						sb.Clear();
 					}
 
 					if (b == 0)
@@ -189,7 +188,7 @@ namespace OpenSora.Scenarios
 				}
 				else
 				{
-					sb.Append(b);
+					sb.Append((char)b);
 				}
 			}
 

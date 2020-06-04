@@ -1,6 +1,7 @@
 ﻿using OpenSora.Utility;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace OpenSora.Scenarios
 {
@@ -126,6 +127,21 @@ namespace OpenSora.Scenarios
 			}
 
 			return result;
+		}
+
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+			for(var i = 0; i < Functions.Length; ++i)
+			{
+				sb.Append(Functions[i].ToString());
+				if (i < Functions.Length - 1)
+				{
+					sb.Append("\n");
+				}
+			}
+
+			return sb.ToString();
 		}
 	}
 }

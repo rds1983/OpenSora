@@ -12,7 +12,9 @@ namespace OpenSora.Rendering
 			Forward,
 			Backward,
 			Up,
-			Down
+			Down,
+			IncreaseViewAngle,
+			DecreaseViewAngle
 		}
 
 		public enum TouchType
@@ -24,7 +26,8 @@ namespace OpenSora.Rendering
 		private readonly Camera _camera;
 		private Point? _touchStart;
 		public bool _moveTouchDown, _rotateTouchDown;
-		private bool _leftKeyPressed, _rightKeyPressed, _forwardKeyPressed, _backwardKeyPressed, _upKeyPressed, _downKeyPressed;
+		private bool _leftKeyPressed, _rightKeyPressed, _forwardKeyPressed, _backwardKeyPressed, _upKeyPressed, _downKeyPressed,
+			_increaseViewAngleKeyPressed, _decreaseViewAngleKeyPressed;
 		private DateTime? _keyboardLastTime;
 
 		public float RotateDelta { get; set; }
@@ -145,9 +148,16 @@ namespace OpenSora.Rendering
 				case ControlKeys.Down:
 					_downKeyPressed = isDown;
 					break;
+				case ControlKeys.IncreaseViewAngle:
+					_increaseViewAngleKeyPressed = isDown;
+					break;
+				case ControlKeys.DecreaseViewAngle:
+					_decreaseViewAngleKeyPressed = isDown;
+					break;
 			}
 
-			if (!_forwardKeyPressed && !_leftKeyPressed && !_rightKeyPressed && !_backwardKeyPressed && !_upKeyPressed && !_downKeyPressed)
+			if (!_forwardKeyPressed && !_leftKeyPressed && !_rightKeyPressed && !_backwardKeyPressed &&
+				!_upKeyPressed && !_downKeyPressed && !_increaseViewAngleKeyPressed && !_decreaseViewAngleKeyPressed)
 			{
 				_keyboardLastTime = null;
 			}
@@ -157,7 +167,7 @@ namespace OpenSora.Rendering
 		{
 			_forwardKeyPressed = _leftKeyPressed =
 								 _rightKeyPressed = _backwardKeyPressed =
-													_upKeyPressed = _downKeyPressed = false;
+													_upKeyPressed = _downKeyPressed = _increaseViewAngleKeyPressed = _decreaseViewAngleKeyPressed = false;
 			_keyboardLastTime = null;
 		}
 
@@ -204,7 +214,17 @@ namespace OpenSora.Rendering
 			{
 				_camera.Position -= delta * _camera.Up;
 			}
-			
+
+			if (_increaseViewAngleKeyPressed)
+			{
+				_camera.ViewAngle += delta;
+			}
+
+			if (_decreaseViewAngleKeyPressed)
+			{
+				_camera.ViewAngle -= delta;
+			}
+
 			_keyboardLastTime = DateTime.Now;
 		}
 	}

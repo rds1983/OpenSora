@@ -7,7 +7,7 @@ namespace OpenSora.Rendering
 	{
 		private Vector3 _position;
 		private float _yawAngle, _pitchAngle, _rollAngle;
-		private float _viewAngle = 67.0f;
+		private float _viewAngle = 45.0f;
 		private Vector3 _up, _right, _direction;
 		private Matrix _view;
 		private bool _dirty = true;
@@ -114,8 +114,11 @@ namespace OpenSora.Rendering
 			set
 			{
 				_viewAngle = value;
+				ViewAngleChanged?.Invoke(this, EventArgs.Empty);
 			}
 		}
+
+		public event EventHandler ViewAngleChanged;
 
 		public Camera()
 		{
@@ -159,7 +162,7 @@ namespace OpenSora.Rendering
 			}
 
 			var rotation = Matrix.CreateFromYawPitchRoll(
-				MathHelper.ToRadians(YawAngle), 
+				MathHelper.ToRadians(YawAngle),
 				MathHelper.ToRadians(PitchAngle),
 				MathHelper.ToRadians(RollAngle));
 

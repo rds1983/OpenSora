@@ -75,7 +75,7 @@ namespace OpenSora.Rendering
 
 		public Matrix World { get; set; }
 
-		private void ResetView()
+		public void ResetView()
 		{
 			_viewProjection = null;
 			_frustrum = null;

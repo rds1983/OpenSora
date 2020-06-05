@@ -15,6 +15,7 @@ using OpenSora.ModelLoading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using OpenSora.Rendering;
+using OpenSora.Scenarios;
 
 namespace OpenSora.Viewer
 {
@@ -28,8 +29,8 @@ namespace OpenSora.Viewer
 		private List<DirEntry> _typeEntries = null;
 		private readonly State _state;
 		private Queue<string> _statusMessages = new Queue<string>();
-		private SceneRenderer _renderer;
 		private ResourceLoader _resourceLoader;
+		private ExecutionContext _executionContext;
 
 		public ViewerGame()
 		{
@@ -98,7 +99,7 @@ namespace OpenSora.Viewer
 				SetFolder(_state.LastFolder);
 			}
 
-			_renderer = new SceneRenderer(GraphicsDevice);
+			_executionContext.Scene = new Scene(GraphicsDevice);
 		}
 
 		private void ResetAnimation()
@@ -214,7 +215,7 @@ namespace OpenSora.Viewer
 
 		private void ProcessMesh(List<ModelMeshPart> meshes, string statusPrefix, MeshData meshData, int meshCount)
 		{
-			SceneRenderer.AddMeshData(GraphicsDevice, meshes, meshData, _resourceLoader.LoadTexture);
+			Scene.AddMeshData(GraphicsDevice, meshes, meshData, _resourceLoader.LoadTexture);
 
 			PushStatusMessage(string.Format(statusPrefix + "Meshed proceeded {0}/{1}", meshes.Count, meshCount));
 		}
@@ -255,7 +256,7 @@ namespace OpenSora.Viewer
 
 			Task.WaitAll(tasks.ToArray());
 
-			_renderer.Meshes = modelMeshes;
+			_executionContext.Scene.Meshes = modelMeshes;
 		}
 
 		private void LoadFile(DirEntry entry)
@@ -444,7 +445,8 @@ namespace OpenSora.Viewer
 
 		private void _comboFunctions_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			var k = _mainPanel._comboFunctions.SelectedIndex;
+			_executionContext.Function = (ScenarioFunctionInfo)_mainPanel._comboFunctions.SelectedItem.Tag;
+			_executionContext.Execute();
 		}
 
 		private void SetFolder(string folder)
@@ -453,10 +455,12 @@ namespace OpenSora.Viewer
 			{
 				_mainPanel._textPath.Text = folder;
 				_resourceLoader = null;
+				_executionContext = null;
 				_typeEntries = null;
 				if (!string.IsNullOrEmpty(folder))
 				{
 					_resourceLoader = new ResourceLoader(GraphicsDevice, folder);
+					_executionContext = new ExecutionContext(_resourceLoader);
 				}
 
 				RefreshFiles();
@@ -507,7 +511,7 @@ namespace OpenSora.Viewer
 
 			//			_fpsCounter.Update(gameTime);
 
-			if (_mainPanel._comboResourceType.SelectedIndex != 1 || _renderer.Meshes == null)
+			if (_mainPanel._comboResourceType.SelectedIndex != 1 || _executionContext.Scene.Meshes == null)
 			{
 				return;
 			}
@@ -515,24 +519,26 @@ namespace OpenSora.Viewer
 			var keyboardState = Keyboard.GetState();
 
 			// Manage camera input controller
-			_renderer.Controller.SetControlKeyState(CameraInputController.ControlKeys.Left, keyboardState.IsKeyDown(Keys.A));
-			_renderer.Controller.SetControlKeyState(CameraInputController.ControlKeys.Right, keyboardState.IsKeyDown(Keys.D));
-			_renderer.Controller.SetControlKeyState(CameraInputController.ControlKeys.Forward, keyboardState.IsKeyDown(Keys.W));
-			_renderer.Controller.SetControlKeyState(CameraInputController.ControlKeys.Backward, keyboardState.IsKeyDown(Keys.S));
-			_renderer.Controller.SetControlKeyState(CameraInputController.ControlKeys.Up, keyboardState.IsKeyDown(Keys.Up));
-			_renderer.Controller.SetControlKeyState(CameraInputController.ControlKeys.Down, keyboardState.IsKeyDown(Keys.Down));
+			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Left, keyboardState.IsKeyDown(Keys.A));
+			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Right, keyboardState.IsKeyDown(Keys.D));
+			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Forward, keyboardState.IsKeyDown(Keys.W));
+			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Backward, keyboardState.IsKeyDown(Keys.S));
+			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Up, keyboardState.IsKeyDown(Keys.Up));
+			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Down, keyboardState.IsKeyDown(Keys.Down));
+			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.IncreaseViewAngle, keyboardState.IsKeyDown(Keys.I));
+			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.DecreaseViewAngle, keyboardState.IsKeyDown(Keys.O));
 
 			var bounds = _mainPanel._panelViewer.Bounds;
 			var mouseState = Mouse.GetState();
 			if (bounds.Contains(mouseState.Position) && !Desktop.IsMouseOverGUI)
 			{
-				_renderer.Controller.SetTouchState(CameraInputController.TouchType.Move, mouseState.LeftButton == ButtonState.Pressed);
-				_renderer.Controller.SetTouchState(CameraInputController.TouchType.Rotate, mouseState.RightButton == ButtonState.Pressed);
+				_executionContext.Scene.Controller.SetTouchState(CameraInputController.TouchType.Move, mouseState.LeftButton == ButtonState.Pressed);
+				_executionContext.Scene.Controller.SetTouchState(CameraInputController.TouchType.Rotate, mouseState.RightButton == ButtonState.Pressed);
 
-				_renderer.Controller.SetMousePosition(new Point(mouseState.X, mouseState.Y));
+				_executionContext.Scene.Controller.SetMousePosition(new Point(mouseState.X, mouseState.Y));
 			}
 
-			_renderer.Controller.Update();
+			_executionContext.Scene.Controller.Update();
 		}
 
 		private void DrawTexture(Texture2D texture)
@@ -605,7 +611,7 @@ namespace OpenSora.Viewer
 			}
 			else if (idx == 1 || idx == 4)
 			{
-				_renderer.Render(_mainPanel._panelViewer.Bounds);
+				_executionContext.Scene.Render(_mainPanel._panelViewer.Bounds);
 			}
 			else if (idx == 3)
 			{

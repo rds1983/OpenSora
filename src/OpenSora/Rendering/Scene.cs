@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Myra;
 using OpenSora.ModelLoading;
 using System;
 using System.Collections.Generic;
@@ -7,22 +8,25 @@ using System.Linq;
 
 namespace OpenSora.Rendering
 {
-	public class SceneRenderer
+	public class Scene
 	{
-		public float NearPlaneDistance = 0.1f;
-		public float FarPlaneDistance = 1000.0f;
-
 		class MeshPartTag
 		{
 			public BoundingSphere BoundingSphere;
 			public Texture2D Texture;
 		}
 
-		private List<ModelMeshPart> _meshes;
+		public float NearPlaneDistance = 0.1f;
+		public float FarPlaneDistance = 1000.0f;
+
 		private readonly GraphicsDevice _device;
-		private readonly Camera _camera = new Camera();
 		private readonly DefaultEffect _defaultEffect;
 		private readonly RenderContext _renderContext = new RenderContext();
+		private List<ModelMeshPart> _meshes;
+		private readonly SpriteBatch _spriteBatch;
+
+		public Camera Camera { get; }
+		public CameraInputController Controller { get; }
 
 		public List<ModelMeshPart> Meshes
 		{
@@ -34,20 +38,23 @@ namespace OpenSora.Rendering
 			set
 			{
 				_meshes = value;
-				_camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
+				ResetCamera();
 			}
 		}
 
-		public CameraInputController Controller { get; }
+		public bool RenderDebugInfo = true;
 
-		public SceneRenderer(GraphicsDevice device)
+		public Scene(GraphicsDevice device)
 		{
 			_device = device;
 			_defaultEffect = new DefaultEffect(device);
+			_spriteBatch = new SpriteBatch(device);
+			Camera = new Camera();
+			Camera.ViewAngleChanged += (s, a) => _renderContext.ResetView();
 
-			// Set camera
-			_camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
-			Controller = new CameraInputController(_camera);
+			Controller = new CameraInputController(Camera);
+
+			ResetCamera();
 		}
 
 		public static void AddMeshData(GraphicsDevice device, List<ModelMeshPart> meshes, MeshData meshData, Func<string, Texture2D> textureLoader)
@@ -95,9 +102,14 @@ namespace OpenSora.Rendering
 			}
 		}
 
+		public void ResetCamera()
+		{
+			Camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
+		}
+
 		public void Render(Rectangle bounds)
 		{
-			if (_meshes == null)
+			if (Meshes == null || Meshes.Count == 0)
 			{
 				return;
 			}
@@ -115,14 +127,14 @@ namespace OpenSora.Rendering
 				_device.BlendState = BlendState.Opaque;
 				_device.SamplerStates[0] = SamplerState.LinearWrap;
 
-				_renderContext.View = _camera.View;
+				_renderContext.View = Camera.View;
 				_renderContext.Projection = Matrix.CreatePerspectiveFieldOfView(
-					MathHelper.ToRadians(_camera.ViewAngle),
+					MathHelper.ToRadians(Camera.ViewAngle),
 					_device.Viewport.AspectRatio,
 					NearPlaneDistance, FarPlaneDistance);
 
 				_defaultEffect.WorldViewProjection = _renderContext.ViewProjection;
-				foreach (var mesh in _meshes)
+				foreach (var mesh in Meshes)
 				{
 					var tag = (MeshPartTag)mesh.Tag;
 
@@ -150,6 +162,19 @@ namespace OpenSora.Rendering
 				_device.RasterizerState = oldRasterizerState;
 				_device.BlendState = oldBlendState;
 				_device.SamplerStates[0] = oldSamplerState;
+			}
+
+			if (RenderDebugInfo)
+			{
+				var x = bounds.X;
+				var y = bounds.Y;
+
+				_spriteBatch.Begin();
+
+				_spriteBatch.DrawString(DefaultAssets.Font, "Camera: " + Camera.Position, new Vector2(x, y), Color.White);
+				y += 20;
+
+				_spriteBatch.End();
 			}
 		}
 	}

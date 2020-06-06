@@ -4,6 +4,7 @@
 	{
 		public string DatFilePath;
 		public string Name;
+		public int Index;
 		public int Timestamp2;
 		public int CompressedSize;
 		public int DecompressedSize;

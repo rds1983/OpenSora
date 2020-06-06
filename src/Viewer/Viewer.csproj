@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Myra\src\Myra\Myra.MonoGame.csproj" />
     <ProjectReference Include="..\OpenSora\OpenSora.csproj" />
   </ItemGroup>
   

@@ -76,6 +76,8 @@ namespace OpenSora.Viewer
 			MyraEnvironment.Game = this;
 			_mainPanel = new MainPanel();
 
+			_mainPanel._panelPlayer.Visible = false;
+
 			_mainPanel._buttonChange.Click += OnChangeFolder;
 			_mainPanel._buttonAbout.Click += OnAbout;
 			_mainPanel._listFiles.SelectedIndexChanged += _listFiles_SelectedIndexChanged;
@@ -83,12 +85,13 @@ namespace OpenSora.Viewer
 			_mainPanel._textFilter.TextChanged += _textFilter_TextChanged;
 
 			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
-			_mainPanel._comboResourceType.SelectedIndex = 4;
 
 			_mainPanel._comboFunctions.SelectedIndexChanged += _comboFunctions_SelectedIndexChanged;
 
 			_mainPanel._numericAnimationStart.ValueChanged += _numericAnimationStart_ValueChanged;
 			_mainPanel._numericAnimationStep.ValueChanged += _numericAnimationStep_ValueChanged;
+
+			_mainPanel._buttonPlayPause.Click += _buttonPlayPause_Click;
 
 			PushStatusMessage(string.Empty);
 
@@ -100,6 +103,22 @@ namespace OpenSora.Viewer
 			}
 
 			_executionContext.Scene = new Scene(GraphicsDevice);
+			_executionContext.MainWorker.TotalPassedPartChanged += _executionContext_TotalPassedPartChanged;
+
+			_mainPanel._comboResourceType.SelectedIndex = 4;
+		}
+
+		private void _executionContext_TotalPassedPartChanged(object sender, EventArgs e)
+		{
+			var position = _mainPanel._sliderPlayer.Minimum +
+				(_mainPanel._sliderPlayer.Maximum - _mainPanel._sliderPlayer.Minimum) * _executionContext.MainWorker.TotalPassedPart;
+
+			_mainPanel._sliderPlayer.Value = position;
+		}
+
+		private void _buttonPlayPause_Click(object sender, EventArgs e)
+		{
+			_executionContext.PlayPause();
 		}
 
 		private void ResetAnimation()
@@ -199,9 +218,12 @@ namespace OpenSora.Viewer
 			if (idx != 4)
 			{
 				HideFunctionsBox();
-			} else
+				_mainPanel._panelPlayer.Visible = false;
+			}
+			else
 			{
 				ShowFunctionsBox();
+				_mainPanel._panelPlayer.Visible = true;
 			}
 		}
 
@@ -291,6 +313,7 @@ namespace OpenSora.Viewer
 				case 4:
 					{
 						var scenario = _resourceLoader.LoadScenario(entry);
+						_executionContext.Scenario = scenario;
 
 						_mainPanel._textScenarioLocation.Text = "Location: " + scenario.Location;
 
@@ -445,8 +468,12 @@ namespace OpenSora.Viewer
 
 		private void _comboFunctions_SelectedIndexChanged(object sender, EventArgs e)
 		{
+			if (_mainPanel._comboFunctions.SelectedItem == null)
+			{
+				return;
+			}
+
 			_executionContext.Function = (ScenarioFunctionInfo)_mainPanel._comboFunctions.SelectedItem.Tag;
-			_executionContext.Execute();
 		}
 
 		private void SetFolder(string folder)
@@ -511,7 +538,8 @@ namespace OpenSora.Viewer
 
 			//			_fpsCounter.Update(gameTime);
 
-			if (_mainPanel._comboResourceType.SelectedIndex != 1 || _executionContext.Scene.Meshes == null)
+			if ((_mainPanel._comboResourceType.SelectedIndex != 1 && _mainPanel._comboResourceType.SelectedIndex != 4) || 
+				_executionContext.Scene.Meshes == null)
 			{
 				return;
 			}
@@ -611,6 +639,7 @@ namespace OpenSora.Viewer
 			}
 			else if (idx == 1 || idx == 4)
 			{
+				_executionContext.Update();
 				_executionContext.Scene.Render(_mainPanel._panelViewer.Bounds);
 			}
 			else if (idx == 3)

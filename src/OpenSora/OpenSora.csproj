@@ -13,7 +13,10 @@
 
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.Portable" Version="3.7.1.189" />
-    <PackageReference Include="Myra" Version="0.9.9.202" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Myra\src\Myra\Myra.MonoGame.csproj" />
   </ItemGroup>
 
   <ItemGroup>

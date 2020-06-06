@@ -8,6 +8,25 @@ using System.Linq;
 
 namespace OpenSora.Rendering
 {
+	public class SceneCharacterInfo
+	{
+		private Vector3 _position;
+
+		public Animation Chip;
+		public Vector3 Position
+		{
+			get
+			{
+				return _position;
+			}
+
+			set
+			{
+				_position = new Vector3(value.X, value.Y, value.Z);
+			}
+		}
+	}
+
 	public class Scene
 	{
 		class MeshPartTag
@@ -24,6 +43,7 @@ namespace OpenSora.Rendering
 		private readonly RenderContext _renderContext = new RenderContext();
 		private List<ModelMeshPart> _meshes;
 		private readonly SpriteBatch _spriteBatch;
+		public Dictionary<int, SceneCharacterInfo> Characters { get; } = new Dictionary<int, SceneCharacterInfo>();
 
 		public Camera Camera { get; }
 		public CameraInputController Controller { get; }
@@ -152,6 +172,25 @@ namespace OpenSora.Rendering
 						_device.Indices = mesh.IndexBuffer;
 
 						_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, mesh.VertexOffset, mesh.StartIndex, mesh.PrimitiveCount);
+					}
+				}
+
+				_device.SamplerStates[0] = SamplerState.PointClamp;
+
+				foreach (var pair in Characters)
+				{
+					var chip = pair.Value.Chip;
+					chip.Animate(0, 8);
+					var view = Matrix.CreateTranslation(pair.Value.Position);
+					_defaultEffect.WorldViewProjection = view * _renderContext.ViewProjection;
+					_defaultEffect.Texture = chip.Texture;
+					foreach (var pass in _defaultEffect.CurrentTechnique.Passes)
+					{
+						pass.Apply();
+
+						_device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList,
+							chip.Vertices, 0, chip.Vertices.Length,
+							chip.Indices, 0, chip.Indices.Length / 3);
 					}
 				}
 			}

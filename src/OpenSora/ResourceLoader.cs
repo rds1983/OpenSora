@@ -8,6 +8,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Ports;
 
 namespace OpenSora
 {
@@ -45,10 +46,37 @@ namespace OpenSora
 			_entries = DirProcessor.BuildEntries(gamePath);
 		}
 
-		public DirEntry FindByName(string nameFilter, string extFilter)
+		public DirEntry FindByIndex(int index)
+		{
+			var dtIndex = index >> 16;
+			var fileIndex = index & 0xffff;
+
+			foreach(var pair in _entries)
+			{
+				if (pair.Key.Contains(dtIndex + ".dat"))
+				{
+					// Found data
+					foreach(var entry in pair.Value)
+					{
+						if (entry.Index == fileIndex)
+						{
+							return entry;
+						}
+					}
+				}
+			}
+
+			return null;
+		}
+
+		public DirEntry FindByName(string nameFilter, string extFilter = "")
 		{
 			nameFilter = nameFilter.ToLower();
-			extFilter = extFilter.ToLower();
+
+			if (!string.IsNullOrEmpty(extFilter))
+			{
+				extFilter = extFilter.ToLower();
+			}
 			foreach (var pair in _entries)
 			{
 				foreach (var entry in pair.Value)
@@ -57,7 +85,8 @@ namespace OpenSora
 					if (entry.Name.Contains("."))
 					{
 						var parts = entry.Name.Split('.');
-						if (parts[0].ToLower().Contains(nameFilter) && parts[1].ToLower().Contains(extFilter))
+						if (parts[0].ToLower().Contains(nameFilter) && 
+							(string.IsNullOrEmpty(extFilter) || parts[1].ToLower().Contains(extFilter)))
 						{
 							return entry;
 						}

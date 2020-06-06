@@ -10,6 +10,14 @@ namespace OpenSora.Scenarios
 		public int Offset { get; set; }
 		public object[] Operands { get; set; }
 
+		public virtual int DurationInMs
+		{
+			get
+			{
+				return 0;
+			}
+		}
+
 		internal static void DecompileDefault(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
 		{
 			if (string.IsNullOrEmpty(entry.Operand))
@@ -35,7 +43,7 @@ namespace OpenSora.Scenarios
 			var sb = new StringBuilder();
 
 			sb.Append("(");
-			for(var i = 0; i < strings.Length; ++i)
+			for (var i = 0; i < strings.Length; ++i)
 			{
 				var str = strings[i];
 
@@ -76,7 +84,7 @@ namespace OpenSora.Scenarios
 
 			sb.AppendFormat("\t{0}(", name);
 
-			for(var i = 0; i < Operands.Length; ++i)
+			for (var i = 0; i < Operands.Length; ++i)
 			{
 				var op = Operands[i];
 				var asString = op as ScpString[];
@@ -101,7 +109,10 @@ namespace OpenSora.Scenarios
 
 
 			return sb.ToString();
+		}
 
+		public virtual void Update(ExecutionWorker context)
+		{
 		}
 	}
 }

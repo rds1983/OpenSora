@@ -54,6 +54,7 @@ namespace OpenSora.Dir
 					var entry = new DirEntry
 					{
 						DatFilePath = datFile,
+						Index = i,
 						Name = ToString(reader.ReadBytes(12)),
 						Timestamp2 = reader.ReadInt32(),
 						CompressedSize = reader.ReadInt32(),

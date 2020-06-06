@@ -14,7 +14,6 @@ namespace OpenSora.Scenarios
 			Instructions = instructions;
 		}
 
-
 		public static ScenarioFunctionInfo FromBinaryReader(BinaryReader reader, int offset)
 		{
 			reader.BaseStream.Seek(offset, SeekOrigin.Begin);

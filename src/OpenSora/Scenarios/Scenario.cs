@@ -35,6 +35,12 @@ namespace OpenSora.Scenarios
 		public ScenarioEntryPoint[] EntryPoints { get; private set; }
 		public ScenarioFunctionInfo[] Functions { get; private set; }
 
+		public ScenarioChipInfo[] ChipInfo { get; private set; }
+		public ScenarioNpcInfo[] NpcInfo { get; private set; }
+		public ScenarioMonsterInfo[] MonsterInfo { get; private set; }
+		public ScenarioEventInfo[] EventInfo { get; private set; }
+		public ScenarioActorInfo[] ActorInfo { get; private set; }
+
 		private Scenario()
 		{
 		}
@@ -72,42 +78,47 @@ namespace OpenSora.Scenarios
 				}
 				result.EntryPoints = entryPoints.ToArray();
 
+				var chipInfo = new List<ScenarioChipInfo>();
+				var npcInfo = new List<ScenarioNpcInfo>();
+				var monsterInfo = new List<ScenarioMonsterInfo>();
+				var eventInfo = new List<ScenarioEventInfo>();
+				var actorInfo = new List<ScenarioActorInfo>();
+
 				for(var i = 0; i < result.Entries.Length; ++i)
 				{
 					var se = result.Entries[i];
 
 					stream.Seek(se.Offset, SeekOrigin.Begin);
 
-					var infos = new List<ScenarioBaseInfo>();
-
 					for (var j = 0; j < se.Size; ++j)
 					{
-						ScenarioBaseInfo scenarioBaseInfo = null;
 						switch (i)
 						{
 							case 0:
 							case 1:
-								scenarioBaseInfo = ScenarioChipInfo.FromBinaryReader(reader);
+								chipInfo.Add(ScenarioChipInfo.FromBinaryReader(reader));
 								break;
 							case 2:
-								scenarioBaseInfo = ScenarioNpcInfo.FromBinaryReader(reader);
+								npcInfo.Add(ScenarioNpcInfo.FromBinaryReader(reader));
 								break;
 							case 3:
-								scenarioBaseInfo = ScenarioMonsterInfo.FromBinaryReader(reader);
+								monsterInfo.Add(ScenarioMonsterInfo.FromBinaryReader(reader));
 								break;
 							case 4:
-								scenarioBaseInfo = ScenarioEventInfo.FromBinaryReader(reader);
+								eventInfo.Add(ScenarioEventInfo.FromBinaryReader(reader));
 								break;
 							case 5:
-								scenarioBaseInfo = ScenarioActorInfo.FromBinaryReader(reader);
+								actorInfo.Add(ScenarioActorInfo.FromBinaryReader(reader));
 								break;
 						}
-
-						infos.Add(scenarioBaseInfo);
 					}
-
-					se.ScenarioInfo = infos.ToArray();
 				}
+
+				result.ChipInfo = chipInfo.ToArray();
+				result.NpcInfo = npcInfo.ToArray();
+				result.MonsterInfo = monsterInfo.ToArray();
+				result.EventInfo = eventInfo.ToArray();
+				result.ActorInfo = actorInfo.ToArray();
 
 				stream.Seek(result.ScenaFunctionTable.Offset, SeekOrigin.Begin);
 				var functionOffsets = new List<int>();

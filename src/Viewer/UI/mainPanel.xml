@@ -59,10 +59,24 @@
           <ListItem Text="TEXTURE2._DS" />
         </ListBox>
       </VerticalStackPanel>
-      <Panel>
-        <Panel Id="_panelViewer" />
-        <Label Text="Processing mesh 23/40..." VerticalAlignment="Bottom" Id="_textStatus" />
-      </Panel>
+      <VerticalStackPanel>
+        <VerticalStackPanel.Proportions>
+          <Proportion Type="Fill" />
+          <Proportion Type="Auto" />
+        </VerticalStackPanel.Proportions>
+        <Panel>
+          <Panel Id="_panelViewer" />
+          <Label Text="Processing mesh 23/40..." VerticalAlignment="Bottom" Id="_textStatus" />
+        </Panel>
+        <HorizontalStackPanel Spacing="8" VerticalAlignment="Bottom" Id="_panelPlayer">
+          <HorizontalStackPanel.Proportions>
+            <Proportion Type="Auto" />
+            <Proportion Type="Fill" />
+          </HorizontalStackPanel.Proportions>
+          <TextButton Text="Play/Pause" VerticalAlignment="Center" Id="_buttonPlayPause" />
+          <HorizontalSlider Id="_sliderPlayer" />
+        </HorizontalStackPanel>
+      </VerticalStackPanel>
     </HorizontalStackPanel>
   </VerticalStackPanel>
 </Project>

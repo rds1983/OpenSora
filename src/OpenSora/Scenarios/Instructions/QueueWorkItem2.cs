@@ -2,34 +2,11 @@
 
 namespace OpenSora.Scenarios.Instructions
 {
-	public class QueueWorkItem2 : BaseInstruction
+	public class QueueWorkItem2 : QueueWorkItem
 	{
-		public int Target
+		internal static void Decompile2(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
 		{
-			get
-			{
-				return (int)Operands[0];
-			}
-		}
-
-		public int TargetId
-		{
-			get
-			{
-				return (int)Operands[1];
-			}
-		}
-
-		public BaseInstruction[] Block
-		{
-			get
-			{
-				return (BaseInstruction[])Operands[2];
-			}
-		}
-		internal static void Decompile(DecompilerContext context, DecompilerTableEntry entry, ref List<object> operands, ref List<int> branchTargets)
-		{
-			QueueWorkItem.InternalDecompile(context, ref operands, 4);
+			InternalDecompile(context, ref operands, 4);
 		}
 	}
 }

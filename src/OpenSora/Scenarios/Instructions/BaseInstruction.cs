@@ -71,6 +71,22 @@ namespace OpenSora.Scenarios
 			return sb.ToString();
 		}
 
+		private static string ToString(BaseInstruction[] block)
+		{
+			var sb = new StringBuilder();
+
+			sb.Append("{\n");
+
+			foreach(var instruction in block)
+			{
+				sb.Append("\t");
+				sb.AppendLine(instruction.ToString());
+			}
+
+			sb.Append("\t}");
+			return sb.ToString();
+		}
+
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
@@ -87,15 +103,19 @@ namespace OpenSora.Scenarios
 			for (var i = 0; i < Operands.Length; ++i)
 			{
 				var op = Operands[i];
-				var asString = op as ScpString[];
-				string str;
-				if (asString != null)
+				var str = string.Empty;
+				switch (op)
 				{
-					str = ToString(asString);
-				}
-				else
-				{
-					str = op.ToString();
+					case ScpString[] scp:
+						str = ToString(scp);
+						break;
+					case BaseInstruction[] block:
+						str = ToString(block);
+						break;
+					default:
+						str = op.ToString();
+						break;
+
 				}
 
 				sb.Append(str);

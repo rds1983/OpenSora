@@ -107,48 +107,11 @@ namespace OpenSora.Rendering
 			var texture = Texture;
 			var data = FrameData;
 
-			// First run - determine size
-			var minX = 0;
-			var minY = 0;
-			var maxX = 0;
-			var maxY = 0;
-			for (var y = 0; y < data.GetLength(0); ++y)
-			{
-				for (var x = 0; x < data.GetLength(1); ++x)
-				{
-					var val = data[y, x];
-					if (val == null)
-					{
-						continue;
-					}
+			var width = data.GetLength(1);
+			var height = data.GetLength(0);
 
-					if (minX == 0)
-					{
-						minX = maxX = x;
-					}
-
-					if (x > maxX)
-					{
-						maxX = x;
-					}
-
-					if (minY == 0)
-					{
-						minY = maxY = y;
-					}
-
-					if (y > maxY)
-					{
-						maxY = y;
-					}
-				}
-			}
-
-			var width = maxX - minX;
-			var height = maxY - minY;
-
-			float dx = 1.0f / width;
-			float dy = 1.0f / width;
+			float dx = (float)0.3f;
+			float dy = (float)0.3f;
 
 			for (var y = 0; y < data.GetLength(0); ++y)
 			{
@@ -163,8 +126,8 @@ namespace OpenSora.Rendering
 					var tileX = val.Value % AnimationLoader.ChunksPerRow;
 					var tileY = val.Value / AnimationLoader.ChunksPerRow;
 
-					var vx = ((float)x - minX - (width)) * dx;
-					var vy = ((float)height - (y - minY)) * dy;
+					var vx = ((float)x - width / 2) * dx;
+					var vy = (3.0f + (float)height / 2 - y) * dy;
 
 					var tx = tileX * AnimationLoader.ChunkSize;
 					var ty = tileY * AnimationLoader.ChunkSize;

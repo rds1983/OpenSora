@@ -63,6 +63,16 @@ namespace OpenSora {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] BillboardEffect {
+            get {
+                object obj = ResourceManager.GetObject("BillboardEffect", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] DefaultEffect {
             get {
                 object obj = ResourceManager.GetObject("DefaultEffect", resourceCulture);

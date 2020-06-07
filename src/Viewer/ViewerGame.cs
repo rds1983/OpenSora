@@ -31,6 +31,7 @@ namespace OpenSora.Viewer
 		private Queue<string> _statusMessages = new Queue<string>();
 		private ResourceLoader _resourceLoader;
 		private ExecutionContext _executionContext;
+		private Desktop _desktop;
 
 		public ViewerGame()
 		{
@@ -95,7 +96,10 @@ namespace OpenSora.Viewer
 
 			PushStatusMessage(string.Empty);
 
-			Desktop.Root = _mainPanel;
+			_desktop = new Desktop
+			{
+				Root = _mainPanel
+			};
 
 			if (_state != null)
 			{
@@ -195,7 +199,7 @@ namespace OpenSora.Viewer
 		{
 			var name = new AssemblyName(typeof(FalcomDecompressor).Assembly.FullName);
 			var messageBox = Dialog.CreateMessageBox("About", "OpenSora.Viewer " + name.Version.ToString());
-			messageBox.ShowModal();
+			messageBox.ShowModal(_desktop);
 		}
 
 		private void _comboResourceType_SelectedIndexChanged(object sender, EventArgs e)
@@ -462,7 +466,7 @@ namespace OpenSora.Viewer
 			catch (Exception ex)
 			{
 				var msg = Dialog.CreateMessageBox("Error", ex.ToString());
-				msg.ShowModal();
+				msg.ShowModal(_desktop);
 			}
 		}
 
@@ -495,7 +499,7 @@ namespace OpenSora.Viewer
 			catch (Exception ex)
 			{
 				var msg = Dialog.CreateMessageBox("Error", ex.ToString());
-				msg.ShowModal();
+				msg.ShowModal(_desktop);
 			}
 		}
 
@@ -529,7 +533,7 @@ namespace OpenSora.Viewer
 				SetFolder(dlg.FilePath);
 			};
 
-			dlg.ShowModal();
+			dlg.ShowModal(_desktop);
 		}
 
 		protected override void Update(GameTime gameTime)
@@ -558,7 +562,7 @@ namespace OpenSora.Viewer
 
 			var bounds = _mainPanel._panelViewer.Bounds;
 			var mouseState = Mouse.GetState();
-			if (bounds.Contains(mouseState.Position) && !Desktop.IsMouseOverGUI)
+			if (bounds.Contains(mouseState.Position) && !_desktop.IsMouseOverGUI)
 			{
 				_executionContext.Scene.Controller.SetTouchState(CameraInputController.TouchType.Move, mouseState.LeftButton == ButtonState.Pressed);
 				_executionContext.Scene.Controller.SetTouchState(CameraInputController.TouchType.Rotate, mouseState.RightButton == ButtonState.Pressed);
@@ -655,7 +659,7 @@ namespace OpenSora.Viewer
 				}
 			}
 
-			Desktop.Render();
+			_desktop.Render();
 		}
 
 		protected override void EndRun()

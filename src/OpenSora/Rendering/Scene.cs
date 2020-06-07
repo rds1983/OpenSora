@@ -180,9 +180,26 @@ namespace OpenSora.Rendering
 				foreach (var pair in Characters)
 				{
 					var chip = pair.Value.Chip;
-					chip.Animate(0, 8);
+					chip.Animate(5, 8);
+
 					var view = Matrix.CreateTranslation(pair.Value.Position);
-					_defaultEffect.WorldViewProjection = view * _renderContext.ViewProjection;
+					var worldView = view * _renderContext.View;
+
+					// Reset rotation part of matrix in order to do billboard effect
+					worldView.M11 = 1;
+					worldView.M12 = 0;
+					worldView.M13 = 0;
+					worldView.M14 = 0;
+					worldView.M21 = 0;
+					worldView.M22 = 1;
+					worldView.M23 = 0;
+					worldView.M24 = 0;
+					worldView.M31 = 0;
+					worldView.M32 = 0;
+					worldView.M33 = 1;
+					worldView.M34 = 0;
+
+					_defaultEffect.WorldViewProjection = worldView * _renderContext.Projection;
 					_defaultEffect.Texture = chip.Texture;
 					foreach (var pass in _defaultEffect.CurrentTechnique.Passes)
 					{
@@ -191,6 +208,32 @@ namespace OpenSora.Rendering
 						_device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList,
 							chip.Vertices, 0, chip.Vertices.Length,
 							chip.Indices, 0, chip.Indices.Length / 3);
+					}
+
+					if (RenderDebugInfo)
+					{
+						_defaultEffect.WorldViewProjection = view * _renderContext.ViewProjection;
+						_defaultEffect.Texture = DefaultAssets.White;
+						foreach (var pass in _defaultEffect.CurrentTechnique.Passes)
+						{
+							pass.Apply();
+
+							var v = Vector3.Zero;
+							var vertices = new VertexPositionNormalTexture[]
+							{
+								new VertexPositionNormalTexture(
+									v,
+									Vector3.One,
+									Vector2.Zero
+								),
+								new VertexPositionNormalTexture(
+									new Vector3(v.X, v.Y + 10, v.Z),
+									Vector3.One,
+									Vector2.Zero
+								)
+							};
+							_device.DrawUserPrimitives(PrimitiveType.LineList, vertices, 0, 1);
+						}
 					}
 				}
 			}

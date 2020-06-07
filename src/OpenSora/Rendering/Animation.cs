@@ -77,9 +77,12 @@ namespace OpenSora.Rendering
 		public void Animate(int start, int step)
 		{
 			var now = DateTime.Now;
-			if (LastFrameRendered == null ||
-				(LastFrameRendered != null &&
-				(now - LastFrameRendered.Value).TotalMilliseconds >= ApplicationFrameChangeDelayInMs))
+			if (LastFrameRendered == null)
+			{
+				FrameIndex = Math.Min(start, Info.Length - 1);
+				LastFrameRendered = now;
+			}
+			else if((now - LastFrameRendered.Value).TotalMilliseconds >= ApplicationFrameChangeDelayInMs)
 			{
 				FrameIndex += step;
 				LastFrameRendered = now;
@@ -160,32 +163,38 @@ namespace OpenSora.Rendering
 					var tileX = val.Value % AnimationLoader.ChunksPerRow;
 					var tileY = val.Value / AnimationLoader.ChunksPerRow;
 
-					var vx = (x - minX) * dx;
-					var vy = (y - minY) * dy;
+					var vx = ((float)x - minX - (width)) * dx;
+					var vy = ((float)height - (y - minY)) * dy;
 
 					var tx = tileX * AnimationLoader.ChunkSize;
 					var ty = tileY * AnimationLoader.ChunkSize;
 
-					// Top Right
+					// Left Top
 					vertices.Add(new VertexPositionNormalTexture(new Vector3(vx, vy, 0),
 						Vector3.One,
 						new Vector2(tx / (float)texture.Width, ty / (float)texture.Height)));
-					vertices.Add(new VertexPositionNormalTexture(new Vector3(vx, vy + dy, 0),
+
+					// Left Bottom
+					vertices.Add(new VertexPositionNormalTexture(new Vector3(vx, vy - dy, 0),
 						Vector3.One,
 						new Vector2(tx / (float)texture.Width, (ty + AnimationLoader.ChunkSize) / (float)texture.Height)));
+
+					// Right Top
 					vertices.Add(new VertexPositionNormalTexture(new Vector3(vx + dx, vy, 0),
 						Vector3.One,
 						new Vector2((tx + AnimationLoader.ChunkSize) / (float)texture.Width, ty / (float)texture.Height)));
-					vertices.Add(new VertexPositionNormalTexture(new Vector3(vx + dx, vy + dy, 0),
+
+					// Right Bottom
+					vertices.Add(new VertexPositionNormalTexture(new Vector3(vx + dx, vy - dy, 0),
 						Vector3.One,
 						new Vector2((tx + AnimationLoader.ChunkSize) / (float)texture.Width, (ty + AnimationLoader.ChunkSize) / (float)texture.Height)));
 
 					indices.Add(idx);
-					indices.Add((short)(idx + 1));
-					indices.Add((short)(idx + 2));
 					indices.Add((short)(idx + 2));
 					indices.Add((short)(idx + 1));
 					indices.Add((short)(idx + 3));
+					indices.Add((short)(idx + 1));
+					indices.Add((short)(idx + 2));
 
 					idx += 4;
 				}

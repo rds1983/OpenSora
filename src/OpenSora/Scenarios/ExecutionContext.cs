@@ -9,7 +9,7 @@ namespace OpenSora.Scenarios
 	{
 		private BaseInstruction[] _instructions;
 
-		public int _currentInstructionIndex, _instructionPassed, _totalDurationInMs, _totalPassedInMs;
+		public int _currentInstructionIndex, _instructionPassedInMs, _totalDurationInMs, _totalPassedInMs;
 		public ExecutionContext Context { get; }
 
 		public BaseInstruction[] Instructions
@@ -35,6 +35,14 @@ namespace OpenSora.Scenarios
 			}
 		}
 
+		public int InstructionPassedInMs
+		{
+			get
+			{
+				return _instructionPassedInMs;
+			}
+		}
+
 		public float TotalPassedPart
 		{
 			get
@@ -45,6 +53,22 @@ namespace OpenSora.Scenarios
 				}
 
 				return (float)_totalPassedInMs / _totalDurationInMs;
+			}
+		}
+
+		public float TotalPassedInMs
+		{
+			get
+			{
+				return _totalPassedInMs;
+			}
+		}
+
+		public float TotalDurationInMs
+		{
+			get
+			{
+				return _totalDurationInMs;
 			}
 		}
 
@@ -70,7 +94,7 @@ namespace OpenSora.Scenarios
 
 		public void Rewind()
 		{
-			_instructionPassed = 0;
+			_instructionPassedInMs = 0;
 			_currentInstructionIndex = 0;
 			_totalPassedInMs = 0;
 			TotalPassedPartChanged?.Invoke(this, EventArgs.Empty);
@@ -83,7 +107,7 @@ namespace OpenSora.Scenarios
 				return;
 			}
 
-			_instructionPassed += passedMs;
+			_instructionPassedInMs += passedMs;
 			_totalPassedInMs += passedMs;
 
 			if (_totalPassedInMs > _totalDurationInMs)
@@ -99,12 +123,12 @@ namespace OpenSora.Scenarios
 
 				instruction.Update(this);
 
-				if (_instructionPassed < instruction.DurationInMs)
+				if (_instructionPassedInMs < instruction.DurationInMs)
 				{
 					break;
 				}
 
-				_instructionPassed -= instruction.DurationInMs;
+				_instructionPassedInMs -= instruction.DurationInMs;
 			}
 		}
 
@@ -121,8 +145,15 @@ namespace OpenSora.Scenarios
 		public ExecutionWorker MainWorker { get; }
 		public List<ExecutionWorker> AdditionalWorkers { get; } = new List<ExecutionWorker>();
 
-		public ResourceLoader ResourceLoader { get; }
-		public Scene Scene { get; set; }
+		public ResourceLoader ResourceLoader
+		{
+			get
+			{
+				return Scene.ResourceLoader;
+			}
+		}
+
+		public Scene Scene { get; }
 
 		public Scenario Scenario
 		{
@@ -170,7 +201,7 @@ namespace OpenSora.Scenarios
 
 		public ExecutionContext(ResourceLoader resourceLoader)
 		{
-			ResourceLoader = resourceLoader;
+			Scene = new Scene(resourceLoader);
 			MainWorker = new ExecutionWorker(this);
 		}
 

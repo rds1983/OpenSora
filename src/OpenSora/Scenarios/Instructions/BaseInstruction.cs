@@ -131,7 +131,7 @@ namespace OpenSora.Scenarios
 			return sb.ToString();
 		}
 
-		public virtual void Update(ExecutionWorker context)
+		public virtual void Update(ExecutionWorker worker)
 		{
 		}
 	}

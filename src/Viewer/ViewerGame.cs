@@ -106,10 +106,19 @@ namespace OpenSora.Viewer
 				SetFolder(_state.LastFolder);
 			}
 
-			_executionContext.Scene = new Scene(GraphicsDevice);
 			_executionContext.MainWorker.TotalPassedPartChanged += _executionContext_TotalPassedPartChanged;
 
 			_mainPanel._comboResourceType.SelectedIndex = 4;
+		}
+
+		private static string FormatDuration(float ms)
+		{
+			var totalSeconds = (int)ms / 1000;
+
+			var mins = totalSeconds / 60;
+			int seconds = totalSeconds % 60;
+
+			return string.Format("{0:d2}:{1:d2}", mins, seconds);
 		}
 
 		private void _executionContext_TotalPassedPartChanged(object sender, EventArgs e)
@@ -118,6 +127,8 @@ namespace OpenSora.Viewer
 				(_mainPanel._sliderPlayer.Maximum - _mainPanel._sliderPlayer.Minimum) * _executionContext.MainWorker.TotalPassedPart;
 
 			_mainPanel._sliderPlayer.Value = position;
+			_mainPanel._labelDuration.Text = FormatDuration(_executionContext.MainWorker.TotalPassedInMs) + "/" +
+				FormatDuration(_executionContext.MainWorker.TotalDurationInMs);
 		}
 
 		private void _buttonPlayPause_Click(object sender, EventArgs e)
@@ -214,7 +225,8 @@ namespace OpenSora.Viewer
 			if (idx != 3)
 			{
 				HideAnimationBox();
-			} else
+			}
+			else
 			{
 				ShowAnimationBox();
 			}
@@ -324,7 +336,7 @@ namespace OpenSora.Viewer
 						_mainPanel._comboFunctions.Items.Clear();
 
 						int idx = 0;
-						foreach(var function in scenario.Functions)
+						foreach (var function in scenario.Functions)
 						{
 							_mainPanel._comboFunctions.Items.Add(new ListItem
 							{
@@ -449,7 +461,7 @@ namespace OpenSora.Viewer
 			if (index == 4)
 			{
 				int? idx = null;
-				for(var i = 0; i < _mainPanel._listFiles.Items.Count; ++i)
+				for (var i = 0; i < _mainPanel._listFiles.Items.Count; ++i)
 				{
 					if (_mainPanel._listFiles.Items[i].Text.Contains("T0310"))
 					{
@@ -550,7 +562,7 @@ namespace OpenSora.Viewer
 
 			//			_fpsCounter.Update(gameTime);
 
-			if ((_mainPanel._comboResourceType.SelectedIndex != 1 && _mainPanel._comboResourceType.SelectedIndex != 4) || 
+			if ((_mainPanel._comboResourceType.SelectedIndex != 1 && _mainPanel._comboResourceType.SelectedIndex != 4) ||
 				_executionContext.Scene.Meshes == null)
 			{
 				return;
@@ -583,7 +595,7 @@ namespace OpenSora.Viewer
 
 		private void DrawTexture(Texture2D texture)
 		{
-			if(texture == null)
+			if (texture == null)
 			{
 				return;
 			}

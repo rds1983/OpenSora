@@ -1,11 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Myra;
+using Myra.Graphics2D.TextureAtlases;
+using Myra.Graphics2D.UI;
 using OpenSora.ModelLoading;
+using OpenSora.UI;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace OpenSora.Rendering
 {
@@ -39,11 +42,16 @@ namespace OpenSora.Rendering
 		public float NearPlaneDistance = 0.1f;
 		public float FarPlaneDistance = 1000.0f;
 
-		private readonly GraphicsDevice _device;
 		private readonly DefaultEffect _defaultEffect;
 		private readonly RenderContext _renderContext = new RenderContext();
 		private List<ModelMeshPart> _meshes;
 		private readonly SpriteBatch _spriteBatch;
+		private readonly Desktop _desktop;
+		private readonly CharacterTalkWidget _talkWidget;
+		private Rectangle _bounds;
+
+		public ResourceLoader ResourceLoader { get; set; }
+
 		public Dictionary<int, SceneCharacterInfo> Characters { get; } = new Dictionary<int, SceneCharacterInfo>();
 
 		public Camera Camera { get; }
@@ -65,17 +73,29 @@ namespace OpenSora.Rendering
 
 		public bool RenderDebugInfo = true;
 
-		public Scene(GraphicsDevice device)
+		public Scene(ResourceLoader resourceLoader)
 		{
-			_device = device;
-			_defaultEffect = new DefaultEffect(device);
-			_spriteBatch = new SpriteBatch(device);
+			if (resourceLoader == null)
+			{
+				throw new ArgumentNullException(nameof(resourceLoader));
+			}
+
+			ResourceLoader = resourceLoader;
+			_defaultEffect = new DefaultEffect(resourceLoader.GraphicsDevice);
+			_spriteBatch = new SpriteBatch(resourceLoader.GraphicsDevice);
 			Camera = new Camera();
 			Camera.ViewAngleChanged += (s, a) => _renderContext.ResetView();
 
 			Controller = new CameraInputController(Camera);
 
 			ResetCamera();
+
+			_desktop = new Desktop
+			{
+				BoundsFetcher = () => _bounds
+			};
+
+			_talkWidget = new CharacterTalkWidget();
 		}
 
 		public static void AddMeshData(GraphicsDevice device, List<ModelMeshPart> meshes, MeshData meshData, Func<string, Texture2D> textureLoader)
@@ -128,13 +148,14 @@ namespace OpenSora.Rendering
 			Camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
 		}
 
-		public void Render(Rectangle bounds)
+		private void RenderScene(Rectangle bounds)
 		{
 			if (Meshes == null || Meshes.Count == 0)
 			{
 				return;
 			}
 
+			var _device = ResourceLoader.GraphicsDevice;
 			var oldViewport = _device.Viewport;
 			var oldDepthStencilState = _device.DepthStencilState;
 			var oldRasterizerState = _device.RasterizerState;
@@ -250,6 +271,44 @@ namespace OpenSora.Rendering
 
 				_spriteBatch.End();
 			}
+		}
+
+		public void Render(Rectangle bounds)
+		{
+			_bounds = bounds;
+
+			RenderScene(bounds);
+			_desktop.Render();
+		}
+
+		private static readonly Regex _imageRegex = new Regex(@"#(\d+)F(.*)");
+
+		public void ShowTalk(int charId, string text)
+		{
+			// Try to parse image
+			var match = _imageRegex.Match(text);
+			if(match != null && match.Success)
+			{
+				var id = int.Parse(match.Groups[1].Value);
+
+				var portrait = ResourceLoader.GetCharacterPortrait(id);
+				_talkWidget._imageCharacter.Renderable = new TextureRegion(portrait);
+
+				text = match.Groups[2].Value;
+			}
+
+
+			_talkWidget._labelText.Text = text;
+
+			if (_desktop.Root != _talkWidget)
+			{
+				_desktop.Root = _talkWidget;
+			}
+		}
+
+		public void CloseMessageWindow()
+		{
+			_desktop.Root = null;
 		}
 	}
 }

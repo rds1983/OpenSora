@@ -75,6 +75,7 @@
           </HorizontalStackPanel.Proportions>
           <TextButton Text="Play/Pause" VerticalAlignment="Center" Id="_buttonPlayPause" />
           <HorizontalSlider Id="_sliderPlayer" />
+          <Label Text="03:10/15:00" Id="_labelDuration" />
         </HorizontalStackPanel>
       </VerticalStackPanel>
     </HorizontalStackPanel>

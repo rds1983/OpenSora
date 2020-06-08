@@ -4,6 +4,7 @@ using Myra;
 using OpenSora.ModelLoading;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace OpenSora.Rendering
@@ -40,7 +41,6 @@ namespace OpenSora.Rendering
 
 		private readonly GraphicsDevice _device;
 		private readonly DefaultEffect _defaultEffect;
-		private readonly BillboardEffect _billboardEffect;
 		private readonly RenderContext _renderContext = new RenderContext();
 		private List<ModelMeshPart> _meshes;
 		private readonly SpriteBatch _spriteBatch;
@@ -69,7 +69,6 @@ namespace OpenSora.Rendering
 		{
 			_device = device;
 			_defaultEffect = new DefaultEffect(device);
-			_billboardEffect = new BillboardEffect(device);
 			_spriteBatch = new SpriteBatch(device);
 			Camera = new Camera();
 			Camera.ViewAngleChanged += (s, a) => _renderContext.ResetView();
@@ -184,27 +183,17 @@ namespace OpenSora.Rendering
 					var chip = pair.Value.Chip;
 					chip.Animate(5, 8);
 
-					var view = Matrix.CreateTranslation(pair.Value.Position);
-					var worldView = view * _renderContext.View;
+					// Calculate angle that the billboard needs to be rotated in order to always face the camera
+					var angle = -(float)Math.Atan2(pair.Value.Position.Z - Camera.Position.Z,
+						pair.Value.Position.X - Camera.Position.X) - (float)Math.PI / 2;
 
-					// Reset rotation part of matrix in order to do billboard effect
-/*					worldView.M11 = 1;
-					worldView.M12 = 0;
-					worldView.M13 = 0;
-					worldView.M14 = 0;
-					worldView.M21 = 0;
-					worldView.M22 = 1;
-					worldView.M23 = 0;
-					worldView.M24 = 0;
-					worldView.M31 = 0;
-					worldView.M32 = 0;
-					worldView.M33 = 1;
-					worldView.M34 = 0;*/
+					// Rotate and translate
+					var rot = Matrix.CreateRotationY(angle);
+					var view = rot * Matrix.CreateTranslation(pair.Value.Position);
 
-					_billboardEffect.WorldView = worldView;
-					_billboardEffect.Projection = _renderContext.Projection;
-					_billboardEffect.Texture = chip.Texture;
-					foreach (var pass in _billboardEffect.CurrentTechnique.Passes)
+					_defaultEffect.WorldViewProjection = view * _renderContext.ViewProjection;
+					_defaultEffect.Texture = chip.Texture;
+					foreach (var pass in _defaultEffect.CurrentTechnique.Passes)
 					{
 						pass.Apply();
 

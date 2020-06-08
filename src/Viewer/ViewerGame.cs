@@ -322,6 +322,8 @@ namespace OpenSora.Viewer
 						_mainPanel._textScenarioLocation.Text = "Location: " + scenario.Location;
 
 						_mainPanel._comboFunctions.Items.Clear();
+
+						int idx = 0;
 						foreach(var function in scenario.Functions)
 						{
 							_mainPanel._comboFunctions.Items.Add(new ListItem
@@ -329,8 +331,14 @@ namespace OpenSora.Viewer
 								Text = string.Format("0x{0:X}", function.Offset),
 								Tag = function
 							});
+
+							if (function.Offset == 0x4370)
+							{
+								idx = Array.IndexOf(scenario.Functions, function);
+							}
 						}
 
+						_mainPanel._comboFunctions.SelectedIndex = idx;
 						var parts = scenario.Location.Split('.');
 						var modelEntry = _resourceLoader.FindByName(parts[0], parts[1]);
 						if (modelEntry != null)

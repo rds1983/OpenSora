@@ -10,6 +10,7 @@ namespace OpenSora.Scenarios
 		private BaseInstruction[] _instructions;
 
 		public int _currentInstructionIndex, _instructionPassedInMs, _totalDurationInMs, _totalPassedInMs;
+		public bool _callBegin = true;
 		public ExecutionContext Context { get; }
 
 		public BaseInstruction[] Instructions
@@ -95,6 +96,7 @@ namespace OpenSora.Scenarios
 		public void Rewind()
 		{
 			_instructionPassedInMs = 0;
+			_callBegin = true;
 			_currentInstructionIndex = 0;
 			_totalPassedInMs = 0;
 			TotalPassedPartChanged?.Invoke(this, EventArgs.Empty);
@@ -121,12 +123,20 @@ namespace OpenSora.Scenarios
 			{
 				var instruction = _instructions[_currentInstructionIndex];
 
+				if (_callBegin)
+				{
+					instruction.Begin(this);
+					_callBegin = false;
+				}
+
 				instruction.Update(this);
 
 				if (_instructionPassedInMs < instruction.DurationInMs)
 				{
 					break;
 				}
+
+				instruction.End(this);
 
 				_instructionPassedInMs -= instruction.DurationInMs;
 			}
@@ -244,7 +254,7 @@ namespace OpenSora.Scenarios
 
 		public static Vector3 ToPosition(int x, int y, int z)
 		{
-			return new Vector3(x / PositionScale, y / PositionScale, z / PositionScale);
+			return new Vector3(x / PositionScale, y / PositionScale, -z / PositionScale);
 		}
 
 		public SceneCharacterInfo EnsureCharacter(int id)
@@ -267,6 +277,18 @@ namespace OpenSora.Scenarios
 			};
 
 			Scene.Characters[id] = result;
+
+			return result;
+		}
+
+		public static int DegreesToAnimationStart(int degrees)
+		{
+			var result = (int)Math.Round(degrees / 45.0f) + 1;
+
+			while (result >= 8)
+			{
+				result -= 8;
+			}
 
 			return result;
 		}

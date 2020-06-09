@@ -2,6 +2,13 @@
 {
 	public class Custom: BaseInstruction
 	{
-		public string Name { get; set; }
+		public string InstructionName { get; set; }
+		public override string Name
+		{
+			get
+			{
+				return InstructionName;
+			}
+		}
 	}
 }

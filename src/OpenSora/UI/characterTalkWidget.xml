@@ -1,6 +1,6 @@
 <Project>
   <Project.ExportOptions Namespace="OpenSora.UI" Class="CharacterTalkWidget" OutputPath="C:\Projects\OpenSora\src\OpenSora\UI" />
-  <HorizontalStackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="700" Height="220" Background="#000000FF">
+  <HorizontalStackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="700" Height="220" Background="#0000007C">
     <HorizontalStackPanel.Proportions>
       <Proportion Type="Auto" />
       <Proportion Type="Fill" />

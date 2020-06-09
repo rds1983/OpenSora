@@ -29,6 +29,9 @@ namespace OpenSora.Rendering
 				_position = new Vector3(value.X, value.Y, value.Z);
 			}
 		}
+
+		public int AnimationStart;
+		public int AnimationStep;
 	}
 
 	public class Scene
@@ -202,7 +205,7 @@ namespace OpenSora.Rendering
 				foreach (var pair in Characters)
 				{
 					var chip = pair.Value.Chip;
-					chip.Animate(5, 8);
+					chip.Animate(pair.Value.AnimationStart, pair.Value.AnimationStep);
 
 					// Calculate angle that the billboard needs to be rotated in order to always face the camera
 					var angle = -(float)Math.Atan2(pair.Value.Position.Z - Camera.Position.Z,
@@ -281,7 +284,7 @@ namespace OpenSora.Rendering
 			_desktop.Render();
 		}
 
-		private static readonly Regex _imageRegex = new Regex(@"#(\d+)F(.*)");
+		private static readonly Regex _imageRegex = new Regex(@"#(\d+)F(.*)", RegexOptions.Singleline);
 
 		public void ShowTalk(int charId, string text)
 		{
@@ -296,7 +299,6 @@ namespace OpenSora.Rendering
 
 				text = match.Groups[2].Value;
 			}
-
 
 			_talkWidget._labelText.Text = text;
 

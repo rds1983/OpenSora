@@ -76,6 +76,13 @@ namespace OpenSora.Rendering
 
 		public void Animate(int start, int step)
 		{
+			if (step == 0)
+			{
+				FrameIndex = Math.Min(start, Info.Length - 1);
+				LastFrameRendered = null;
+				return;
+			}
+
 			var now = DateTime.Now;
 			if (LastFrameRendered == null)
 			{

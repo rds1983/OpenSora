@@ -1,5 +1,6 @@
 ﻿using OpenSora.Scenarios.Instructions;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace OpenSora.Scenarios
@@ -15,6 +16,14 @@ namespace OpenSora.Scenarios
 			get
 			{
 				return 0;
+			}
+		}
+
+		public virtual string Name
+		{
+			get
+			{
+				return GetType().Name;
 			}
 		}
 
@@ -131,8 +140,18 @@ namespace OpenSora.Scenarios
 			return sb.ToString();
 		}
 
+		public virtual void Begin(ExecutionWorker worker)
+		{
+			Debug.WriteLine(Name + ".Begin");
+		}
+
 		public virtual void Update(ExecutionWorker worker)
 		{
+		}
+
+		public virtual void End(ExecutionWorker worker)
+		{
+			Debug.WriteLine(Name + ".End");
 		}
 	}
 }

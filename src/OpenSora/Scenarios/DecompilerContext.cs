@@ -48,7 +48,7 @@ namespace OpenSora.Scenarios
 			var asCustom = instruction as Custom;
 			if (asCustom != null)
 			{
-				asCustom.Name = entry.Name;
+				asCustom.InstructionName = entry.Name;
 			}
 
 			var decompiler = entry.CustomDecompiler ?? BaseInstruction.DecompileDefault;

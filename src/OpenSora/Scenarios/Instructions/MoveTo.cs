@@ -9,7 +9,7 @@ namespace OpenSora.Scenarios.Instructions
 	{
 		private Vector3 _initialPosition;
 
-		public int X
+		public int CharId
 		{
 			get
 			{
@@ -17,11 +17,19 @@ namespace OpenSora.Scenarios.Instructions
 			}
 		}
 
+		public long X
+		{
+			get
+			{
+				return (long)Operands[1];
+			}
+		}
+
 		public int Y
 		{
 			get
 			{
-				return (int)Operands[1];
+				return (int)(long)Operands[2];
 			}
 		}
 
@@ -29,7 +37,7 @@ namespace OpenSora.Scenarios.Instructions
 		{
 			get
 			{
-				return (int)Operands[2];
+				return (int)(long)Operands[3];
 			}
 		}
 
@@ -37,7 +45,7 @@ namespace OpenSora.Scenarios.Instructions
 		{
 			get
 			{
-				return (int)Operands[3];
+				return (int)(long)Operands[4];
 			}
 		}
 
@@ -52,7 +60,9 @@ namespace OpenSora.Scenarios.Instructions
 
 			var character = GetCharacter(worker);
 			_initialPosition = character.Position;
-			var delta = ExecutionContext.ToPosition(X, Y, Z) - _initialPosition;
+
+			var x = (int)(X & 0xffffffff);
+			var delta = ExecutionContext.ToPosition(x, Y, Z) - _initialPosition;
 
 			var angle = (int)(Math.Atan2(delta.Z, delta.X) * 360 / (2 * Math.PI)) + 90;
 			if (angle < 0)
@@ -71,11 +81,13 @@ namespace OpenSora.Scenarios.Instructions
 
 			var character = GetCharacter(worker);
 
-			var targetPosition = ExecutionContext.ToPosition(X, Y, Z);
+			var x = (int)(X & 0xffffffff);
+			var targetPosition = ExecutionContext.ToPosition(x, Y, Z);
 
-			var newPosition = new Vector3(_initialPosition.X + (targetPosition.X - _initialPosition.X) * worker.TotalPassedPart,
-				_initialPosition.Y + (targetPosition.Y - _initialPosition.Y) * worker.TotalPassedPart,
-				_initialPosition.Z + (targetPosition.Z - _initialPosition.Z) * worker.TotalPassedPart);
+			var part = worker.InstructionPassedPart;
+			var newPosition = new Vector3(_initialPosition.X + (targetPosition.X - _initialPosition.X) * part,
+				_initialPosition.Y + (targetPosition.Y - _initialPosition.Y) * part,
+				_initialPosition.Z + (targetPosition.Z - _initialPosition.Z) * part);
 
 			character.Position = newPosition;
 			var cameraPosition = new Vector3(newPosition.X - 8, newPosition.Y + 6.0f, newPosition.Z + 6.0f);

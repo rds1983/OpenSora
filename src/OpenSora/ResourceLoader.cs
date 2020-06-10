@@ -214,7 +214,7 @@ namespace OpenSora
 			_textures.Clear();
 		}
 
-		public Texture2D GetCharacterPortrait(int id)
+		public Texture2D GetCharacterPortrait(string id)
 		{
 			var str = "H_KAO" + id;
 

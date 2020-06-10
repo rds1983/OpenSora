@@ -44,6 +44,49 @@ namespace OpenSora.Scenarios
 			}
 		}
 
+		public int InstructionTotalInMs
+		{
+			get
+			{
+				if (_instructions == null || _currentInstructionIndex >= _instructions.Length)
+				{
+					return 0;
+				}
+
+				return _instructions[_currentInstructionIndex].DurationInMs;
+			}
+		}
+
+		public float InstructionPassedPart
+		{
+			get
+			{
+				var total = InstructionTotalInMs;
+				if (total == 0)
+				{
+					return 0;
+				}
+
+				return (float)InstructionPassedInMs / total;
+			}
+		}
+
+		public int TotalPassedInMs
+		{
+			get
+			{
+				return _totalPassedInMs;
+			}
+		}
+
+		public int TotalDurationInMs
+		{
+			get
+			{
+				return _totalDurationInMs;
+			}
+		}
+
 		public float TotalPassedPart
 		{
 			get
@@ -54,22 +97,6 @@ namespace OpenSora.Scenarios
 				}
 
 				return (float)_totalPassedInMs / _totalDurationInMs;
-			}
-		}
-
-		public float TotalPassedInMs
-		{
-			get
-			{
-				return _totalPassedInMs;
-			}
-		}
-
-		public float TotalDurationInMs
-		{
-			get
-			{
-				return _totalDurationInMs;
 			}
 		}
 
@@ -137,6 +164,7 @@ namespace OpenSora.Scenarios
 				}
 
 				instruction.End(this);
+				_callBegin = true;
 
 				_instructionPassedInMs -= instruction.DurationInMs;
 			}

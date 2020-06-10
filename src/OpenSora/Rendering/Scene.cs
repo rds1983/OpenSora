@@ -8,7 +8,6 @@ using OpenSora.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace OpenSora.Rendering
 {
@@ -74,7 +73,7 @@ namespace OpenSora.Rendering
 			}
 		}
 
-		public bool RenderDebugInfo = true;
+		public bool RenderDebugInfo = false;
 
 		public Scene(ResourceLoader resourceLoader)
 		{
@@ -284,23 +283,11 @@ namespace OpenSora.Rendering
 			_desktop.Render();
 		}
 
-		private static readonly Regex _imageRegex = new Regex(@"#(\d+)F(.*)", RegexOptions.Singleline);
-
-		public void ShowTalk(int charId, string text)
+		public void ShowTalk(TalkString talk, int symbolsCount)
 		{
-			// Try to parse image
-			var match = _imageRegex.Match(text);
-			if(match != null && match.Success)
-			{
-				var id = int.Parse(match.Groups[1].Value);
-
-				var portrait = ResourceLoader.GetCharacterPortrait(id);
-				_talkWidget._imageCharacter.Renderable = new TextureRegion(portrait);
-
-				text = match.Groups[2].Value;
-			}
-
-			_talkWidget._labelText.Text = text;
+			_talkWidget._imageCharacter.Renderable = talk.Portrait;
+			_talkWidget._labelName.Text = talk.Name;
+			_talkWidget._labelText.Text = talk.Text.Substring(0, symbolsCount);
 
 			if (_desktop.Root != _talkWidget)
 			{

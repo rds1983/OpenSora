@@ -5,176 +5,11 @@ using System.Collections.Generic;
 
 namespace OpenSora.Scenarios
 {
-	public class ExecutionWorker
-	{
-		private BaseInstruction[] _instructions;
-
-		public int _currentInstructionIndex, _instructionPassedInMs, _totalDurationInMs, _totalPassedInMs;
-		public bool _callBegin = true;
-		public ExecutionContext Context { get; }
-
-		public BaseInstruction[] Instructions
-		{
-			get
-			{
-				return _instructions;
-			}
-
-			set
-			{
-				_instructions = value;
-				_totalDurationInMs = 0;
-				if (_instructions != null)
-				{
-					for (var i = 0; i < _instructions.Length; ++i)
-					{
-						_totalDurationInMs += _instructions[i].DurationInMs;
-					}
-				}
-
-				Rewind();
-			}
-		}
-
-		public int InstructionPassedInMs
-		{
-			get
-			{
-				return _instructionPassedInMs;
-			}
-		}
-
-		public int InstructionTotalInMs
-		{
-			get
-			{
-				if (_instructions == null || _currentInstructionIndex >= _instructions.Length)
-				{
-					return 0;
-				}
-
-				return _instructions[_currentInstructionIndex].DurationInMs;
-			}
-		}
-
-		public float InstructionPassedPart
-		{
-			get
-			{
-				var total = InstructionTotalInMs;
-				if (total == 0)
-				{
-					return 0;
-				}
-
-				return (float)InstructionPassedInMs / total;
-			}
-		}
-
-		public int TotalPassedInMs
-		{
-			get
-			{
-				return _totalPassedInMs;
-			}
-		}
-
-		public int TotalDurationInMs
-		{
-			get
-			{
-				return _totalDurationInMs;
-			}
-		}
-
-		public float TotalPassedPart
-		{
-			get
-			{
-				if (_totalDurationInMs == 0)
-				{
-					return 0;
-				}
-
-				return (float)_totalPassedInMs / _totalDurationInMs;
-			}
-		}
-
-		public bool Finished
-		{
-			get
-			{
-				return _totalPassedInMs >= _totalDurationInMs;
-			}
-		}
-
-		public event EventHandler TotalPassedPartChanged;
-
-		public ExecutionWorker(ExecutionContext context)
-		{
-			if (context == null)
-			{
-				throw new ArgumentOutOfRangeException(nameof(context));
-			}
-
-			Context = context;
-		}
-
-		public void Rewind()
-		{
-			_instructionPassedInMs = 0;
-			_callBegin = true;
-			_currentInstructionIndex = 0;
-			_totalPassedInMs = 0;
-			TotalPassedPartChanged?.Invoke(this, EventArgs.Empty);
-		}
-
-		public void Update(int passedMs)
-		{
-			if (_instructions == null || _instructions.Length == 0 || _totalPassedInMs >= _totalDurationInMs)
-			{
-				return;
-			}
-
-			_instructionPassedInMs += passedMs;
-			_totalPassedInMs += passedMs;
-
-			if (_totalPassedInMs > _totalDurationInMs)
-			{
-				_totalPassedInMs = _totalDurationInMs;
-			}
-
-			TotalPassedPartChanged?.Invoke(this, EventArgs.Empty);
-
-			for (; _currentInstructionIndex < _instructions.Length; ++_currentInstructionIndex)
-			{
-				var instruction = _instructions[_currentInstructionIndex];
-
-				if (_callBegin)
-				{
-					instruction.Begin(this);
-					_callBegin = false;
-				}
-
-				instruction.Update(this);
-
-				if (_instructionPassedInMs < instruction.DurationInMs)
-				{
-					break;
-				}
-
-				instruction.End(this);
-				_callBegin = true;
-
-				_instructionPassedInMs -= instruction.DurationInMs;
-			}
-		}
-
-	}
-
 	public class ExecutionContext
 	{
 		public const float PositionScale = 1000.0f;
+
+		private static readonly Dictionary<int, SceneCharacterInfo> _hardcodedNpcs = new Dictionary<int, SceneCharacterInfo>();
 
 		private Scenario _scenario;
 		private ScenarioFunctionInfo _function;
@@ -192,6 +27,19 @@ namespace OpenSora.Scenarios
 		}
 
 		public Scene Scene { get; }
+
+		public float PlayedPart
+		{
+			get
+			{
+				return MainWorker.TotalPassedPart;
+			}
+
+			set
+			{
+				SetPlayedPart(value);
+			}
+		}
 
 		public Scenario Scenario
 		{
@@ -236,7 +84,29 @@ namespace OpenSora.Scenarios
 			}
 		}
 
+		static ExecutionContext()
+		{
+			_hardcodedNpcs[254] = new SceneCharacterInfo
+			{
+				ChipId = 1
+			};
 
+
+			_hardcodedNpcs[257] = new SceneCharacterInfo
+			{
+				ChipId = 8
+			};
+
+			_hardcodedNpcs[258] = new SceneCharacterInfo
+			{
+				ChipId = 9
+			};
+
+			_hardcodedNpcs[259] = new SceneCharacterInfo
+			{
+				ChipId = 11
+			};
+		}
 		public ExecutionContext(ResourceLoader resourceLoader)
 		{
 			Scene = new Scene(resourceLoader);
@@ -285,28 +155,53 @@ namespace OpenSora.Scenarios
 			return new Vector3(x / PositionScale, y / PositionScale, -z / PositionScale);
 		}
 
-		public SceneCharacterInfo EnsureCharacter(int id)
+		public SceneCharacter EnsureCharacter(int id)
 		{
-			SceneCharacterInfo result;
+			SceneCharacter result;
 			if (Scene.Characters.TryGetValue(id, out result))
 			{
 				return result;
 			}
 
-			var npc = GetNpcById(id);
-			var chip = Scenario.ChipInfo[npc.ChipIndex];
+			SceneCharacterInfo characterInfo;
+
+			int chipIndex;
+			var position = Vector3.Zero;
+			if (_hardcodedNpcs.TryGetValue(id, out characterInfo))
+			{
+				chipIndex = characterInfo.ChipId;
+			}
+			else
+			{
+				var npc = GetNpcById(id);
+				chipIndex = npc.ChipIndex;
+				position = ToPosition(npc.X, npc.Y, npc.Z);
+			}
+
+			var chip = Scenario.ChipInfo[chipIndex];
 			var animationEntry = ResourceLoader.FindByIndex(chip.ChipIndex);
 			var animation = ResourceLoader.LoadAnimation(animationEntry);
 
-			result = new SceneCharacterInfo
+			result = new SceneCharacter
 			{
 				Chip = animation,
-				Position = ToPosition(npc.X, npc.Y, npc.Z)
+				Position = position
 			};
 
 			Scene.Characters[id] = result;
 
 			return result;
+		}
+
+		private void SetPlayedPart(float part)
+		{
+			// Rewind and remove additional workers
+			MainWorker.Rewind();
+			AdditionalWorkers.Clear();
+
+			// Now execute everything up to the part
+			int passedMs = (int)(part * MainWorker.TotalDurationInMs);
+			MainWorker.Update(passedMs);
 		}
 
 		public static int DegreesToAnimationStart(int degrees)

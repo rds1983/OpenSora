@@ -2,9 +2,9 @@
 {
 	public class CloseMessageWindow: BaseInstruction
 	{
-		public override void Update(ExecutionWorker worker)
+		public override void Begin(ExecutionWorker worker)
 		{
-			base.Update(worker);
+			base.Begin(worker);
 
 			worker.Context.Scene.CloseMessageWindow();
 		}

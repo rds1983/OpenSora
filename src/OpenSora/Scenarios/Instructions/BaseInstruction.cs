@@ -142,7 +142,7 @@ namespace OpenSora.Scenarios
 
 		public virtual void Begin(ExecutionWorker worker)
 		{
-			Debug.WriteLine(Name + ".Begin");
+			//Debug.WriteLine(Name + ".Begin");
 		}
 
 		public virtual void Update(ExecutionWorker worker)
@@ -151,7 +151,7 @@ namespace OpenSora.Scenarios
 
 		public virtual void End(ExecutionWorker worker)
 		{
-			Debug.WriteLine(Name + ".End");
+			//Debug.WriteLine(Name + ".End");
 		}
 	}
 }

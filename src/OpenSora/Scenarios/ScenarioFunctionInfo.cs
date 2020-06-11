@@ -5,8 +5,35 @@ namespace OpenSora.Scenarios
 {
 	public class ScenarioFunctionInfo
 	{
+		private int? _durationInMs;
+
 		public int Offset { get; }
 		public BaseInstruction[] Instructions { get; }
+
+		public int DurationInMs
+		{
+			get
+			{
+				if (_durationInMs != null)
+				{
+					return _durationInMs.Value;
+				}
+
+				if (Instructions == null)
+				{
+					return 0;
+				}
+
+				var result = 0;
+				foreach(var ins in Instructions)
+				{
+					result += ins.DurationInMs;
+				}
+
+				_durationInMs = result;
+				return result;
+			}
+		}
 
 		private ScenarioFunctionInfo(int offset, BaseInstruction[] instructions)
 		{

@@ -44,9 +44,9 @@ namespace OpenSora.Scenarios.Instructions
 			}
 		}
 
-		public override void Update(ExecutionWorker worker)
+		public override void Begin(ExecutionWorker worker)
 		{
-			base.Update(worker);
+			base.Begin(worker);
 
 			var target = ExecutionContext.ToPosition(X, Y, Z);
 			// var target = new Vector3(-1f, 1.0f, -1.5f);

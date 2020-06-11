@@ -32,6 +32,7 @@ namespace OpenSora.Viewer
 		private ResourceLoader _resourceLoader;
 		private ExecutionContext _executionContext;
 		private Desktop _desktop;
+		private bool _wasPlaying;
 
 		public ViewerGame()
 		{
@@ -94,6 +95,9 @@ namespace OpenSora.Viewer
 
 			_mainPanel._buttonPlayPause.Click += _buttonPlayPause_Click;
 
+			_mainPanel._sliderPlayer.ImageButton.PressedChanged += SliderPlayer_PressedChanged;
+			_mainPanel._sliderPlayer.ValueChangedByUser += _sliderPlayer_ValueChangedByUser;
+
 			PushStatusMessage(string.Empty);
 
 			_desktop = new Desktop
@@ -109,6 +113,33 @@ namespace OpenSora.Viewer
 			_executionContext.MainWorker.TotalPassedPartChanged += _executionContext_TotalPassedPartChanged;
 
 			_mainPanel._comboResourceType.SelectedIndex = 4;
+		}
+
+		private void _sliderPlayer_ValueChangedByUser(object sender, Myra.Utility.ValueChangedEventArgs<float> e)
+		{
+			var part = (float)(_mainPanel._sliderPlayer.Value - _mainPanel._sliderPlayer.Minimum) / (_mainPanel._sliderPlayer.Maximum - _mainPanel._sliderPlayer.Minimum);
+			Debug.WriteLine("Rewind to {0}", part);
+			_executionContext.PlayedPart = part;
+		}
+
+		private void SliderPlayer_PressedChanged(object sender, EventArgs e)
+		{
+			if (_mainPanel._sliderPlayer.ImageButton.IsPressed)
+			{
+				_wasPlaying = _executionContext.IsPlaying;
+				if (_executionContext.IsPlaying)
+				{
+					Debug.WriteLine("Pause");
+					_executionContext.PlayPause();
+				}
+			} else
+			{
+				if (_wasPlaying)
+				{
+					Debug.WriteLine("Resume");
+					_executionContext.PlayPause();
+				}
+			}
 		}
 
 		private static string FormatDuration(float ms)
@@ -338,15 +369,20 @@ namespace OpenSora.Viewer
 						int idx = 0;
 						foreach (var function in scenario.Functions)
 						{
+							if (function.DurationInMs <= 1000)
+							{
+								continue;
+							}
+
 							_mainPanel._comboFunctions.Items.Add(new ListItem
 							{
 								Text = string.Format("0x{0:X}", function.Offset),
 								Tag = function
 							});
 
-							if (function.Offset == 0x4370)
+							if (function.Offset == 0x429A)
 							{
-								idx = Array.IndexOf(scenario.Functions, function);
+								idx = _mainPanel._comboFunctions.Items.Count - 1;
 							}
 						}
 
@@ -463,7 +499,7 @@ namespace OpenSora.Viewer
 				int? idx = null;
 				for (var i = 0; i < _mainPanel._listFiles.Items.Count; ++i)
 				{
-					if (_mainPanel._listFiles.Items[i].Text.Contains("T0310"))
+					if (_mainPanel._listFiles.Items[i].Text.Contains("T0311"))
 					{
 						idx = i;
 						break;

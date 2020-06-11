@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Myra;
-using Myra.Graphics2D.TextureAtlases;
 using Myra.Graphics2D.UI;
 using OpenSora.ModelLoading;
 using OpenSora.UI;
@@ -11,28 +10,6 @@ using System.Linq;
 
 namespace OpenSora.Rendering
 {
-	public class SceneCharacterInfo
-	{
-		private Vector3 _position;
-
-		public Animation Chip;
-		public Vector3 Position
-		{
-			get
-			{
-				return _position;
-			}
-
-			set
-			{
-				_position = new Vector3(value.X, value.Y, value.Z);
-			}
-		}
-
-		public int AnimationStart;
-		public int AnimationStep;
-	}
-
 	public class Scene
 	{
 		class MeshPartTag
@@ -54,7 +31,7 @@ namespace OpenSora.Rendering
 
 		public ResourceLoader ResourceLoader { get; set; }
 
-		public Dictionary<int, SceneCharacterInfo> Characters { get; } = new Dictionary<int, SceneCharacterInfo>();
+		public Dictionary<int, SceneCharacter> Characters { get; } = new Dictionary<int, SceneCharacter>();
 
 		public Camera Camera { get; }
 		public CameraInputController Controller { get; }

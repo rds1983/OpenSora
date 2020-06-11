@@ -49,7 +49,16 @@ namespace OpenSora.Scenarios.Instructions
 			}
 		}
 
-		private SceneCharacterInfo GetCharacter(ExecutionWorker worker)
+		private Vector3 TargetPosition
+		{
+			get
+			{
+				var x = (int)(X & 0xffffffff);
+				return ExecutionContext.ToPosition(x, Y, Z);
+			}
+		}
+
+		private SceneCharacter GetCharacter(ExecutionWorker worker)
 		{
 			return worker.Context.Scene.Characters.Values.First();
 		}
@@ -61,8 +70,7 @@ namespace OpenSora.Scenarios.Instructions
 			var character = GetCharacter(worker);
 			_initialPosition = character.Position;
 
-			var x = (int)(X & 0xffffffff);
-			var delta = ExecutionContext.ToPosition(x, Y, Z) - _initialPosition;
+			var delta = TargetPosition - _initialPosition;
 
 			var angle = (int)(Math.Atan2(delta.Z, delta.X) * 360 / (2 * Math.PI)) + 90;
 			if (angle < 0)
@@ -81,8 +89,7 @@ namespace OpenSora.Scenarios.Instructions
 
 			var character = GetCharacter(worker);
 
-			var x = (int)(X & 0xffffffff);
-			var targetPosition = ExecutionContext.ToPosition(x, Y, Z);
+			var targetPosition = TargetPosition;
 
 			var part = worker.InstructionPassedPart;
 			var newPosition = new Vector3(_initialPosition.X + (targetPosition.X - _initialPosition.X) * part,
@@ -98,8 +105,15 @@ namespace OpenSora.Scenarios.Instructions
 		{
 			base.End(worker);
 
-			// End the movement animation
 			var character = GetCharacter(worker);
+
+			// Set target position
+			var targetPosition = TargetPosition;
+			character.Position = targetPosition;
+			var cameraPosition = new Vector3(targetPosition.X - 8, targetPosition.Y + 6.0f, targetPosition.Z + 6.0f);
+			worker.Context.Scene.Camera.SetLookAt(cameraPosition, targetPosition);
+
+			// End the movement animation
 			character.AnimationStep = 0;
 		}
 	}

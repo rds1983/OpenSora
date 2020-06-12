@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenSora.Scenarios.Instructions;
+using System;
 
 namespace OpenSora.Scenarios
 {
@@ -148,13 +149,24 @@ namespace OpenSora.Scenarios
 			{
 				var instruction = _instructions[_currentInstructionIndex];
 
+				// Skip QueueItem item if it can't be even partially executed
+				var inProgress = _instructionPassedInMs < instruction.DurationInMs;
+				var isQueue = instruction is QueueWorkItem;
+
+				if (isQueue && !inProgress)
+				{
+					_instructionPassedInMs -= instruction.DurationInMs;
+					_callBegin = true;
+					continue;
+				}
+
 				if (_callBegin)
 				{
 					instruction.Begin(this);
 					_callBegin = false;
 				}
 
-				if (_instructionPassedInMs < instruction.DurationInMs)
+				if (inProgress)
 				{
 					instruction.Update(this);
 					break;

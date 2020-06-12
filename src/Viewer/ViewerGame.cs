@@ -81,14 +81,18 @@ namespace OpenSora.Viewer
 
 			_mainPanel._panelPlayer.Visible = false;
 
+
 			_mainPanel._buttonChange.Click += OnChangeFolder;
 			_mainPanel._buttonAbout.Click += OnAbout;
+
+			_mainPanel._listFiles.Items.Clear();
 			_mainPanel._listFiles.SelectedIndexChanged += _listFiles_SelectedIndexChanged;
 
 			_mainPanel._textFilter.TextChanged += _textFilter_TextChanged;
 
 			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
 
+			_mainPanel._comboFunctions.Items.Clear();
 			_mainPanel._comboFunctions.SelectedIndexChanged += _comboFunctions_SelectedIndexChanged;
 
 			_mainPanel._numericAnimationStart.ValueChanged += _numericAnimationStart_ValueChanged;
@@ -111,13 +115,16 @@ namespace OpenSora.Viewer
 				SetFolder(_state.LastFolder);
 			}
 
-			_executionContext.MainWorker.TotalPassedPartChanged += _executionContext_TotalPassedPartChanged;
-
 			_mainPanel._comboResourceType.SelectedIndex = 3;
 		}
 
 		private void _sliderPlayer_ValueChangedByUser(object sender, Myra.Utility.ValueChangedEventArgs<float> e)
 		{
+			if (_executionContext == null)
+			{
+				return;
+			}
+
 			var part = (float)(_mainPanel._sliderPlayer.Value - _mainPanel._sliderPlayer.Minimum) / (_mainPanel._sliderPlayer.Maximum - _mainPanel._sliderPlayer.Minimum);
 			Debug.WriteLine("Rewind to {0}", part);
 			_executionContext.PlayedPart = part;
@@ -125,6 +132,11 @@ namespace OpenSora.Viewer
 
 		private void SliderPlayer_PressedChanged(object sender, EventArgs e)
 		{
+			if (_executionContext == null)
+			{
+				return;
+			}
+
 			if (_mainPanel._sliderPlayer.ImageButton.IsPressed)
 			{
 				_wasPlaying = _executionContext.IsPlaying;
@@ -251,8 +263,13 @@ namespace OpenSora.Viewer
 			_typeEntries = null;
 			_animation = null;
 			_texture = null;
-			_executionContext.Reset();
-			_executionContext.Stop();
+
+			if (_executionContext != null)
+			{
+				_executionContext.Reset();
+				_executionContext.Stop();
+			}
+
 			ResetAnimation();
 			RefreshFilesSafe();
 
@@ -521,7 +538,7 @@ namespace OpenSora.Viewer
 
 		private void _comboFunctions_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			if (_mainPanel._comboFunctions.SelectedItem == null)
+			if (_executionContext == null || _mainPanel._comboFunctions.SelectedItem == null)
 			{
 				return;
 			}
@@ -623,12 +640,15 @@ namespace OpenSora.Viewer
 			//			_fpsCounter.Update(gameTime);
 			var keyboardState = Keyboard.GetState();
 
+
 			if (keyboardState.IsKeyDown(Keys.OemTilde) && !_lastKeyboardState.IsKeyDown(Keys.OemTilde) && _executionContext.Scene != null)
 			{
 				_executionContext.Scene.RenderDebugInfo = !_executionContext.Scene.RenderDebugInfo;
 			}
 
 			if ((_mainPanel._comboResourceType.SelectedIndex != 1 && _mainPanel._comboResourceType.SelectedIndex != 4) ||
+				_executionContext == null ||
+				_executionContext.Scene == null ||
 				_executionContext.Scene.Meshes == null)
 			{
 				_lastKeyboardState = keyboardState;
@@ -730,8 +750,15 @@ namespace OpenSora.Viewer
 			}
 			else if (idx == 1 || idx == 4)
 			{
-				_executionContext.Update();
-				_executionContext.Scene.Render(_mainPanel._panelViewer.Bounds);
+				if (_executionContext != null)
+				{
+					_executionContext.Update();
+
+					if (_executionContext.Scene != null)
+					{
+						_executionContext.Scene.Render(_mainPanel._panelViewer.Bounds);
+					}
+				}
 			}
 			else if (idx == 3)
 			{

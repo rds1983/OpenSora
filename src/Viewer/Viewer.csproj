@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.7.1.189" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\OpenSora\OpenSora.csproj" />
   </ItemGroup>
   

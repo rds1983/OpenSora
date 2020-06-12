@@ -9,9 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unpacker", "..\src\Unpacker
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Viewer", "..\src\Viewer\Viewer.csproj", "{B81F103F-D2FA-45D9-A3C8-14EE1C0145CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Decompiler", "..\src\Decompiler\Decompiler.csproj", "{318CF2DC-F8DB-460A-8E71-8767649E8DB6}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Myra.MonoGame", "..\..\Myra\src\Myra\Myra.MonoGame.csproj", "{B5A3C32E-D0CA-4F46-9CE6-C86EB8246BBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Decompiler", "..\src\Decompiler\Decompiler.csproj", "{318CF2DC-F8DB-460A-8E71-8767649E8DB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +33,6 @@ Global
 		{318CF2DC-F8DB-460A-8E71-8767649E8DB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{318CF2DC-F8DB-460A-8E71-8767649E8DB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{318CF2DC-F8DB-460A-8E71-8767649E8DB6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B5A3C32E-D0CA-4F46-9CE6-C86EB8246BBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B5A3C32E-D0CA-4F46-9CE6-C86EB8246BBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B5A3C32E-D0CA-4F46-9CE6-C86EB8246BBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B5A3C32E-D0CA-4F46-9CE6-C86EB8246BBC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

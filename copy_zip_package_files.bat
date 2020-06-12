@@ -9,8 +9,10 @@ mkdir "ZipPackage\x86"
 set "CONFIGURATION=bin\Release\net45"
 
 rem Copy output files
+copy "src\Decompiler\%CONFIGURATION%\Decompiler.exe" ZipPackage /Y
 copy "src\Viewer\%CONFIGURATION%\Viewer.exe" ZipPackage /Y
 copy "src\Viewer\%CONFIGURATION%\Myra.dll" "ZipPackage" /Y
+copy "src\Viewer\%CONFIGURATION%\info.lundin.math.dll" ZipPackage /Y
 copy "src\Viewer\%CONFIGURATION%\XNAssets.dll" "ZipPackage" /Y
 copy "src\Viewer\%CONFIGURATION%\OpenSora.dll" "ZipPackage" /Y
 copy "src\Viewer\%CONFIGURATION%\MonoGame.Framework.dll" "ZipPackage" /Y

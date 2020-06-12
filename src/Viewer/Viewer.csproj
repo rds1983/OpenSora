@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.7.1.189" />
-    <PackageReference Include="Myra" Version="0.9.9.202" />
   </ItemGroup>
 
   <ItemGroup>

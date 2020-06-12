@@ -50,6 +50,11 @@ namespace OpenSora.Rendering
 			}
 		}
 
+		/// <summary>
+		/// Opacity from 0.0f to 1.0f
+		/// </summary>
+		public float Opacity = 1.0f;
+
 		public bool RenderDebugInfo = false;
 
 		public Scene(ResourceLoader resourceLoader)
@@ -155,6 +160,8 @@ namespace OpenSora.Rendering
 					NearPlaneDistance, FarPlaneDistance);
 
 				_defaultEffect.WorldViewProjection = _renderContext.ViewProjection;
+				_defaultEffect.DiffuseColor = Color.White * Opacity;
+
 				foreach (var mesh in Meshes)
 				{
 					var tag = (MeshPartTag)mesh.Tag;

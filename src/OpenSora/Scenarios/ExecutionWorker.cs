@@ -178,6 +178,5 @@ namespace OpenSora.Scenarios
 				_instructionPassedInMs -= instruction.DurationInMs;
 			}
 		}
-
 	}
 }

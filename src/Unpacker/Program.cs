@@ -30,12 +30,13 @@ namespace Unpacker
 							continue;
 						}
 
-						if (!entry.Name.EndsWith("_SN"))
+						if (!entry.Name.EndsWith("_X2"))
 						{
 							continue;
 						}
 
-						var unpack = !entry.Name.EndsWith("_DT");
+						var unpack = !entry.Name.EndsWith("_DT") && !entry.Name.EndsWith("_DS") &&
+									!entry.Name.EndsWith("WAV") && !entry.Name.EndsWith("_VS");
 						if (unpack)
 						{
 							Console.WriteLine("Unpacking '{0}'", entry.Name);

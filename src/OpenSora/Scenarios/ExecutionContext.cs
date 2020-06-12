@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
+using OpenSora.Dir;
 using OpenSora.Rendering;
+using OpenSora.Scenarios.Instructions;
 using System;
 using System.Collections.Generic;
 
@@ -69,7 +71,36 @@ namespace OpenSora.Scenarios
 				if (value != null)
 				{
 					MainWorker.Instructions = value.Instructions;
-				} else
+					if (value.Instructions != null)
+					{
+						var toAdd = new HashSet<int>();
+						var toIgnore = new HashSet<int>();
+						// Place characters
+						foreach (var ins in value.Instructions)
+						{
+							var asSetCharPosition = ins as SetChrPos;
+							if (asSetCharPosition != null)
+							{
+								toIgnore.Add(asSetCharPosition.CharId);
+							}
+
+							var asTalk = ins as BaseTalk;
+							if (asTalk != null && asTalk.CharId != null)
+							{
+								toAdd.Add(asTalk.CharId.Value);
+							}
+						}
+
+						foreach(var id in toAdd)
+						{
+							if (!toIgnore.Contains(id))
+							{
+								EnsureCharacter(id);
+							}
+						}
+					}
+				}
+				else
 				{
 					MainWorker.Instructions = null;
 				}
@@ -86,25 +117,19 @@ namespace OpenSora.Scenarios
 
 		static ExecutionContext()
 		{
-			_hardcodedNpcs[254] = new SceneCharacterInfo
-			{
-				ChipId = 1
-			};
-
-
 			_hardcodedNpcs[257] = new SceneCharacterInfo
 			{
-				ChipId = 8
+				ChipId = "00000"
 			};
 
 			_hardcodedNpcs[258] = new SceneCharacterInfo
 			{
-				ChipId = 9
+				ChipId = "00010"
 			};
 
 			_hardcodedNpcs[259] = new SceneCharacterInfo
 			{
-				ChipId = 11
+				ChipId = "00020"
 			};
 		}
 		public ExecutionContext(ResourceLoader resourceLoader)
@@ -118,7 +143,8 @@ namespace OpenSora.Scenarios
 			if (_lastDt == null)
 			{
 				_lastDt = DateTime.Now;
-			} else
+			}
+			else
 			{
 				_lastDt = null;
 			}
@@ -135,7 +161,7 @@ namespace OpenSora.Scenarios
 
 			MainWorker.Update(passedMs);
 
-			foreach(var worker in AdditionalWorkers)
+			foreach (var worker in AdditionalWorkers)
 			{
 				worker.Update(passedMs);
 			}
@@ -147,12 +173,41 @@ namespace OpenSora.Scenarios
 
 		public ScenarioNpcInfo GetNpcById(int id)
 		{
-			return Scenario.NpcInfo[id - 8];
+			id -= 8;
+			if (id < 0 || id >= Scenario.NpcInfo.Length)
+			{
+				return null;
+			}
+
+			return Scenario.NpcInfo[id];
 		}
 
 		public static Vector3 ToPosition(int x, int y, int z)
 		{
 			return new Vector3(x / PositionScale, y / PositionScale, -z / PositionScale);
+		}
+
+		private Animation GetCharacterInfo(int id, out Vector3 position)
+		{
+			int chipIndex;
+			position = Vector3.Zero;
+
+			DirEntry animationEntry;
+			SceneCharacterInfo characterInfo;
+			if (_hardcodedNpcs.TryGetValue(id, out characterInfo))
+			{
+				animationEntry = ResourceLoader.FindByName("CH" + characterInfo.ChipId);
+			}
+			else
+			{
+				var npc = GetNpcById(id);
+				chipIndex = npc.ChipIndex;
+				position = ToPosition(npc.X, npc.Y, npc.Z);
+				var chip = Scenario.ChipInfo[chipIndex];
+				animationEntry = ResourceLoader.FindByIndex(chip.ChipIndex);
+			}
+
+			return ResourceLoader.LoadAnimation(animationEntry);
 		}
 
 		public SceneCharacter EnsureCharacter(int id)
@@ -163,24 +218,8 @@ namespace OpenSora.Scenarios
 				return result;
 			}
 
-			SceneCharacterInfo characterInfo;
-
-			int chipIndex;
-			var position = Vector3.Zero;
-			if (_hardcodedNpcs.TryGetValue(id, out characterInfo))
-			{
-				chipIndex = characterInfo.ChipId;
-			}
-			else
-			{
-				var npc = GetNpcById(id);
-				chipIndex = npc.ChipIndex;
-				position = ToPosition(npc.X, npc.Y, npc.Z);
-			}
-
-			var chip = Scenario.ChipInfo[chipIndex];
-			var animationEntry = ResourceLoader.FindByIndex(chip.ChipIndex);
-			var animation = ResourceLoader.LoadAnimation(animationEntry);
+			Vector3 position;
+			var animation = GetCharacterInfo(id, out position);
 
 			result = new SceneCharacter
 			{
@@ -192,6 +231,17 @@ namespace OpenSora.Scenarios
 
 			return result;
 		}
+
+		public void ResetCharacterChip(int id)
+		{
+			var ch = EnsureCharacter(id);
+
+			Vector3 position;
+			var animation = GetCharacterInfo(id, out position);
+
+			ch.Chip = animation;
+		}
+
 
 		private void SetPlayedPart(float part)
 		{

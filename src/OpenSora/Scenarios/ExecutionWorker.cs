@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenSora.Scenarios.Instructions;
+using System;
 
 namespace OpenSora.Scenarios
 {

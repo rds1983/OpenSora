@@ -51,7 +51,7 @@ namespace OpenSora.Rendering
 		}
 
 		public bool RenderDebugInfo = false;
-
+		
 		public Scene(ResourceLoader resourceLoader)
 		{
 			if (resourceLoader == null)

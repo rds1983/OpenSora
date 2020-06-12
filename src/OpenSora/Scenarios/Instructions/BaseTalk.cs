@@ -16,6 +16,16 @@ namespace OpenSora.Scenarios.Instructions
 
 		private TalkString[] TalkStrings;
 
+		public abstract int? CharId
+		{
+			get;
+		}
+
+		public abstract string CharName
+		{
+			get;
+		}
+
 		public abstract ScpString[] ScpStrings
 		{
 			get;
@@ -158,6 +168,8 @@ namespace OpenSora.Scenarios.Instructions
 			{
 				symbolsCount = passed / SymbolDurationInMs;
 			}
+
+			str.Name = CharName;
 
 			worker.Context.Scene.ShowTalk(str, symbolsCount);
 		}

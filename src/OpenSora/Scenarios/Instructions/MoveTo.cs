@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using OpenSora.Rendering;
+using OpenSora.Utility;
 using System;
 using System.Linq;
 
@@ -97,8 +98,7 @@ namespace OpenSora.Scenarios.Instructions
 				_initialPosition.Z + (targetPosition.Z - _initialPosition.Z) * part);
 
 			character.Position = newPosition;
-			var cameraPosition = new Vector3(newPosition.X - 8, newPosition.Y + 6.0f, newPosition.Z + 6.0f);
-			worker.Context.Scene.Camera.SetLookAt(cameraPosition, newPosition);
+			worker.Context.Scene.Camera.SetLookAt(newPosition);
 		}
 
 		public override void End(ExecutionWorker worker)
@@ -110,8 +110,7 @@ namespace OpenSora.Scenarios.Instructions
 			// Set target position
 			var targetPosition = TargetPosition;
 			character.Position = targetPosition;
-			var cameraPosition = new Vector3(targetPosition.X - 8, targetPosition.Y + 6.0f, targetPosition.Z + 6.0f);
-			worker.Context.Scene.Camera.SetLookAt(cameraPosition, targetPosition);
+			worker.Context.Scene.Camera.SetLookAt(targetPosition);
 
 			// End the movement animation
 			character.AnimationStep = 0;

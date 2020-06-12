@@ -2,13 +2,9 @@
 {
 	public class ChrTalk: BaseTalk
 	{
-		public int CharId
-		{
-			get
-			{
-				return (int)Operands[0];
-			}
-		}
+		public override int? CharId => (int)Operands[0];
+
+		public override string CharName => string.Empty;
 
 		public override ScpString[] ScpStrings
 		{

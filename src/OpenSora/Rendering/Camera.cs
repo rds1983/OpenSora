@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using OpenSora.Utility;
 using System;
 
 namespace OpenSora.Rendering
@@ -147,6 +148,10 @@ namespace OpenSora.Rendering
 
 			PitchAngle = 360 - MathHelper.ToDegrees((float)Math.Asin(direction.Y));
 			YawAngle = MathHelper.ToDegrees((float)Math.Atan2(direction.X, direction.Y));
+		}
+		public void SetLookAt(Vector3 target)
+		{
+			SetLookAt(target.ToCameraPosition(), target);
 		}
 
 		private void Invalidate()

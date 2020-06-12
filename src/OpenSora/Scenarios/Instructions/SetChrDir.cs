@@ -1,6 +1,6 @@
 ﻿namespace OpenSora.Scenarios.Instructions
 {
-	public class SetChrSubChip: BaseInstruction
+	public class SetChrDir: BaseInstruction
 	{
 		public int CharId
 		{
@@ -10,7 +10,7 @@
 			}
 		}
 
-		public int ChipId
+		public int Angle
 		{
 			get
 			{
@@ -23,7 +23,7 @@
 			base.Begin(worker);
 
 			var character = worker.Context.EnsureCharacter(CharId);
-			character.AnimationStart = ChipId;
+			character.AnimationStart = ExecutionContext.DegreesToAnimationStart(Angle);
 		}
 	}
 }

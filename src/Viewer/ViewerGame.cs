@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using OpenSora.Rendering;
 using OpenSora.Scenarios;
+using OpenSora.Scenarios.Instructions;
 
 namespace OpenSora.Viewer
 {
@@ -369,7 +370,8 @@ namespace OpenSora.Viewer
 						int idx = 0;
 						foreach (var function in scenario.Functions)
 						{
-							if (function.DurationInMs <= 1000)
+							var hasTalk = (from ins in function.Instructions where ins is BaseTalk select ins).Count() > 0;
+							if (!hasTalk)
 							{
 								continue;
 							}
@@ -431,6 +433,8 @@ namespace OpenSora.Viewer
 						_mainPanel._listFiles.Enabled = true;
 					}
 				});
+
+				_mainPanel._labelIndex.Text = "Index: " + entry.Index;
 			}
 		}
 

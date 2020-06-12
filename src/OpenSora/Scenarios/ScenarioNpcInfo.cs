@@ -22,8 +22,8 @@ namespace OpenSora.Scenarios
 			return new ScenarioNpcInfo
 			{
 				X = reader.ReadInt32(),
-				Z = reader.ReadInt32(),
 				Y = reader.ReadInt32(),
+				Z = reader.ReadInt32(),
 				Direction = reader.ReadUInt16(),
 				Unknown2 = reader.ReadUInt16(),
 				Unknown3 = reader.ReadInt32(),

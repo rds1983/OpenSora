@@ -85,7 +85,7 @@ namespace OpenSora
 					if (entry.Name.Contains("."))
 					{
 						var parts = entry.Name.Split('.');
-						if (parts[0].ToLower().Contains(nameFilter) && 
+						if (parts[0].ToLower().StartsWith(nameFilter) && 
 							(string.IsNullOrEmpty(extFilter) || parts[1].ToLower().Contains(extFilter)))
 						{
 							return entry;
@@ -93,7 +93,7 @@ namespace OpenSora
 					}
 					else
 					{
-						if (ename.ToLower().Contains(nameFilter))
+						if (ename.ToLower().StartsWith(nameFilter))
 						{
 							return entry;
 						}

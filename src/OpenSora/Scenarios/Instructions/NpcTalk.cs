@@ -2,11 +2,19 @@
 {
 	public class NpcTalk: BaseTalk
 	{
-		public int CharId
+		public override int? CharId => (int)Operands[0];
+
+		public override string CharName
 		{
 			get
 			{
-				return (int)Operands[0];
+				var strings = (ScpString[])Operands[1];
+				if (strings == null || strings.Length == 0)
+				{
+					return string.Empty;
+				}
+
+				return strings[0].String;
 			}
 		}
 

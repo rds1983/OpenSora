@@ -2,6 +2,6 @@
 {
 	public class SceneCharacterInfo
 	{
-		public int ChipId;
+		public string ChipId;
 	}
 }

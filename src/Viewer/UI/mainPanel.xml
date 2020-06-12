@@ -9,12 +9,14 @@
       <HorizontalStackPanel.Proportions>
         <Proportion Type="Auto" />
         <Proportion Type="Auto" />
+        <Proportion Type="Auto" />
         <Proportion Type="Part" />
         <Proportion Type="Part" />
         <Proportion Type="Part" />
       </HorizontalStackPanel.Proportions>
       <TextBox Readonly="True" Width="300" Id="_textPath" />
       <TextButton Text="Change..." Id="_buttonChange" />
+      <Label Text="Index: " Id="_labelIndex" />
       <HorizontalStackPanel Spacing="8" HorizontalAlignment="Center" Id="_boxAnimation">
         <Label Text="Start" />
         <SpinButton Minimum="0" Integer="True" Width="32" Id="_numericAnimationStart" />

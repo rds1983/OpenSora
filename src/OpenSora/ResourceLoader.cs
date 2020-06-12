@@ -8,7 +8,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Ports;
 
 namespace OpenSora
 {
@@ -44,6 +43,21 @@ namespace OpenSora
 			GamePath = gamePath;
 
 			_entries = DirProcessor.BuildEntries(gamePath);
+		}
+
+		public static GameType? DetermineGameType(string folder)
+		{
+			if (File.Exists(Path.Combine(folder, "ed6_win.exe")))
+			{
+				return GameType.FC;
+			}
+
+			if (File.Exists(Path.Combine(folder, "ed6_win2.exe")))
+			{
+				return GameType.SC;
+			}
+
+			return null;
 		}
 
 		public DirEntry FindByIndex(int index)

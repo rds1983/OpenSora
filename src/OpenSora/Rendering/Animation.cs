@@ -122,7 +122,7 @@ namespace OpenSora.Rendering
 			var width = data.GetLength(1);
 			var height = data.GetLength(0);
 
-			float dx = (float)0.35f;
+			float dx = (float)0.30f;
 			float dy = (float)0.35f;
 
 			for (var y = 0; y < data.GetLength(0); ++y)

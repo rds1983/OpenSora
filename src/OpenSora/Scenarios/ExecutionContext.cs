@@ -11,8 +11,6 @@ namespace OpenSora.Scenarios
 	{
 		public const float PositionScale = 1000.0f;
 
-		private static readonly Dictionary<int, SceneCharacterInfo> _hardcodedNpcs = new Dictionary<int, SceneCharacterInfo>();
-
 		private Scenario _scenario;
 		private ScenarioFunctionInfo _function;
 		private DateTime? _lastDt;
@@ -69,6 +67,7 @@ namespace OpenSora.Scenarios
 				_function = value;
 
 				Reset();
+				Stop();
 				if (value != null)
 				{
 					MainWorker.Instructions = value.Instructions;
@@ -116,23 +115,6 @@ namespace OpenSora.Scenarios
 			}
 		}
 
-		static ExecutionContext()
-		{
-			_hardcodedNpcs[257] = new SceneCharacterInfo
-			{
-				ChipId = "00000"
-			};
-
-			_hardcodedNpcs[258] = new SceneCharacterInfo
-			{
-				ChipId = "00010"
-			};
-
-			_hardcodedNpcs[259] = new SceneCharacterInfo
-			{
-				ChipId = "00020"
-			};
-		}
 		public ExecutionContext(ResourceLoader resourceLoader)
 		{
 			Scene = new Scene(resourceLoader);
@@ -192,10 +174,11 @@ namespace OpenSora.Scenarios
 			position = Vector3.Zero;
 
 			DirEntry animationEntry = null;
-			SceneCharacterInfo characterInfo;
-			if (_hardcodedNpcs.TryGetValue(id, out characterInfo))
+
+			if(id >= 257)
 			{
-				animationEntry = ResourceLoader.FindByName("CH" + characterInfo.ChipId);
+				var chId = string.Format("CH{0:D5}", (id - 257) * 10);
+				animationEntry = ResourceLoader.FindByName(chId);
 			}
 			else
 			{
@@ -266,8 +249,6 @@ namespace OpenSora.Scenarios
 			MainWorker.Rewind();
 			AdditionalWorkers.Clear();
 			Scene.Characters.Clear();
-
-			Stop();
 		}
 
 		private void SetPlayedPart(float part)

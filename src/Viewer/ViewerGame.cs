@@ -252,6 +252,7 @@ namespace OpenSora.Viewer
 			_animation = null;
 			_texture = null;
 			_executionContext.Reset();
+			_executionContext.Stop();
 			ResetAnimation();
 			RefreshFilesSafe();
 
@@ -532,14 +533,36 @@ namespace OpenSora.Viewer
 		{
 			try
 			{
+				var gameType = ResourceLoader.DetermineGameType(folder);
+				if (gameType == null)
+				{
+					return;
+				}
+
+				if (gameType.Value == GameType.SC && _mainPanel._comboResourceType.Items.Count == 5)
+				{
+					// Remove scenes
+					_mainPanel._comboResourceType.Items.RemoveAt(4);
+				} else if (gameType.Value == GameType.FC && _mainPanel._comboResourceType.Items.Count == 4)
+				{
+					_mainPanel._comboResourceType.Items.Add(new ListItem("Scenes"));
+				}
+
 				_mainPanel._textPath.Text = folder;
 				_resourceLoader = null;
+				if (_executionContext != null)
+				{
+					_executionContext.MainWorker.TotalPassedPartChanged -= _executionContext_TotalPassedPartChanged;
+				}
+
 				_executionContext = null;
 				_typeEntries = null;
 				if (!string.IsNullOrEmpty(folder))
 				{
 					_resourceLoader = new ResourceLoader(GraphicsDevice, folder);
+
 					_executionContext = new ExecutionContext(_resourceLoader);
+					_executionContext.MainWorker.TotalPassedPartChanged += _executionContext_TotalPassedPartChanged;
 				}
 
 				RefreshFiles();
@@ -578,7 +601,16 @@ namespace OpenSora.Viewer
 					return;
 				}
 
-				SetFolder(dlg.FilePath);
+				var gameType = ResourceLoader.DetermineGameType(dlg.FilePath);
+				if (gameType == null)
+				{
+					var messageBox = Dialog.CreateMessageBox("Error", "The game isnt supported.");
+					messageBox.ShowModal(_desktop);
+				}
+				else
+				{
+					SetFolder(dlg.FilePath);
+				}
 			};
 
 			dlg.ShowModal(_desktop);

@@ -34,6 +34,11 @@
 			}
 			else
 			{
+				if (ChipId >= worker.Context.Scenario.ChipInfo.Length)
+				{
+					return;
+				}
+
 				var chip = worker.Context.Scenario.ChipInfo[ChipId];
 				var entry = worker.Context.ResourceLoader.FindByIndex(chip.ChipIndex);
 				ch.Chip = worker.Context.ResourceLoader.LoadAnimation(entry);

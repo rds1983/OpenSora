@@ -1,5 +1,4 @@
-﻿using OpenSora.Scenarios.Instructions;
-using System;
+﻿using System;
 
 namespace OpenSora.Scenarios
 {
@@ -125,7 +124,6 @@ namespace OpenSora.Scenarios
 			_currentInstructionIndex = 0;
 			_totalPassedInMs = 0;
 			TotalPassedPartChanged?.Invoke(this, EventArgs.Empty);
-			Context.Scene.Characters.Clear();
 			Context.Scene.CloseMessageWindow();
 		}
 

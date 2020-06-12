@@ -187,7 +187,15 @@ namespace OpenSora.Rendering
 
 			if (_forwardKeyPressed)
 			{
-				_camera.Position += delta * _camera.Direction;
+				if (_camera.Zoom > 0.6f)
+				{
+					_camera.Zoom -= 0.1f;
+				}
+			}
+
+			if (_backwardKeyPressed)
+			{
+				_camera.Zoom += 0.1f;
 			}
 
 			if (_leftKeyPressed)
@@ -198,11 +206,6 @@ namespace OpenSora.Rendering
 			if (_rightKeyPressed)
 			{
 				_camera.Position += delta * _camera.Right;
-			}
-
-			if (_backwardKeyPressed)
-			{
-				_camera.Position -= delta * _camera.Direction;
 			}
 
 			if (_upKeyPressed)

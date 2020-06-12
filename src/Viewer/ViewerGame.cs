@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using OpenSora.Rendering;
 using OpenSora.Scenarios;
-using OpenSora.Scenarios.Instructions;
 
 namespace OpenSora.Viewer
 {
@@ -34,6 +33,7 @@ namespace OpenSora.Viewer
 		private ExecutionContext _executionContext;
 		private Desktop _desktop;
 		private bool _wasPlaying;
+		private KeyboardState _lastKeyboardState;
 
 		public ViewerGame()
 		{
@@ -113,7 +113,7 @@ namespace OpenSora.Viewer
 
 			_executionContext.MainWorker.TotalPassedPartChanged += _executionContext_TotalPassedPartChanged;
 
-			_mainPanel._comboResourceType.SelectedIndex = 4;
+			_mainPanel._comboResourceType.SelectedIndex = 3;
 		}
 
 		private void _sliderPlayer_ValueChangedByUser(object sender, Myra.Utility.ValueChangedEventArgs<float> e)
@@ -128,17 +128,12 @@ namespace OpenSora.Viewer
 			if (_mainPanel._sliderPlayer.ImageButton.IsPressed)
 			{
 				_wasPlaying = _executionContext.IsPlaying;
-				if (_executionContext.IsPlaying)
-				{
-					Debug.WriteLine("Pause");
-					_executionContext.PlayPause();
-				}
+				_executionContext.Stop();
 			} else
 			{
 				if (_wasPlaying)
 				{
-					Debug.WriteLine("Resume");
-					_executionContext.PlayPause();
+					_executionContext.Play();
 				}
 			}
 		}
@@ -165,7 +160,13 @@ namespace OpenSora.Viewer
 
 		private void _buttonPlayPause_Click(object sender, EventArgs e)
 		{
-			_executionContext.PlayPause();
+			if (_executionContext.IsPlaying)
+			{
+				_executionContext.Stop();
+			} else
+			{
+				_executionContext.Play();
+			}
 		}
 
 		private void ResetAnimation()
@@ -250,6 +251,7 @@ namespace OpenSora.Viewer
 			_typeEntries = null;
 			_animation = null;
 			_texture = null;
+			_executionContext.Reset();
 			ResetAnimation();
 			RefreshFilesSafe();
 
@@ -370,8 +372,7 @@ namespace OpenSora.Viewer
 						int idx = 0;
 						foreach (var function in scenario.Functions)
 						{
-							var hasTalk = (from ins in function.Instructions where ins is BaseTalk select ins).Count() > 0;
-							if (!hasTalk)
+							if (!function.HasTalk)
 							{
 								continue;
 							}
@@ -381,11 +382,6 @@ namespace OpenSora.Viewer
 								Text = string.Format("0x{0:X}", function.Offset),
 								Tag = function
 							});
-
-							if (function.Offset == 0x429A)
-							{
-								idx = _mainPanel._comboFunctions.Items.Count - 1;
-							}
 						}
 
 						_mainPanel._comboFunctions.SelectedIndex = idx;
@@ -465,6 +461,16 @@ namespace OpenSora.Viewer
 
 						if (add)
 						{
+							if (index == 4)
+							{
+								// Skip empty scenarios
+								var scenario = _resourceLoader.LoadScenario(entry);
+								if (!scenario.HasTalk)
+								{
+									continue;
+								}
+							}
+
 							_typeEntries.Add(entry);
 						}
 					}
@@ -496,24 +502,6 @@ namespace OpenSora.Viewer
 					Text = a.Name,
 					Tag = a
 				});
-			}
-
-			if (index == 4)
-			{
-				int? idx = null;
-				for (var i = 0; i < _mainPanel._listFiles.Items.Count; ++i)
-				{
-					if (_mainPanel._listFiles.Items[i].Text.Contains("T0311"))
-					{
-						idx = i;
-						break;
-					}
-				}
-
-				if (idx != null)
-				{
-					_mainPanel._listFiles.SelectedIndex = idx.Value;
-				}
 			}
 		}
 
@@ -601,14 +589,19 @@ namespace OpenSora.Viewer
 			base.Update(gameTime);
 
 			//			_fpsCounter.Update(gameTime);
+			var keyboardState = Keyboard.GetState();
+
+			if (keyboardState.IsKeyDown(Keys.OemTilde) && !_lastKeyboardState.IsKeyDown(Keys.OemTilde) && _executionContext.Scene != null)
+			{
+				_executionContext.Scene.RenderDebugInfo = !_executionContext.Scene.RenderDebugInfo;
+			}
 
 			if ((_mainPanel._comboResourceType.SelectedIndex != 1 && _mainPanel._comboResourceType.SelectedIndex != 4) ||
 				_executionContext.Scene.Meshes == null)
 			{
+				_lastKeyboardState = keyboardState;
 				return;
 			}
-
-			var keyboardState = Keyboard.GetState();
 
 			// Manage camera input controller
 			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Left, keyboardState.IsKeyDown(Keys.A));
@@ -631,6 +624,8 @@ namespace OpenSora.Viewer
 			}
 
 			_executionContext.Scene.Controller.Update();
+
+			_lastKeyboardState = keyboardState;
 		}
 
 		private void DrawTexture(Texture2D texture)

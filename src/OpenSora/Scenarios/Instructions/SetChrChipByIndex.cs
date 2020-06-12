@@ -22,7 +22,11 @@
 		{
 			base.Begin(worker);
 
-			var ch = worker.Context.EnsureCharacter(CharId);
+			var ch = worker.Context.GetCharacter(CharId);
+			if (ch == null)
+			{
+				return;
+			}
 
 			if (ChipId == 65535)
 			{

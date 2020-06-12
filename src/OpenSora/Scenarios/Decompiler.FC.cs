@@ -113,7 +113,7 @@ namespace OpenSora.Scenarios
 			CreateCustomEntry("OP_66","W"),
 			CreateCustomEntry("OP_67","iiii"),
 			CreateCustomEntry("OP_68","W"),
-			CreateCustomEntry("OP_69","WL"),
+			CreateEntry<CameraToChar>("WL"),
 			CreateCustomEntry("OP_6A","W"),
 			CreateCustomEntry("OP_6B","ii"),
 			CreateCustomEntry("OP_6C","ii"),

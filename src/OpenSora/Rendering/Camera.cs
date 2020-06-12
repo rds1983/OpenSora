@@ -119,6 +119,8 @@ namespace OpenSora.Rendering
 			}
 		}
 
+		public float Zoom = 1.0f;
+
 		public event EventHandler ViewAngleChanged;
 
 		public Camera()
@@ -148,6 +150,7 @@ namespace OpenSora.Rendering
 
 			PitchAngle = 360 - MathHelper.ToDegrees((float)Math.Asin(direction.Y));
 			YawAngle = MathHelper.ToDegrees((float)Math.Atan2(direction.X, direction.Y));
+			Zoom = 1.0f;
 		}
 		public void SetLookAt(Vector3 target)
 		{

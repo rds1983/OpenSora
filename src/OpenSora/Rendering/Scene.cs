@@ -51,7 +51,7 @@ namespace OpenSora.Rendering
 		}
 
 		public bool RenderDebugInfo = false;
-		
+
 		public Scene(ResourceLoader resourceLoader)
 		{
 			if (resourceLoader == null)
@@ -124,7 +124,7 @@ namespace OpenSora.Rendering
 
 		public void ResetCamera()
 		{
-			Camera.SetLookAt(new Vector3(10, 10, 10), Vector3.Zero);
+			Camera.SetLookAt(new Vector3(100, 100, 100), Vector3.Zero);
 		}
 
 		private void RenderScene(Rectangle bounds)
@@ -149,9 +149,9 @@ namespace OpenSora.Rendering
 				_device.SamplerStates[0] = SamplerState.LinearWrap;
 
 				_renderContext.View = Camera.View;
-				_renderContext.Projection = Matrix.CreatePerspectiveFieldOfView(
-					MathHelper.ToRadians(Camera.ViewAngle),
-					_device.Viewport.AspectRatio,
+				_renderContext.Projection = Matrix.CreateOrthographicOffCenter(
+					-7.0f * Camera.Zoom, 7.0f * Camera.Zoom, 
+					-4.0f * Camera.Zoom, 4.0f * Camera.Zoom, 
 					NearPlaneDistance, FarPlaneDistance);
 
 				_defaultEffect.WorldViewProjection = _renderContext.ViewProjection;
@@ -245,7 +245,9 @@ namespace OpenSora.Rendering
 
 				_spriteBatch.Begin();
 
-				_spriteBatch.DrawString(DefaultAssets.Font, "Camera: " + Camera.Position, new Vector2(x, y), Color.White);
+				_spriteBatch.DrawString(DefaultAssets.Font,
+					string.Format("Camera: X={0}, Y={1}, Z={2}, Zoom={3}", Camera.Position.X, Camera.Position.Y, Camera.Position.Z, Camera.Zoom), 
+					new Vector2(x, y), Color.White);
 				y += 20;
 
 				_spriteBatch.End();

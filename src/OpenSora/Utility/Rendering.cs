@@ -4,9 +4,11 @@ namespace OpenSora.Utility
 {
 	public static class Rendering
 	{
+		private const float Distance = 30.0f;
+
 		public static Vector3 ToCameraPosition(this Vector3 pos)
 		{
-			return new Vector3(pos.X - 8, pos.Y + 6.0f, pos.Z + 6.0f);
+			return new Vector3(pos.X - Distance, pos.Y + Distance, pos.Z + Distance);
 		}
 	}
 }

@@ -10,8 +10,8 @@
         <Proportion Type="Auto" />
         <Proportion Type="Auto" />
         <Proportion Type="Auto" />
-        <Proportion Type="Part" />
-        <Proportion Type="Part" />
+        <Proportion Type="Auto" />
+        <Proportion Type="Auto" />
         <Proportion Type="Part" />
       </HorizontalStackPanel.Proportions>
       <TextBox Readonly="True" Width="300" Id="_textPath" />

@@ -1,8 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using OpenSora.Rendering;
-using OpenSora.Utility;
 using System;
-using System.Linq;
 
 namespace OpenSora.Scenarios.Instructions
 {
@@ -14,15 +11,20 @@ namespace OpenSora.Scenarios.Instructions
 		{
 			get
 			{
+				if (Queue != null)
+				{
+					return Queue.Target;
+				}
+
 				return (int)Operands[0];
 			}
 		}
 
-		public long X
+		public int X
 		{
 			get
 			{
-				return (long)Operands[1];
+				return (int)((long)Operands[1]);
 			}
 		}
 
@@ -30,7 +32,7 @@ namespace OpenSora.Scenarios.Instructions
 		{
 			get
 			{
-				return (int)(long)Operands[2];
+				return (int)((long)Operands[2]);
 			}
 		}
 
@@ -38,7 +40,7 @@ namespace OpenSora.Scenarios.Instructions
 		{
 			get
 			{
-				return (int)(long)Operands[3];
+				return (int)((long)Operands[3]);
 			}
 		}
 
@@ -54,21 +56,20 @@ namespace OpenSora.Scenarios.Instructions
 		{
 			get
 			{
-				var x = (int)(X & 0xffffffff);
-				return ExecutionContext.ToPosition(x, Y, Z);
+				return ExecutionContext.ToPosition(X, Y, Z);
 			}
-		}
-
-		private SceneCharacter GetCharacter(ExecutionWorker worker)
-		{
-			return worker.Context.Scene.Characters.Values.First();
 		}
 
 		public override void Begin(ExecutionWorker worker)
 		{
 			base.Begin(worker);
 
-			var character = GetCharacter(worker);
+			var character = worker.Context.GetCharacter(CharId);
+			if (character == null)
+			{
+				return;
+			}
+
 			_initialPosition = character.Position;
 
 			var delta = TargetPosition - _initialPosition;
@@ -88,7 +89,11 @@ namespace OpenSora.Scenarios.Instructions
 		{
 			base.Update(worker);
 
-			var character = GetCharacter(worker);
+			var character = worker.Context.GetCharacter(CharId);
+			if (character == null)
+			{
+				return;
+			}
 
 			var targetPosition = TargetPosition;
 
@@ -105,7 +110,11 @@ namespace OpenSora.Scenarios.Instructions
 		{
 			base.End(worker);
 
-			var character = GetCharacter(worker);
+			var character = worker.Context.GetCharacter(CharId);
+			if (character == null)
+			{
+				return;
+			}
 
 			// Set target position
 			var targetPosition = TargetPosition;

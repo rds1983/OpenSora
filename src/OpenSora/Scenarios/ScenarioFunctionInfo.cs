@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using OpenSora.Scenarios.Instructions;
+using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace OpenSora.Scenarios
@@ -6,9 +8,31 @@ namespace OpenSora.Scenarios
 	public class ScenarioFunctionInfo
 	{
 		private int? _durationInMs;
+		private bool? _hasTalk;
 
 		public int Offset { get; }
 		public BaseInstruction[] Instructions { get; }
+
+		public bool HasTalk
+		{
+			get
+			{
+				if (_hasTalk != null)
+				{
+					return _hasTalk.Value;
+				}
+
+				if (Instructions == null || Instructions.Length == 0)
+				{
+					_hasTalk = false;
+				} else
+				{
+					_hasTalk = (from ins in Instructions where ins is BaseTalk select ins).Count() > 0;
+				}
+
+				return _hasTalk.Value;
+			}
+		}
 
 		public int DurationInMs
 		{

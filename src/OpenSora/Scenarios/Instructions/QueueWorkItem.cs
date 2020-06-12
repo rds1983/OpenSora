@@ -47,9 +47,14 @@ namespace OpenSora.Scenarios.Instructions
 			InternalDecompile(context, ref operands, 1);
 		}
 
-		public override void Update(ExecutionWorker worker)
+		public override void Begin(ExecutionWorker worker)
 		{
-			base.Update(worker);
+			base.Begin(worker);
+
+			foreach(var ins in Block)
+			{
+				ins.Queue = this;
+			}
 
 			var newWorker = new ExecutionWorker(worker.Context)
 			{

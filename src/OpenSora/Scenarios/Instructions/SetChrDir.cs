@@ -22,8 +22,13 @@
 		{
 			base.Begin(worker);
 
-			var character = worker.Context.EnsureCharacter(CharId);
-			character.AnimationStart = ExecutionContext.DegreesToAnimationStart(Angle);
+			var ch = worker.Context.GetCharacter(CharId);
+			if (ch == null)
+			{
+				return;
+			}
+
+			ch.AnimationStart = ExecutionContext.DegreesToAnimationStart(Angle);
 		}
 	}
 }

@@ -48,10 +48,15 @@
 
 			var target = ExecutionContext.ToPosition(X, Y, Z);
 
-			var character = worker.Context.EnsureCharacter(CharId);
-			character.Position = target;
-			character.AnimationStart = ExecutionContext.DegreesToAnimationStart(Angle);
-			character.AnimationStep = 0;
+			var ch = worker.Context.GetCharacter(CharId);
+			if (ch == null)
+			{
+				return;
+			}
+
+			ch.Position = target;
+			ch.AnimationStart = ExecutionContext.DegreesToAnimationStart(Angle);
+			ch.AnimationStep = 0;
 		}
 	}
 }

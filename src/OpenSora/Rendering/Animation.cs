@@ -26,6 +26,11 @@ namespace OpenSora.Rendering
 
 			set
 			{
+				if (value == _frameIndex)
+				{
+					return;
+				}
+
 				_frameIndex = value;
 				_vertices = null;
 				_indices = null;
@@ -117,8 +122,8 @@ namespace OpenSora.Rendering
 			var width = data.GetLength(1);
 			var height = data.GetLength(0);
 
-			float dx = (float)0.3f;
-			float dy = (float)0.3f;
+			float dx = (float)0.35f;
+			float dy = (float)0.35f;
 
 			for (var y = 0; y < data.GetLength(0); ++y)
 			{

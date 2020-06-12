@@ -67,7 +67,8 @@ namespace OpenSora.Scenarios
 			set
 			{
 				_function = value;
-				_lastDt = null;
+
+				Reset();
 				if (value != null)
 				{
 					MainWorker.Instructions = value.Instructions;
@@ -95,7 +96,7 @@ namespace OpenSora.Scenarios
 						{
 							if (!toIgnore.Contains(id))
 							{
-								EnsureCharacter(id);
+								GetCharacter(id);
 							}
 						}
 					}
@@ -138,16 +139,14 @@ namespace OpenSora.Scenarios
 			MainWorker = new ExecutionWorker(this);
 		}
 
-		public void PlayPause()
+		public void Stop()
 		{
-			if (_lastDt == null)
-			{
-				_lastDt = DateTime.Now;
-			}
-			else
-			{
-				_lastDt = null;
-			}
+			_lastDt = null;
+		}
+
+		public void Play()
+		{
+			_lastDt = DateTime.Now;
 		}
 
 		public void Update()
@@ -192,7 +191,7 @@ namespace OpenSora.Scenarios
 			int chipIndex;
 			position = Vector3.Zero;
 
-			DirEntry animationEntry;
+			DirEntry animationEntry = null;
 			SceneCharacterInfo characterInfo;
 			if (_hardcodedNpcs.TryGetValue(id, out characterInfo))
 			{
@@ -201,16 +200,26 @@ namespace OpenSora.Scenarios
 			else
 			{
 				var npc = GetNpcById(id);
+				if (npc == null)
+				{
+					return null;
+				}
+
 				chipIndex = npc.ChipIndex;
 				position = ToPosition(npc.X, npc.Y, npc.Z);
 				var chip = Scenario.ChipInfo[chipIndex];
 				animationEntry = ResourceLoader.FindByIndex(chip.ChipIndex);
 			}
 
+			if (animationEntry == null)
+			{
+				return null;
+			}
+
 			return ResourceLoader.LoadAnimation(animationEntry);
 		}
 
-		public SceneCharacter EnsureCharacter(int id)
+		public SceneCharacter GetCharacter(int id)
 		{
 			SceneCharacter result;
 			if (Scene.Characters.TryGetValue(id, out result))
@@ -220,6 +229,11 @@ namespace OpenSora.Scenarios
 
 			Vector3 position;
 			var animation = GetCharacterInfo(id, out position);
+
+			if (animation == null)
+			{
+				return null;
+			}
 
 			result = new SceneCharacter
 			{
@@ -234,7 +248,11 @@ namespace OpenSora.Scenarios
 
 		public void ResetCharacterChip(int id)
 		{
-			var ch = EnsureCharacter(id);
+			var ch = GetCharacter(id);
+			if (ch == null)
+			{
+				return;
+			}
 
 			Vector3 position;
 			var animation = GetCharacterInfo(id, out position);
@@ -242,12 +260,19 @@ namespace OpenSora.Scenarios
 			ch.Chip = animation;
 		}
 
-
-		private void SetPlayedPart(float part)
+		public void Reset()
 		{
 			// Rewind and remove additional workers
 			MainWorker.Rewind();
 			AdditionalWorkers.Clear();
+			Scene.Characters.Clear();
+
+			Stop();
+		}
+
+		private void SetPlayedPart(float part)
+		{
+			Reset();
 
 			// Now execute everything up to the part
 			int passedMs = (int)(part * MainWorker.TotalDurationInMs);

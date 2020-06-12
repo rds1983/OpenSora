@@ -1,20 +1,12 @@
 ﻿namespace OpenSora.Scenarios.Instructions
 {
-	public class SetChrSubChip: BaseInstruction
+	public class CameraToChar: BaseInstruction
 	{
 		public int CharId
 		{
 			get
 			{
 				return (int)Operands[0];
-			}
-		}
-
-		public int ChipId
-		{
-			get
-			{
-				return (int)Operands[1];
 			}
 		}
 
@@ -28,7 +20,7 @@
 				return;
 			}
 
-			ch.AnimationStart = ChipId;
+			worker.Context.Scene.Camera.SetLookAt(ch.Position);
 		}
 	}
 }

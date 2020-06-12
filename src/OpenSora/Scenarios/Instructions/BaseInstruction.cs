@@ -1,12 +1,13 @@
 ﻿using OpenSora.Scenarios.Instructions;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 
 namespace OpenSora.Scenarios
 {
 	public class BaseInstruction
 	{
+		public QueueWorkItem Queue;
+
 		public DecompilerTableEntry Entry;
 		public int Offset { get; set; }
 		public object[] Operands { get; set; }

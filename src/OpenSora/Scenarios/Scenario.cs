@@ -1,6 +1,7 @@
 ﻿using OpenSora.Utility;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace OpenSora.Scenarios
@@ -40,6 +41,19 @@ namespace OpenSora.Scenarios
 		public ScenarioMonsterInfo[] MonsterInfo { get; private set; }
 		public ScenarioEventInfo[] EventInfo { get; private set; }
 		public ScenarioActorInfo[] ActorInfo { get; private set; }
+
+		public bool HasTalk
+		{
+			get
+			{
+				if (Functions == null)
+				{
+					return false;
+				}
+
+				return (from f in Functions where f.HasTalk select f).Count() > 0;
+			}
+		}
 
 		private Scenario()
 		{

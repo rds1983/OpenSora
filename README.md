@@ -1,9 +1,12 @@
 # Overview
 [![Build status](https://ci.appveyor.com/api/projects/status/nhryaguc3murmq8q?svg=true)](https://ci.appveyor.com/project/RomanShapiro/opensora)
 
-Various experiments with game "Trails in the sky".
-
-For now it consists only from OpenSora.Viewer, which is utility to view "Trails in the Sky FC/SC" textures and models.
+Resource Viewer for "Trails in the Sky FC/SC".
+It can view following:
+* Images
+* Models
+* Animations
+* Scenes
 
 # Usage
 1. Download latest binary release(OpenSora.v.v.v.v.zip) from https://github.com/rds1983/OpenSora/releases

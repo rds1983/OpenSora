@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Runtime.CompilerServices;
+using XNAssets.Utility;
 
 namespace OpenSora.Rendering
 {
@@ -52,7 +54,8 @@ namespace OpenSora.Rendering
 			}
 		}
 
-		public DefaultEffect(GraphicsDevice device): base(device, Resources.DefaultEffect)
+		public DefaultEffect(GraphicsDevice device): 
+			base(device, Res.ReadResourceAsBytes(typeof(DefaultEffect).Assembly, "Effects.DefaultEffect.mgfx"))
 		{
 		}
 

@@ -115,7 +115,7 @@ namespace OpenSora.Viewer
 				SetFolder(_state.LastFolder);
 			}
 
-			_mainPanel._comboResourceType.SelectedIndex = 4;
+			_mainPanel._comboResourceType.SelectedIndex = 3;
 		}
 
 		private void _sliderPlayer_ValueChangedByUser(object sender, Myra.Utility.ValueChangedEventArgs<float> e)
@@ -522,7 +522,7 @@ namespace OpenSora.Viewer
 				});
 			}
 
-			if (index == 4)
+/*			if (index == 4)
 			{
 				int? idx = null;
 				for (var i = 0; i < _mainPanel._listFiles.Items.Count; ++i)
@@ -538,7 +538,7 @@ namespace OpenSora.Viewer
 				{
 					_mainPanel._listFiles.SelectedIndex = idx.Value;
 				}
-			}
+			}*/
 		}
 
 		private void RefreshFilesSafe()

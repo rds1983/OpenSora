@@ -5,6 +5,8 @@ namespace OpenSora.Scenarios.Instructions
 {
 	public class QueueWorkItem : BaseInstruction
 	{
+		private int? _blockDurationInMs;
+
 		public int Target
 		{
 			get
@@ -18,6 +20,31 @@ namespace OpenSora.Scenarios.Instructions
 			get
 			{
 				return (int)Operands[1];
+			}
+		}
+
+		public int BlockDurationInMs
+		{
+			get
+			{
+				if (_blockDurationInMs != null)
+				{
+					return _blockDurationInMs.Value;
+				}
+
+				if (Block == null)
+				{
+					return 0;
+				}
+
+				var result = 0;
+				foreach (var ins in Block)
+				{
+					result += ins.DurationInMs;
+				}
+
+				_blockDurationInMs = result;
+				return result;
 			}
 		}
 

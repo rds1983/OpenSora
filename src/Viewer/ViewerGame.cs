@@ -115,7 +115,7 @@ namespace OpenSora.Viewer
 				SetFolder(_state.LastFolder);
 			}
 
-			_mainPanel._comboResourceType.SelectedIndex = 3;
+			_mainPanel._comboResourceType.SelectedIndex = 4;
 		}
 
 		private void _sliderPlayer_ValueChangedByUser(object sender, Myra.Utility.ValueChangedEventArgs<float> e)
@@ -520,6 +520,24 @@ namespace OpenSora.Viewer
 					Text = a.Name,
 					Tag = a
 				});
+			}
+
+			if (index == 4)
+			{
+				int? idx = null;
+				for (var i = 0; i < _mainPanel._listFiles.Items.Count; ++i)
+				{
+					if (_mainPanel._listFiles.Items[i].Text.Contains("R2412"))
+					{
+						idx = i;
+						break;
+					}
+				}
+
+				if (idx != null)
+				{
+					_mainPanel._listFiles.SelectedIndex = idx.Value;
+				}
 			}
 		}
 

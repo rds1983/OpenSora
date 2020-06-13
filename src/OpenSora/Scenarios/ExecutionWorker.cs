@@ -98,13 +98,7 @@ namespace OpenSora.Scenarios
 			}
 		}
 
-		public bool Finished
-		{
-			get
-			{
-				return _totalPassedInMs >= _totalDurationInMs;
-			}
-		}
+		public bool Finished { get; internal set; }
 
 		public event EventHandler TotalPassedPartChanged;
 
@@ -149,13 +143,15 @@ namespace OpenSora.Scenarios
 			{
 				var instruction = _instructions[_currentInstructionIndex];
 
-				// Skip QueueItem item if it can't be even partially executed
-				var inProgress = _instructionPassedInMs < instruction.DurationInMs;
-				var isQueue = instruction is QueueWorkItem;
-
-				if (isQueue && !inProgress)
+				var asQueue = instruction as QueueWorkItem;
+				if (asQueue != null && asQueue.BlockDurationInMs <= _instructionPassedInMs)
 				{
-					_instructionPassedInMs -= instruction.DurationInMs;
+					// Execute the whole queue right now if it is possible
+					foreach(var ins in asQueue.Block)
+					{
+						ins.Begin(this);
+						ins.End(this);
+					}
 					_callBegin = true;
 					continue;
 				}
@@ -166,7 +162,7 @@ namespace OpenSora.Scenarios
 					_callBegin = false;
 				}
 
-				if (inProgress)
+				if (_instructionPassedInMs < instruction.DurationInMs)
 				{
 					instruction.Update(this);
 					break;

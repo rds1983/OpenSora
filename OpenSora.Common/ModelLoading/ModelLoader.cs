@@ -7,6 +7,7 @@ namespace OpenSora.ModelLoading
 {
 	public static class ModelLoader
 	{
+		// Format notes: docs/formats/x2-x3.md
 		public static Frame Load(Stream stream, int version)
 		{
 			try

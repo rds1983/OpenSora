@@ -27,6 +27,7 @@ current-state snapshot; it is updated whenever a task lands.
 | Engine loop | Fixed 60 Hz engine host; viewer owns input and UI | Replayable deterministic simulation across platforms |
 | Determinism | Seeded RNG and recordable/replayable input traces | Full save/replay coverage for all game systems |
 | Diagnostics | Structured logs, local crash reports, unknown-data dedup, F12 overlay | Log retention policy and developer analysis tooling |
+| Format docs | Working notes for archives, compression, DDS, CH/CP, X2/X3, and FC SCP | Complete FC/SC/3rd references for every asset and save format |
 | Game detection | FC and SC folders recognized | FC, SC, and the 3rd, all supported PC editions |
 | Archives (`.dir`/`.dat`) | Read-only browsing | Full virtual filesystem with loose-file overrides |
 | Textures | DDS and CH images | Complete format coverage, mipmaps, alpha |
@@ -62,6 +63,8 @@ current-state snapshot; it is updated whenever a task lands.
   X2/X3 models, and FC scenarios. Fixtures are generated from code, never copied from game data.
 * Structured diagnostic logs, local crash reports with recent log context, unknown-data deduplication,
   and an F12 diagnostics overlay in the viewer.
+* Working format notes for DIR/DAT, Falcom compression, DDS, CH/CP, X2/X3, FC scenarios, and SCP
+  expressions.
 
 ### Known limitations
 
@@ -81,6 +84,8 @@ current-state snapshot; it is updated whenever a task lands.
 * The viewer still polls MonoGame devices directly; logical input snapshots are not yet wired into
   the viewer or scenario VM.
 * Diagnostics are local only. There is no telemetry, automatic upload, or log retention policy yet.
+* Save, audio, movie, and effect format pages are open research notes; those loaders are not
+  implemented. SC/3rd scenario and sidecar formats remain largely undocumented.
 
 ## Running the current viewer
 
@@ -187,6 +192,7 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <path/to/
 | `docs/adr` | Architecture decision records |
 | `docs/testing` | Test and fixture policy |
 | `docs/diagnostics.md` | Logging, crash reports, and debug-overlay guide |
+| `docs/formats` | Binary format notes and open questions |
 
 The engine host currently lives in `OpenSora.Common`. The roadmap separates the simulation and
 runtime rendering core into a dedicated engine project while keeping the viewer as a developer tool.
@@ -198,6 +204,12 @@ Design decisions are recorded in [docs/adr](docs/adr). See
 update model and
 [ADR 0002 - Deterministic random numbers and input traces](docs/adr/0002-deterministic-input-and-random.md)
 for reproducible randomness and input.
+
+## Format documentation
+
+Binary format notes live in [docs/formats](docs/formats). The index lists implemented, partial, and
+unimplemented formats, the observed archive entry catalog, references, and open questions. Statements
+are marked verified, inferred, or unknown; loader source files link to their format page.
 
 ## Roadmap
 

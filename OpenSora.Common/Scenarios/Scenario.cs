@@ -8,6 +8,7 @@ namespace OpenSora.Scenarios
 {
 	public class Scenario
 	{
+		// Format notes: docs/formats/sn-scp.md
 		public const int SCN_INFO_MAXIMUM = 6;
 		public const int NUMBER_OF_INCLUDE_FILE = 8;
 

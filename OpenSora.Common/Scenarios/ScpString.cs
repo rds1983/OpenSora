@@ -1,5 +1,6 @@
 ﻿namespace OpenSora.Scenarios
 {
+	// Format notes: docs/formats/sn-scp.md
 	public enum ScpStringType
 	{
 		SCPSTR_CODE_STRING = -1,

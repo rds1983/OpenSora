@@ -46,6 +46,7 @@ namespace OpenSora.Scenarios
 
 	public partial class Decompiler
 	{
+		// Format notes: docs/formats/sn-scp.md
 		private readonly DecompilerContext _context;
 
 		public BinaryReader Reader

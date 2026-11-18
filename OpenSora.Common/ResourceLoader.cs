@@ -13,6 +13,7 @@ namespace OpenSora
 {
 	public class ResourceLoader
 	{
+		// Format notes: docs/formats/README.md
 		private Dictionary<string, List<DirEntry>> _entries = null;
 		private readonly ConcurrentDictionary<string, Texture2D> _textures = new ConcurrentDictionary<string, Texture2D>();
 

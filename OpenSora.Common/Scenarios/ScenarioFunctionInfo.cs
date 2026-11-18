@@ -7,6 +7,7 @@ namespace OpenSora.Scenarios
 {
 	public class ScenarioFunctionInfo
 	{
+		// Format notes: docs/formats/sn-scp.md
 		private int? _durationInMs;
 		private bool? _hasTalk;
 

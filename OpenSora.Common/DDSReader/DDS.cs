@@ -9,6 +9,7 @@ namespace Imaging.DDSReader
 	/// <summary>
 	/// This is the main class of the library.  All static methods are contained within.
 	/// </summary>
+	// Format notes: docs/formats/dds.md
 	public static class DDS
 	{
 		/// <summary>

@@ -6,8 +6,8 @@
 
 **Last updated:** 2026-11-18
 **Current milestone:** M0 - Foundations, tests, and architecture
-**Next task:** M0-07 - Document the binary formats
-**Last completed:** M0-06 - Add diagnostics, logging, and crash reporting (2026-11-18)
+**Next task:** M0-08 - Record architecture decisions and dependency rules
+**Last completed:** M0-07 - Document the binary formats (2026-11-18)
 
 ## Purpose
 
@@ -50,7 +50,7 @@ Discovery work that spans milestones goes to `Cross-cutting backlog` until it is
 ## Current focus
 
 - **Milestone:** M0 - make the codebase safe to evolve before adding gameplay.
-- **Next task:** M0-07 - document the binary formats and link every loader to its format page.
+- **Next task:** M0-08 - record architecture decisions and dependency rules.
 - **Why:** every later milestone depends on automated verification and deterministic updates. The VM,
   asset loaders, and battle formulas cannot be validated by "the viewer still opens".
 - **Suggested first vertical slice after M0:** FC prologue through the first field map, first
@@ -155,11 +155,15 @@ enforced.
     all executables, unknown-opcode reporting, and an F12 overlay. 35 tests pass in Debug/Release and
     clean Linux; forced-crash smoke test produced a valid report.
 
-- [ ] **M0-07 - Document the binary formats** - _todo_
+- [x] **M0-07 - Document the binary formats** - _done 2026-11-18_
   - Depends on: none
-  - Scope: `docs/formats/` pages for DIR/DAT, DDS, CH/CP, X2/X3, SN/SCP + expressions, save files,
-    audio containers, movie containers, and effects. Cite existing references and mark unknowns.
+  - Scope: `docs/formats/` pages for DIR/DAT, Falcom block compression, DDS, CH/CP, X2/X3,
+    SN/SCP + expressions, save files, audio containers, movie containers, and effects. Cite existing
+    references and mark unknowns.
   - Done when: every loader file links to its format page, and the docs list open questions.
+  - Result: 12 format pages covering implemented, partial, and unimplemented formats, an observed
+    FC entry catalog, references, and open questions. Loader/source files link to their pages.
+    Entry counts and structures were verified against the local FC installation and fixtures.
 
 - [ ] **M0-08 - Record architecture decisions and dependency rules** - _todo_
   - Depends on: M0-02
@@ -845,6 +849,7 @@ A task is done only when all of the following are true:
 | 2026-11-18 | M0-04 | Added the synthetic fixture toolkit and headless CH/animation decoders; documented fixture policy. |
 | 2026-11-18 | M0-05 | Added GitHub Actions CI for Windows and Linux with caching, tests, and downloadable artifacts. |
 | 2026-11-18 | M0-06 | Added structured logging, local crash reports, unknown-data deduplication, and the F12 diagnostics overlay. |
+| 2026-11-18 | M0-07 | Documented archive, compression, texture, sprite, model, scenario, expression, save, audio, movie, and effect formats with open questions. |
 
 ## Changelog
 
@@ -856,3 +861,4 @@ A task is done only when all of the following are true:
 | 2026-11-18 | Completed M0-04; SC/3rd scenario fixtures moved to M2-03/M2-04 | Build loadable fixtures only for formats the engine can currently parse |
 | 2026-11-18 | Completed M0-05; next focus is M0-06 | Establish hosted verification before diagnostics and asset work |
 | 2026-11-18 | Completed M0-06; next focus is M0-07 | Make failures actionable and suppress unknown-data spam before format documentation |
+| 2026-11-18 | Completed M0-07; next focus is M0-08 | Establish shared format knowledge before asset pipeline work |

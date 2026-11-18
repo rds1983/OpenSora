@@ -4,6 +4,7 @@ using System.IO;
 
 namespace OpenSora
 {
+	// Format notes: docs/formats/falcom-compression.md
 	public static class FalcomDecompressor
 	{
 		private class NonZeroDecompressor

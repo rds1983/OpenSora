@@ -7,6 +7,7 @@ namespace OpenSora
 {
 	public static class AnimationLoader
 	{
+		// Format notes: docs/formats/ch-cp.md
 		private const int BytesPerColor = 2;
 
 		public const int TextureSize = 1024;

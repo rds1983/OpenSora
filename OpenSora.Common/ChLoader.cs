@@ -30,6 +30,7 @@ namespace OpenSora
 
 	public static class ChLoader
 	{
+		// Format notes: docs/formats/ch-cp.md
 		private class ImageTypeInfo
 		{
 			public string Dir;

@@ -12,6 +12,7 @@ namespace OpenSora.Scenarios
 {
 	public class DecompilerContext
 	{
+		// Format notes: docs/formats/sn-scp.md
 		private readonly HashSet<int> _disasmTable = new HashSet<int>();
 		private readonly Dictionary<int, DecompilerTableEntry> _entriesTable;
 		private readonly HashSet<int> _globalLabelTable = new HashSet<int>();

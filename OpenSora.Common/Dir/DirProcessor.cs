@@ -6,6 +6,7 @@ using System.Text;
 
 namespace OpenSora.Dir
 {
+	// Format notes: docs/formats/dir-dat.md
 	public static class DirProcessor
 	{
 		const string LbDirSignature = "LB DIR";

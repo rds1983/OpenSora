@@ -7,6 +7,7 @@ namespace Imaging.DDSReader
 {
     internal class Decompressor
     {
+        // Format notes: docs/formats/dds.md
         internal static byte[] Expand(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			System.Diagnostics.Debug.WriteLine(pixelFormat);

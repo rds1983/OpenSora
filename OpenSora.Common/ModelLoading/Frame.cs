@@ -5,6 +5,7 @@ namespace OpenSora.ModelLoading
 {
 	public class Frame
 	{
+		// Format notes: docs/formats/x2-x3.md
 		private readonly List<string> _materials = new List<string>();
 		private readonly List<Frame> _children = new List<Frame>();
 		private readonly List<MeshData> _meshes = new List<MeshData>();

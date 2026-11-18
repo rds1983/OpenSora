@@ -2,6 +2,7 @@
 {
 	public enum ExpressionType
 	{
+		// Format notes: docs/formats/scp-expressions.md
 		EXPR_PUSH_LONG,
 		EXPR_END,
 		EXPR_EQU,

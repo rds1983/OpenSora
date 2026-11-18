@@ -7,6 +7,7 @@ namespace OpenSora.ModelLoading
 {
 	public class MeshData
 	{
+		// Format notes: docs/formats/x2-x3.md
 		private readonly List<MaterialData> _materials = new List<MaterialData>();
 		private readonly List<VertexPositionNormalTexture> _vertices = new List<VertexPositionNormalTexture>();
 		private readonly List<short> _indices = new List<short>();

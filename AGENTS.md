@@ -290,6 +290,8 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <game-fol
   WSL/Linux before pushing
 - Diagnostics write local logs and crash reports under the platform's application-data directory; see
   `docs/diagnostics.md`. Nothing is uploaded
+- Binary format notes live in `docs/formats/`; when changing a loader, update its format page and mark
+  statements as verified, inferred, or unknown
 - Simulation time comes from `OpenSora.Engine.EngineHost`; do not use `DateTime.Now` or other
   wall-clock sources in simulation or animation code
 - Simulation randomness must use `DeterministicRandom`; do not use `System.Random` in simulation code

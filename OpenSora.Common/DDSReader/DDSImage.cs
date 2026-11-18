@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace Imaging.DDSReader
 {
+	// Format notes: docs/formats/dds.md
 	public class DDSImage
 	{
 		private DDSResult _bitmap;

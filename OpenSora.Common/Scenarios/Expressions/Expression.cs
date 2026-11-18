@@ -5,6 +5,7 @@ namespace OpenSora.Scenarios.Expressions
 {
 	public class Expression
 	{
+		// Format notes: docs/formats/scp-expressions.md
 		public ExpressionType Type { get; private set; }
 		public object[] Operands { get; private set; }
 

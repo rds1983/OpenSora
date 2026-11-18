@@ -6,6 +6,7 @@ namespace OpenSora.Scenarios
 {
 	partial class Decompiler
 	{
+		// Format notes: docs/formats/sn-scp.md
 		private static readonly DecompilerTableEntry[] DecompilerArrayFC = new DecompilerTableEntry[]
 		{
 			CreateEntry<ExitThread>(),

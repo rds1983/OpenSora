@@ -18,7 +18,8 @@ immediately.
 
 1. **No game data in the repository.** Never commit game installations, extracted archives, assets,
    saves, movies, audio, or other copyrighted content. Do not add test fixtures copied from a game.
-   Use synthetic fixtures generated from code or scripts.
+   Use synthetic fixtures generated from code or scripts. Read `docs/legal.md` before adding data,
+   screenshots, logs, or dependencies.
 2. **One task at a time.** Pick one board task, finish it, get confirmation, then move on. Do not
    batch unrelated work into one confirmation request.
 3. **No completion claims without evidence.** "It builds" is not testing. State exactly what was run,
@@ -297,6 +298,8 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <game-fol
   statements as verified, inferred, or unknown
 - Architecture decisions live in `docs/adr/`; dependency direction is enforced by
   `OpenSora.Tests/ArchitectureTests.cs` and CI
+- Asset/legal policy lives in `docs/legal.md`; `RepositoryPolicyTests` rejects tracked game data and
+  large binaries in CI, and `.gitignore` blocks common asset/save/archive extensions
 - Simulation time comes from `OpenSora.Engine.EngineHost`; do not use `DateTime.Now` or other
   wall-clock sources in simulation or animation code
 - Simulation randomness must use `DeterministicRandom`; do not use `System.Random` in simulation code

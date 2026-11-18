@@ -28,6 +28,7 @@ current-state snapshot; it is updated whenever a task lands.
 | Determinism | Seeded RNG and recordable/replayable input traces | Full save/replay coverage for all game systems |
 | Diagnostics | Structured logs, local crash reports, unknown-data dedup, F12 overlay | Log retention policy and developer analysis tooling |
 | Format docs | Working notes for archives, compression, DDS, CH/CP, X2/X3, and FC SCP | Complete FC/SC/3rd references for every asset and save format |
+| Assets/legal | Asset policy, third-party notices, `.gitignore` guards, CI repository-policy test | Final legal review and release packaging |
 | Game detection | FC and SC folders recognized | FC, SC, and the 3rd, all supported PC editions |
 | Archives (`.dir`/`.dat`) | Read-only browsing | Full virtual filesystem with loose-file overrides |
 | Textures | DDS and CH images | Complete format coverage, mipmaps, alpha |
@@ -66,6 +67,8 @@ current-state snapshot; it is updated whenever a task lands.
 * Working format notes for DIR/DAT, Falcom compression, DDS, CH/CP, X2/X3, FC scenarios, and SCP
   expressions.
 * Architecture decision records and an automated project-dependency/architecture test.
+* An asset and legal policy with `.gitignore` guards and a CI repository-policy test that rejects
+  tracked game data and large binaries.
 
 ### Known limitations
 
@@ -89,6 +92,8 @@ current-state snapshot; it is updated whenever a task lands.
   implemented. SC/3rd scenario and sidecar formats remain largely undocumented.
 * The engine runtime still lives in `OpenSora.Common`; the dedicated engine assembly and UI-boundary
   cleanup are tracked as M2-14.
+* The existing `images/OpenSora.png` screenshot predates the asset policy and should be replaced with
+  an asset-free capture before release.
 
 ## Running the current viewer
 
@@ -196,6 +201,8 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <path/to/
 | `docs/testing` | Test and fixture policy |
 | `docs/diagnostics.md` | Logging, crash reports, and debug-overlay guide |
 | `docs/formats` | Binary format notes and open questions |
+| `docs/legal.md` | Asset, clean-room, and legal policy |
+| `THIRD-PARTY-NOTICES.md` | Dependency attribution and license index |
 
 The engine host currently lives in `OpenSora.Common`. The roadmap separates the simulation and
 runtime rendering core into a dedicated engine project while keeping the viewer as a developer tool.
@@ -229,6 +236,8 @@ and only then update `TASKS.md` and commit/push.
 * Never commit game assets, extracted files, saves, or copyrighted data.
 * Add tests for every behavioral change. "It builds" is not a test.
 * Do not rewrite the roadmap silently - `TASKS.md` is a living document and changes must be visible.
+* Read the asset/legal policy in [docs/legal.md](docs/legal.md) before adding data, screenshots, logs,
+  or new dependencies.
 
 ## Credits
 
@@ -252,5 +261,6 @@ and only then update `TASKS.md` and commit/push.
 
 ## License
 
-GPL-3.0. See [LICENSE](LICENSE). The games, their names, and their assets belong to their
-respective rights holders.
+GPL-3.0. See [LICENSE](LICENSE). Third-party dependencies retain their own licenses; see
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). The games, their names, and their assets belong to
+their respective rights holders.

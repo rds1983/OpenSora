@@ -8,15 +8,17 @@ namespace OpenSora.Rendering
 	public class Animation
 	{
 		private const int ApplicationFrameChangeDelayInMs = 100;
+		private const double FrameChangeDelayEpsilonMs = 1e-6;
 
 		private int _frameIndex;
 		private VertexPositionNormalTexture[] _vertices;
 		private short[] _indices;
+		private bool _animationStarted;
+		private double _frameAccumulatorMs;
 
 		public ushort?[][,] Info { get; private set; }
 		public Texture2D Texture { get; private set; }
 
-		public DateTime? LastFrameRendered;
 		public int FrameIndex
 		{
 			get
@@ -79,31 +81,49 @@ namespace OpenSora.Rendering
 			Texture = texture;
 		}
 
-		public void Animate(int start, int step)
+		public void Animate(int start, int step, double deltaSeconds)
 		{
 			if (step == 0)
 			{
 				FrameIndex = Math.Min(start, Info.Length - 1);
-				LastFrameRendered = null;
+				ResetAnimationClock();
 				return;
 			}
 
-			var now = DateTime.Now;
-			if (LastFrameRendered == null)
+			if (!_animationStarted)
 			{
 				FrameIndex = Math.Min(start, Info.Length - 1);
-				LastFrameRendered = now;
+				_animationStarted = true;
+				_frameAccumulatorMs = 0;
+				return;
 			}
-			else if((now - LastFrameRendered.Value).TotalMilliseconds >= ApplicationFrameChangeDelayInMs)
+
+			if (deltaSeconds <= 0)
 			{
+				return;
+			}
+
+			_frameAccumulatorMs += deltaSeconds * 1000.0;
+
+			while (_frameAccumulatorMs + FrameChangeDelayEpsilonMs >= ApplicationFrameChangeDelayInMs)
+			{
+				_frameAccumulatorMs -= ApplicationFrameChangeDelayInMs;
 				FrameIndex += step;
-				LastFrameRendered = now;
 			}
 
 			if (FrameIndex >= Info.Length)
 			{
 				FrameIndex = Math.Min(start, Info.Length - 1);
 			}
+		}
+
+		/// <summary>
+		/// Clears accumulated frame time so the next animation call starts from the current frame.
+		/// </summary>
+		public void ResetAnimationClock()
+		{
+			_animationStarted = false;
+			_frameAccumulatorMs = 0;
 		}
 
 		private void Update()

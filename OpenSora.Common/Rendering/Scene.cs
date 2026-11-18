@@ -189,7 +189,6 @@ namespace OpenSora.Rendering
 				foreach (var pair in Characters)
 				{
 					var chip = pair.Value.Chip;
-					chip.Animate(pair.Value.AnimationStart, pair.Value.AnimationStep);
 
 					// Calculate angle that the billboard needs to be rotated in order to always face the camera
 					var angle = -(float)Math.Atan2(pair.Value.Position.Z - Camera.Position.Z,
@@ -259,6 +258,22 @@ namespace OpenSora.Rendering
 				y += 20;
 
 				_spriteBatch.End();
+			}
+		}
+
+		/// <summary>
+		/// Advances scene animation state by the supplied fixed delta. Rendering must not mutate
+		/// animation state.
+		/// </summary>
+		public void Update(double deltaSeconds)
+		{
+			foreach (var pair in Characters)
+			{
+				var character = pair.Value;
+				if (character.Chip != null)
+				{
+					character.Chip.Animate(character.AnimationStart, character.AnimationStep, deltaSeconds);
+				}
 			}
 		}
 

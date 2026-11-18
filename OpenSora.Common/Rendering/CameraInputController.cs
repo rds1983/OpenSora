@@ -28,7 +28,6 @@ namespace OpenSora.Rendering
 		public bool _moveTouchDown, _rotateTouchDown;
 		private bool _leftKeyPressed, _rightKeyPressed, _forwardKeyPressed, _backwardKeyPressed, _upKeyPressed, _downKeyPressed,
 			_increaseViewAngleKeyPressed, _decreaseViewAngleKeyPressed;
-		private DateTime? _keyboardLastTime;
 
 		public float RotateDelta { get; set; }
 		public float MoveDelta { get; set; }
@@ -155,12 +154,6 @@ namespace OpenSora.Rendering
 					_decreaseViewAngleKeyPressed = isDown;
 					break;
 			}
-
-			if (!_forwardKeyPressed && !_leftKeyPressed && !_rightKeyPressed && !_backwardKeyPressed &&
-				!_upKeyPressed && !_downKeyPressed && !_increaseViewAngleKeyPressed && !_decreaseViewAngleKeyPressed)
-			{
-				_keyboardLastTime = null;
-			}
 		}
 
 		public void ResetKeyboard()
@@ -168,17 +161,16 @@ namespace OpenSora.Rendering
 			_forwardKeyPressed = _leftKeyPressed =
 								 _rightKeyPressed = _backwardKeyPressed =
 													_upKeyPressed = _downKeyPressed = _increaseViewAngleKeyPressed = _decreaseViewAngleKeyPressed = false;
-			_keyboardLastTime = null;
 		}
 
-		public void Update()
+		public void Update(float deltaSeconds)
 		{
-			if (_keyboardLastTime == null)
+			if (deltaSeconds <= 0)
 			{
-				_keyboardLastTime = DateTime.Now;
+				return;
 			}
 
-			var delta = (float)(DateTime.Now - _keyboardLastTime.Value).TotalSeconds * KeyboardMovementSpeed;
+			var delta = deltaSeconds * KeyboardMovementSpeed;
 
 			if (delta < 0.01)
 			{
@@ -227,8 +219,6 @@ namespace OpenSora.Rendering
 			{
 				_camera.ViewAngle -= delta;
 			}
-
-			_keyboardLastTime = DateTime.Now;
 		}
 	}
 }

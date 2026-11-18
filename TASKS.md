@@ -6,8 +6,8 @@
 
 **Last updated:** 2026-11-18
 **Current milestone:** M0 - Foundations, tests, and architecture
-**Next task:** M0-02 - Create the engine host and deterministic update loop
-**Last completed:** M0-01 - Add automated test infrastructure (2026-11-18)
+**Next task:** M0-03 - Add deterministic RNG and input abstractions
+**Last completed:** M0-02 - Create the engine host and deterministic update loop (2026-11-18)
 
 ## Purpose
 
@@ -50,8 +50,8 @@ Discovery work that spans milestones goes to `Cross-cutting backlog` until it is
 ## Current focus
 
 - **Milestone:** M0 - make the codebase safe to evolve before adding gameplay.
-- **Next task:** M0-02 - create the engine host, fixed-timestep update loop, and remove wall-clock
-  time from simulation code.
+- **Next task:** M0-03 - add seeded RNG, input snapshots, replayable input traces, and a time source
+  abstraction.
 - **Why:** every later milestone depends on automated verification and deterministic updates. The VM,
   asset loaders, and battle formulas cannot be validated by "the viewer still opens".
 - **Suggested first vertical slice after M0:** FC prologue through the first field map, first
@@ -98,12 +98,17 @@ enforced.
     parsing/decompilation; Debug and Release test runs pass. A manual full-corpus FC smoke test
     decompiled 491 scenarios from 549 `_SN` entries with 0 exceptions.
 
-- [ ] **M0-02 - Create the engine host and deterministic update loop** - _todo_
+- [x] **M0-02 - Create the engine host and deterministic update loop** - _done 2026-11-18_
   - Depends on: M0-01
   - Scope: introduce an engine host that owns update/render phases and a fixed-timestep game clock;
     make `OpenSora.Viewer` a tool that drives the host; remove `DateTime.Now` from simulation code.
+  - ADR: `docs/adr/0001-engine-host.md`
   - Done when: the viewer behaves as before, a headless host can run N fixed updates with identical
     results, and simulation code has no wall-clock access.
+  - Result: `EngineHost`/`EngineTime` added with 60 Hz fixed updates and headless stepping; viewer,
+    scenario playback, sprite animation, and camera input are host-driven; `DateTime.Now` is gone
+    from simulation/animation code. 11 tests pass in Debug and Release; viewer startup smoke test
+    passed with the FC installation.
 
 - [ ] **M0-03 - Add deterministic RNG and input abstractions** - _todo_
   - Depends on: M0-02
@@ -815,9 +820,11 @@ A task is done only when all of the following are true:
 |---|---|---|
 | 2026-11-18 | DOC-01 | Established the project goal, live roadmap, and agent workflow; documented the current viewer state. |
 | 2026-11-18 | M0-01 | Added the xUnit test project with archive, DDS, and FC scenario coverage; documented the test workflow. |
+| 2026-11-18 | M0-02 | Added the fixed-timestep engine host, removed wall-clock timing from simulation/animation, and recorded ADR 0001. |
 
 ## Changelog
 
 | Date | Change | Rationale |
 |---|---|---|
 | 2026-11-18 | Initial roadmap with M0-M8, cross-cutting backlog, spikes, risks, and definition of done | Turn the revived viewer into a full trilogy engine with an actionable, testable plan |
+| 2026-11-18 | Added ADR 0001 and completed M0-02; next focus is M0-03 | Establish deterministic fixed-step timing before input abstraction and gameplay work |

@@ -13,7 +13,8 @@ namespace OpenSora.Scenarios
 
 		private Scenario _scenario;
 		private ScenarioFunctionInfo _function;
-		private DateTime? _lastDt;
+		private bool _isPlaying;
+		private double _pendingMilliseconds;
 
 		public ExecutionWorker MainWorker { get; }
 		public List<ExecutionWorker> AdditionalWorkers { get; } = new List<ExecutionWorker>();
@@ -111,7 +112,7 @@ namespace OpenSora.Scenarios
 		{
 			get
 			{
-				return _lastDt != null;
+				return _isPlaying;
 			}
 		}
 
@@ -123,22 +124,36 @@ namespace OpenSora.Scenarios
 
 		public void Stop()
 		{
-			_lastDt = null;
+			_isPlaying = false;
+			_pendingMilliseconds = 0;
 		}
 
 		public void Play()
 		{
-			_lastDt = DateTime.Now;
+			_isPlaying = true;
+			_pendingMilliseconds = 0;
 		}
 
-		public void Update()
+		/// <summary>
+		/// Advances the active scenario by the supplied fixed delta. Fractional milliseconds are
+		/// accumulated so a 60 Hz host does not lose time to integer truncation.
+		/// </summary>
+		public void Update(double deltaSeconds)
 		{
-			if (_lastDt == null)
+			if (!_isPlaying || deltaSeconds <= 0)
 			{
 				return;
 			}
 
-			var passedMs = (int)(DateTime.Now - _lastDt.Value).TotalMilliseconds;
+			_pendingMilliseconds += deltaSeconds * 1000.0;
+
+			var passedMs = (int)_pendingMilliseconds;
+			if (passedMs <= 0)
+			{
+				return;
+			}
+
+			_pendingMilliseconds -= passedMs;
 
 			MainWorker.Update(passedMs);
 
@@ -148,8 +163,6 @@ namespace OpenSora.Scenarios
 			}
 
 			AdditionalWorkers.RemoveAll(w => w.Finished);
-
-			_lastDt = DateTime.Now;
 		}
 
 		public ScenarioNpcInfo GetNpcById(int id)
@@ -246,6 +259,7 @@ namespace OpenSora.Scenarios
 		public void Reset()
 		{
 			// Rewind and remove additional workers
+			_pendingMilliseconds = 0;
 			MainWorker.Rewind();
 			AdditionalWorkers.Clear();
 			Scene.Characters.Clear();

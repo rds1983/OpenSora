@@ -281,6 +281,8 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <game-fol
 - The solution currently builds with warnings; treat new warnings as regressions and fix existing
   ones under M0-11
 - Automated tests live in `OpenSora.Tests`; run them with `dotnet test OpenSora.MonoGame.sln`
+- Simulation time comes from `OpenSora.Engine.EngineHost`; do not use `DateTime.Now` or other
+  wall-clock sources in simulation or animation code
 - Game data is not present in the repository and must never be added
 
 ## When in doubt

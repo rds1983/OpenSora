@@ -22,6 +22,7 @@ current-state snapshot; it is updated whenever a task lands.
 
 | Area | Today | Goal |
 |---|---|---|
+| Engine loop | Fixed 60 Hz engine host; viewer owns input and UI | Replayable deterministic simulation across platforms |
 | Game detection | FC and SC folders recognized | FC, SC, and the 3rd, all supported PC editions |
 | Archives (`.dir`/`.dat`) | Read-only browsing | Full virtual filesystem with loose-file overrides |
 | Textures | DDS and CH images | Complete format coverage, mipmaps, alpha |
@@ -36,7 +37,7 @@ current-state snapshot; it is updated whenever a task lands.
 | Movies | None | Intro and event movie playback with skip |
 | Save/load | Viewer window state only | Full game saves, slots, FC -> SC import |
 | Platforms | Windows (MonoGame DesktopGL) | Windows, Linux, macOS |
-| Tests | xUnit suite for archives, DDS textures, and FC scenarios | Unit, integration, golden-trace, and visual regression suites |
+| Tests | xUnit suite for archives, DDS, scenarios, and engine timing | Unit, integration, golden-trace, and visual regression suites |
 | CI | AppVeyor build | Windows and Linux build + test on every change |
 
 ### What works today
@@ -47,8 +48,10 @@ current-state snapshot; it is updated whenever a task lands.
 * Loading FC `_SN` scenario files and previewing functions on a timeline.
 * Camera controls, resource filtering, and a Myra-based viewer UI.
 * Command-line tools for unpacking archives and disassembling FC scenarios.
-* An xUnit test suite covering `.dir`/`.dat` parsing, uncompressed DDS decoding, and FC scenario
-  header/function decompilation.
+* An xUnit test suite covering `.dir`/`.dat` parsing, uncompressed DDS decoding, FC scenario
+  header/function decompilation, deterministic engine timing, and delta-based camera movement.
+* A fixed-timestep engine host (60 Hz by default) drives scenario playback, sprite animation, and
+  camera movement. Simulation no longer reads wall-clock time.
 
 ### Known limitations
 
@@ -59,8 +62,10 @@ current-state snapshot; it is updated whenever a task lands.
   game flags, inventory, or save state.
 * There is no player movement, collision, interaction, encounter, battle, menu, audio, movie, or
   save/load system.
-* Test coverage is limited to archive parsing, DDS decoding, and FC scenario parsing/decompilation.
-  There are no integration, golden-trace, or visual regression tests yet.
+* Test coverage is limited to archive parsing, DDS decoding, FC scenario parsing/decompilation, and
+  engine timing. There are no integration, golden-trace, or visual regression tests yet.
+* The engine host still lives in `OpenSora.Common`, and the viewer owns input and UI. Input
+  abstraction and the engine/viewer project split are later M0 tasks.
 
 ## Running the current viewer
 
@@ -111,6 +116,8 @@ code; never commit extracted game data. The initial suite covers:
 * `.dir`/`.dat` archive parsing, including the zero-size entry rule.
 * Uncompressed RGBA DDS decoding and channel order.
 * FC scenario header/function-table parsing and instruction decompilation.
+* Deterministic fixed-timestep host updates and long-frame clamping.
+* Delta-based camera movement.
 
 Add a test for every behavioral change. A change that cannot be covered automatically needs a
 recorded manual verification step in the task report.
@@ -129,14 +136,21 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <path/to/
 
 | Project | Purpose |
 |---|---|
-| `OpenSora.Common` | Format readers, loaders, rendering, scenario decompiler/VM |
-| `OpenSora.Viewer` | Myra-based resource viewer and scenario preview |
+| `OpenSora.Common` | Format readers, loaders, rendering, engine host, scenario decompiler/VM |
+| `OpenSora.Viewer` | Myra-based resource viewer and scenario preview, acting as the engine host application |
 | `OpenSora.Unpacker` | CLI tool that extracts archive entries |
 | `OpenSora.Decompiler` | CLI tool that disassembles scenario scripts |
-| `OpenSora.Tests` | xUnit tests for loaders, decompilation, and future engine systems |
+| `OpenSora.Tests` | xUnit tests for loaders, decompilation, engine timing, and future game systems |
+| `docs/adr` | Architecture decision records |
 
-The roadmap extracts the simulation and rendering core into a dedicated engine host while keeping
-the viewer as a developer tool.
+The engine host currently lives in `OpenSora.Common`. The roadmap separates the simulation and
+runtime rendering core into a dedicated engine project while keeping the viewer as a developer tool.
+
+## Architecture decisions
+
+Design decisions are recorded in [docs/adr](docs/adr). See
+[ADR 0001 - Engine host and fixed-timestep clock](docs/adr/0001-engine-host.md) for the deterministic
+update model.
 
 ## Roadmap
 

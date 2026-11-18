@@ -15,6 +15,7 @@ using OpenSora.ModelLoading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using OpenSora.Rendering;
+using OpenSora.Engine;
 using OpenSora.Scenarios;
 using Myra.Events;
 
@@ -35,6 +36,7 @@ namespace OpenSora.Viewer
 		private Desktop _desktop;
 		private bool _wasPlaying;
 		private KeyboardState _lastKeyboardState;
+		private readonly EngineHost _engineHost = new EngineHost();
 
 		public ViewerGame()
 		{
@@ -68,6 +70,8 @@ namespace OpenSora.Viewer
 			}
 
 			Window.Title = "OpenSora.Viewer";
+
+			_engineHost.Update += OnEngineUpdate;
 		}
 
 		protected override void LoadContent()
@@ -184,6 +188,49 @@ namespace OpenSora.Viewer
 			}
 		}
 
+		private bool CanControlCamera()
+		{
+			if (_mainPanel == null || _executionContext == null || _executionContext.Scene == null ||
+				_executionContext.Scene.Meshes == null)
+			{
+				return false;
+			}
+
+			var index = _mainPanel._comboResourceType.SelectedIndex;
+			return index == 1 || index == 4;
+		}
+
+		private void OnEngineUpdate(EngineTime time)
+		{
+			if (_mainPanel == null)
+			{
+				return;
+			}
+
+			// Keep the preview modes in sync with the tab that used to own their updates.
+			var index = _mainPanel._comboResourceType.SelectedIndex;
+			if (index == 1 || index == 4)
+			{
+				if (_executionContext != null && _executionContext.Scene != null)
+				{
+					_executionContext.Update(time.DeltaSeconds);
+					_executionContext.Scene.Update(time.DeltaSeconds);
+
+					if (CanControlCamera())
+					{
+						_executionContext.Scene.Controller.Update((float)time.DeltaSeconds);
+					}
+				}
+			}
+			else if (index == 3 && _animation != null)
+			{
+				_animation.Animate(
+					(int)_mainPanel._numericAnimationStart.Value.Value,
+					(int)_mainPanel._numericAnimationStep.Value.Value,
+					time.DeltaSeconds);
+			}
+		}
+
 		private void ResetAnimation()
 		{
 			if (_animation == null)
@@ -192,7 +239,7 @@ namespace OpenSora.Viewer
 			}
 
 			_animation.FrameIndex = (int)_mainPanel._numericAnimationStart.Value.Value;
-			_animation.LastFrameRendered = null;
+			_animation.ResetAnimationClock();
 		}
 
 		private void HideAnimationBox()
@@ -637,45 +684,38 @@ namespace OpenSora.Viewer
 		{
 			base.Update(gameTime);
 
-			//			_fpsCounter.Update(gameTime);
 			var keyboardState = Keyboard.GetState();
 
-
-			if (keyboardState.IsKeyDown(Keys.OemTilde) && !_lastKeyboardState.IsKeyDown(Keys.OemTilde) && _executionContext.Scene != null)
+			if (keyboardState.IsKeyDown(Keys.OemTilde) && !_lastKeyboardState.IsKeyDown(Keys.OemTilde) &&
+				_executionContext != null && _executionContext.Scene != null)
 			{
 				_executionContext.Scene.RenderDebugInfo = !_executionContext.Scene.RenderDebugInfo;
 			}
 
-			if ((_mainPanel._comboResourceType.SelectedIndex != 1 && _mainPanel._comboResourceType.SelectedIndex != 4) ||
-				_executionContext == null ||
-				_executionContext.Scene == null ||
-				_executionContext.Scene.Meshes == null)
+			if (CanControlCamera())
 			{
-				_lastKeyboardState = keyboardState;
-				return;
+				// Manage camera input controller
+				_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Left, keyboardState.IsKeyDown(Keys.A));
+				_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Right, keyboardState.IsKeyDown(Keys.D));
+				_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Forward, keyboardState.IsKeyDown(Keys.W));
+				_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Backward, keyboardState.IsKeyDown(Keys.S));
+				_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Up, keyboardState.IsKeyDown(Keys.Up));
+				_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Down, keyboardState.IsKeyDown(Keys.Down));
+				_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.IncreaseViewAngle, keyboardState.IsKeyDown(Keys.I));
+				_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.DecreaseViewAngle, keyboardState.IsKeyDown(Keys.O));
+
+				var bounds = _mainPanel._panelViewer.Bounds;
+				var mouseState = Mouse.GetState();
+				if (bounds.Contains(mouseState.Position) && !_desktop.IsMouseOverGUI)
+				{
+					_executionContext.Scene.Controller.SetTouchState(CameraInputController.TouchType.Move, mouseState.LeftButton == ButtonState.Pressed);
+					_executionContext.Scene.Controller.SetTouchState(CameraInputController.TouchType.Rotate, mouseState.RightButton == ButtonState.Pressed);
+
+					_executionContext.Scene.Controller.SetMousePosition(new Point(mouseState.X, mouseState.Y));
+				}
 			}
 
-			// Manage camera input controller
-			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Left, keyboardState.IsKeyDown(Keys.A));
-			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Right, keyboardState.IsKeyDown(Keys.D));
-			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Forward, keyboardState.IsKeyDown(Keys.W));
-			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Backward, keyboardState.IsKeyDown(Keys.S));
-			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Up, keyboardState.IsKeyDown(Keys.Up));
-			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.Down, keyboardState.IsKeyDown(Keys.Down));
-			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.IncreaseViewAngle, keyboardState.IsKeyDown(Keys.I));
-			_executionContext.Scene.Controller.SetControlKeyState(CameraInputController.ControlKeys.DecreaseViewAngle, keyboardState.IsKeyDown(Keys.O));
-
-			var bounds = _mainPanel._panelViewer.Bounds;
-			var mouseState = Mouse.GetState();
-			if (bounds.Contains(mouseState.Position) && !_desktop.IsMouseOverGUI)
-			{
-				_executionContext.Scene.Controller.SetTouchState(CameraInputController.TouchType.Move, mouseState.LeftButton == ButtonState.Pressed);
-				_executionContext.Scene.Controller.SetTouchState(CameraInputController.TouchType.Rotate, mouseState.RightButton == ButtonState.Pressed);
-
-				_executionContext.Scene.Controller.SetMousePosition(new Point(mouseState.X, mouseState.Y));
-			}
-
-			_executionContext.Scene.Controller.Update();
+			_engineHost.Advance(gameTime.ElapsedGameTime);
 
 			_lastKeyboardState = keyboardState;
 		}
@@ -731,7 +771,6 @@ namespace OpenSora.Viewer
 				location.Y = _mainPanel._panelViewer.Bounds.Y;
 			}
 
-			_animation.Animate((int)_mainPanel._numericAnimationStart.Value.Value, (int)_mainPanel._numericAnimationStep.Value.Value);
 			_animation.Render(_spriteBatch, location);
 
 			_spriteBatch.End();
@@ -752,8 +791,6 @@ namespace OpenSora.Viewer
 			{
 				if (_executionContext != null)
 				{
-					_executionContext.Update();
-
 					if (_executionContext.Scene != null)
 					{
 						_executionContext.Scene.Render(_mainPanel._panelViewer.Bounds);

@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSora.Unpacker", "OpenSo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSora.Viewer.MonoGame", "OpenSora.Viewer\OpenSora.Viewer.MonoGame.csproj", "{CABA79E6-1995-E968-CFFC-4054764E5D9A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSora.Tests", "OpenSora.Tests\OpenSora.Tests.csproj", "{B98580D0-3AA2-43DE-81A3-051C13B8C041}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{CABA79E6-1995-E968-CFFC-4054764E5D9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CABA79E6-1995-E968-CFFC-4054764E5D9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CABA79E6-1995-E968-CFFC-4054764E5D9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B98580D0-3AA2-43DE-81A3-051C13B8C041}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B98580D0-3AA2-43DE-81A3-051C13B8C041}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B98580D0-3AA2-43DE-81A3-051C13B8C041}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B98580D0-3AA2-43DE-81A3-051C13B8C041}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "label": "Reference Windows workstation (12 logical CPUs)",
+  "generatedAtUtc": "2026-11-18T08:42:51.1392161\u002B00:00",
+  "machine": {
+    "os": "Microsoft Windows 10.0.26200",
+    "runtime": ".NET 8.0.31",
+    "architecture": "X64",
+    "processorCount": 12
+  },
+  "game": {
+    "type": "FC",
+    "entryCount": 12821,
+    "scenarioEntries": 491,
+    "modelEntry": "ATARI00 ._X2",
+    "textureEntry": "AMARI   ._DS",
+    "scenarioEntry": "C0100   ._SN"
+  },
+  "benchmarks": [
+    {
+      "name": "archive-index",
+      "iterations": 5,
+      "operationsPerIteration": 1,
+      "medianTotalMs": 8.806,
+      "medianPerOperationMs": 8.806,
+      "minTotalMs": 8.3092,
+      "maxTotalMs": 9.8422,
+      "medianAllocatedBytes": 5737144,
+      "medianAllocatedBytesPerOperation": 5737144,
+      "notes": "Full .dir/.dat index build."
+    },
+    {
+      "name": "map-model-load",
+      "iterations": 5,
+      "operationsPerIteration": 1,
+      "medianTotalMs": 0.2565,
+      "medianPerOperationMs": 0.2565,
+      "minTotalMs": 0.2179,
+      "maxTotalMs": 0.2849,
+      "medianAllocatedBytes": 83816,
+      "medianAllocatedBytesPerOperation": 83816,
+      "notes": "Map proxy: read, decompress, and parse one X2/X3 model. Full map composition is not implemented yet."
+    },
+    {
+      "name": "texture-decode",
+      "iterations": 5,
+      "operationsPerIteration": 1,
+      "medianTotalMs": 0.7423,
+      "medianPerOperationMs": 0.7423,
+      "minTotalMs": 0.681,
+      "maxTotalMs": 0.7819,
+      "medianAllocatedBytes": 788200,
+      "medianAllocatedBytesPerOperation": 788200,
+      "notes": "Read and decode one _DS DDS texture (CPU only; no GPU upload)."
+    },
+    {
+      "name": "scenario-parse",
+      "iterations": 5,
+      "operationsPerIteration": 1,
+      "medianTotalMs": 1.8736,
+      "medianPerOperationMs": 1.8736,
+      "minTotalMs": 1.7578,
+      "maxTotalMs": 3.3567,
+      "medianAllocatedBytes": 1373712,
+      "medianAllocatedBytesPerOperation": 1373712,
+      "notes": "Read, decompress, parse, and decompile one _SN scenario."
+    },
+    {
+      "name": "scenario-corpus-parse",
+      "iterations": 1,
+      "operationsPerIteration": 491,
+      "medianTotalMs": 500.232,
+      "medianPerOperationMs": 1.0188024439918535,
+      "minTotalMs": 500.232,
+      "maxTotalMs": 500.232,
+      "medianAllocatedBytes": 248187120,
+      "medianAllocatedBytesPerOperation": 505472,
+      "notes": "Parsed 491, failed 0."
+    },
+    {
+      "name": "engine-update-100k-steps",
+      "iterations": 5,
+      "operationsPerIteration": 100000,
+      "medianTotalMs": 0.3573,
+      "medianPerOperationMs": 3.573E-06,
+      "minTotalMs": 0.3541,
+      "maxTotalMs": 0.3726,
+      "medianAllocatedBytes": 40,
+      "medianAllocatedBytesPerOperation": 0,
+      "notes": "Headless fixed-step host update; no rendering or scenario VM."
+    },
+    {
+      "name": "engine-frame-advance-10k",
+      "iterations": 5,
+      "operationsPerIteration": 10000,
+      "medianTotalMs": 0.1131,
+      "medianPerOperationMs": 1.131E-05,
+      "minTotalMs": 0.1031,
+      "maxTotalMs": 0.1531,
+      "medianAllocatedBytes": 40,
+      "medianAllocatedBytesPerOperation": 0,
+      "notes": "10,000 CPU frame advances with a fixed 60 Hz source; no rendering."
+    },
+    {
+      "name": "deterministic-state-100k",
+      "iterations": 5,
+      "operationsPerIteration": 100000,
+      "medianTotalMs": 1.0623,
+      "medianPerOperationMs": 1.0623E-05,
+      "minTotalMs": 0.9739,
+      "maxTotalMs": 1.2258,
+      "medianAllocatedBytes": 104,
+      "medianAllocatedBytesPerOperation": 0,
+      "notes": "Input trace \u002B deterministic RNG state update."
+    }
+  ],
+  "skipped": [
+    {
+      "name": "vm-update",
+      "reason": "Headless scenario VM is not implemented yet; tracked as M2-15."
+    },
+    {
+      "name": "full-map-load",
+      "reason": "Composed map/tilemap/asset loading is not implemented; map-model-load is the current proxy (M1-07)."
+    },
+    {
+      "name": "render-frame",
+      "reason": "Requires a graphics device/window; CPU frame advance is measured instead."
+    }
+  ]
+}

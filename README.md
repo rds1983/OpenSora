@@ -29,6 +29,7 @@ current-state snapshot; it is updated whenever a task lands.
 | Diagnostics | Structured logs, local crash reports, unknown-data dedup, F12 overlay | Log retention policy and developer analysis tooling |
 | Format docs | Working notes for archives, compression, DDS, CH/CP, X2/X3, and FC SCP | Complete FC/SC/3rd references for every asset and save format |
 | Assets/legal | Asset policy, third-party notices, `.gitignore` guards, CI repository-policy test | Final legal review and release packaging |
+| Performance | Headless benchmark harness with checked-in baseline | GPU/render and VM benchmarks, CI performance gates |
 | Game detection | FC and SC folders recognized | FC, SC, and the 3rd, all supported PC editions |
 | Archives (`.dir`/`.dat`) | Read-only browsing | Full virtual filesystem with loose-file overrides |
 | Textures | DDS and CH images | Complete format coverage, mipmaps, alpha |
@@ -69,6 +70,8 @@ current-state snapshot; it is updated whenever a task lands.
 * Architecture decision records and an automated project-dependency/architecture test.
 * An asset and legal policy with `.gitignore` guards and a CI repository-policy test that rejects
   tracked game data and large binaries.
+* A headless benchmark harness with a checked-in FC baseline for archive indexing, model/texture
+  loading, scenario parsing, engine updates, and deterministic state.
 
 ### Known limitations
 
@@ -94,6 +97,8 @@ current-state snapshot; it is updated whenever a task lands.
   cleanup are tracked as M2-14.
 * The existing `images/OpenSora.png` screenshot predates the asset policy and should be replaced with
   an asset-free capture before release.
+* Benchmarks are CPU-only: VM execution and render-frame timing are not measured yet. Full map load is
+  approximated by X2 model parsing until M1-07.
 
 ## Running the current viewer
 
@@ -170,6 +175,23 @@ the fixture policy and builders. The initial suite covers:
 Add a test for every behavioral change. A change that cannot be covered automatically needs a
 recorded manual verification step in the task report.
 
+## Benchmarking
+
+`OpenSora.Benchmarks` measures archive indexing, X2 model parsing, DDS decoding, scenario
+parsing/decompilation, engine fixed-step updates, and deterministic input/RNG state.
+
+```bash
+dotnet run --project OpenSora.Benchmarks -c Release -- \
+  --game "/path/to/Trails in the Sky FC" \
+  --output benchmarks/benchmark-result.json \
+  --compare benchmarks/baseline.json
+```
+
+The checked-in [baseline](benchmarks/baseline.md) was recorded on a reference Windows workstation.
+Benchmarks require a local game installation and are not run in CI; compare on the same hardware and
+runtime. See [benchmarks/README.md](benchmarks/README.md) for methodology and current gaps (VM and
+render timing are deferred).
+
 ## Diagnostics
 
 Diagnostics are local: a per-session log, crash reports with recent log context, and an F12 overlay in
@@ -196,7 +218,9 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <path/to/
 | `OpenSora.Viewer` | Myra-based resource viewer and scenario preview, acting as the engine host application |
 | `OpenSora.Unpacker` | CLI tool that extracts archive entries |
 | `OpenSora.Decompiler` | CLI tool that disassembles scenario scripts |
+| `OpenSora.Benchmarks` | Headless benchmark harness and baseline reports |
 | `OpenSora.Tests` | xUnit tests, synthetic fixtures, deterministic simulation checks, and future game systems |
+| `benchmarks` | Benchmark methodology, checked-in baseline JSON, and baseline summary |
 | `docs/adr` | Architecture decision records |
 | `docs/testing` | Test and fixture policy |
 | `docs/diagnostics.md` | Logging, crash reports, and debug-overlay guide |

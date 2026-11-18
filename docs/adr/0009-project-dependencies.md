@@ -19,6 +19,7 @@ OpenSora.Common.MonoGame      (no project references)
     ├── OpenSora.Viewer.MonoGame
     ├── OpenSora.Unpacker
     ├── OpenSora.Decompiler
+    ├── OpenSora.Benchmarks
     └── OpenSora.Tests
 ```
 
@@ -30,6 +31,7 @@ Allowed project references today:
 | `OpenSora.Viewer.MonoGame` | `OpenSora.Common.MonoGame` |
 | `OpenSora.Unpacker` | `OpenSora.Common.MonoGame` |
 | `OpenSora.Decompiler` | `OpenSora.Common.MonoGame` |
+| `OpenSora.Benchmarks` | `OpenSora.Common.MonoGame` |
 | `OpenSora.Tests` | `OpenSora.Common.MonoGame` |
 
 No production project may reference the viewer, tools, or tests. Test projects are leaves.

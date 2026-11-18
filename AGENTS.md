@@ -292,6 +292,8 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <game-fol
 - Automated tests live in `OpenSora.Tests`; run them with `dotnet test OpenSora.MonoGame.sln`
 - CI runs on GitHub Actions for Windows and Linux; validate locally on Windows and, when available,
   WSL/Linux before pushing
+- Benchmarks live in `OpenSora.Benchmarks` and `benchmarks/`; update the baseline when a benchmark
+  workload or reference machine changes
 - Diagnostics write local logs and crash reports under the platform's application-data directory; see
   `docs/diagnostics.md`. Nothing is uploaded
 - Binary format notes live in `docs/formats/`; when changing a loader, update its format page and mark

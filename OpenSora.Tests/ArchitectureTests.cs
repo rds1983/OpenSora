@@ -45,6 +45,7 @@ namespace OpenSora.Tests
 				["OpenSora.Viewer.MonoGame.csproj"] = new[] { "OpenSora.Common.MonoGame.csproj" },
 				["OpenSora.Unpacker.csproj"] = new[] { "OpenSora.Common.MonoGame.csproj" },
 				["OpenSora.Decompiler.csproj"] = new[] { "OpenSora.Common.MonoGame.csproj" },
+				["OpenSora.Benchmarks.csproj"] = new[] { "OpenSora.Common.MonoGame.csproj" },
 				["OpenSora.Tests.csproj"] = new[] { "OpenSora.Common.MonoGame.csproj" }
 			};
 

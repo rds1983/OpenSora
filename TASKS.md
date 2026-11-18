@@ -6,8 +6,8 @@
 
 **Last updated:** 2026-11-18
 **Current milestone:** M0 - Foundations, tests, and architecture
-**Next task:** M0-10 - Add baseline performance and memory measurements
-**Last completed:** M0-09 - Establish the asset and legal policy (2026-11-18)
+**Next task:** M0-11 - Clean up build warnings and namespace issues
+**Last completed:** M0-10 - Add baseline performance and memory measurements (2026-11-18)
 
 ## Purpose
 
@@ -50,7 +50,7 @@ Discovery work that spans milestones goes to `Cross-cutting backlog` until it is
 ## Current focus
 
 - **Milestone:** M0 - make the codebase safe to evolve before adding gameplay.
-- **Next task:** M0-10 - add baseline performance and memory measurements.
+- **Next task:** M0-11 - clean up build warnings and namespace issues.
 - **Why:** every later milestone depends on automated verification and deterministic updates. The VM,
   asset loaders, and battle formulas cannot be validated by "the viewer still opens".
 - **Suggested first vertical slice after M0:** FC prologue through the first field map, first
@@ -186,11 +186,15 @@ enforced.
     forbidden data and >5 MB files. 39 tests pass in Debug/Release and clean Linux; manual
     `git check-ignore` samples passed.
 
-- [ ] **M0-10 - Add baseline performance and memory measurements** - _todo_
+- [x] **M0-10 - Add baseline performance and memory measurements** - _done 2026-11-18_
   - Depends on: M0-02
   - Scope: benchmark CLI for map load, model load, scenario parse, VM update, and frame time; record
     a baseline on a representative machine.
   - Done when: a repeatable benchmark report exists and regressions can be compared.
+  - Result: `OpenSora.Benchmarks` with archive, model, texture, scenario, corpus, engine update, frame
+    advance, and deterministic state workloads; JSON baseline plus Markdown summary; `--compare`
+    regression deltas. Full map/VM/render benchmarks are documented as deferred (M1-07/M2-15).
+    39 tests pass in Debug/Release and clean Linux; benchmark baseline recorded on FC.
 
 - [ ] **M0-11 - Clean up build warnings and namespace issues** - _todo_
   - Depends on: M0-01
@@ -401,6 +405,13 @@ golden traces pass for representative scripts in all three games.
     move Myra/dialogue UI out of `Scene` into the viewer; update project references, tests, and CI.
   - Done when: the engine runtime has no viewer/UI references, the viewer consumes it, and the
     architecture tests enforce the new dependency graph.
+
+- [ ] **M2-15 - Add VM execution benchmarks** - _todo_
+  - Depends on: M2-01, M2-10
+  - Scope: extend `OpenSora.Benchmarks` with headless VM update/execution workloads, scenario traces,
+    and save/restore timings now that a headless VM exists.
+  - Done when: the baseline report includes VM update and scenario execution measurements with
+    reproducible inputs.
 
 ## M3 - Field gameplay and game shell (FC)
 
@@ -867,6 +878,7 @@ A task is done only when all of the following are true:
 | 2026-11-18 | M0-07 | Documented archive, compression, texture, sprite, model, scenario, expression, save, audio, movie, and effect formats with open questions. |
 | 2026-11-18 | M0-08 | Added ADRs for engine/viewer, MonoGame, VM, assets, saves, modding, and dependencies; enforced the graph in tests. |
 | 2026-11-18 | M0-09 | Added the asset/legal policy, third-party notices, ignore rules, and a tracked-file repository policy test. |
+| 2026-11-18 | M0-10 | Added the benchmark harness, FC baseline, comparison mode, and deferred VM/map/render benchmark notes. |
 
 ## Changelog
 
@@ -881,3 +893,4 @@ A task is done only when all of the following are true:
 | 2026-11-18 | Completed M0-07; next focus is M0-08 | Establish shared format knowledge before asset pipeline work |
 | 2026-11-18 | Completed M0-08; next focus is M0-09; added M2-14 | Make boundaries explicit and enforceable before policy and asset work |
 | 2026-11-18 | Completed M0-09; next focus is M0-10 | Prevent accidental asset commits before performance and asset-pipeline work |
+| 2026-11-18 | Completed M0-10; next focus is M0-11; added M2-15 | Establish performance baselines before warning cleanup and asset work |

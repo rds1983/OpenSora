@@ -318,6 +318,7 @@ overrides/
 **/logs/
 **/crash-reports/
 *.trx
+benchmarks/benchmark-result.json
 
 # Note: OpenSora.Common/Effects/DefaultEffect.mgfx is a compiled project
 # resource and is intentionally tracked; do not add *.mgfx here.

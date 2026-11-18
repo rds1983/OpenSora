@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows.Forms;
 
 namespace OpenSora.Viewer
 {
@@ -16,7 +15,6 @@ namespace OpenSora.Viewer
 			}
 			catch(Exception ex)
 			{
-				MessageBox.Show(ex.ToString());
 				Console.WriteLine(ex.ToString());
 			}
 		}

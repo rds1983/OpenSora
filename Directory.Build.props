@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <Authors>OpenSoraTeam</Authors>
+    <Product>OpenSora</Product>
+    <PackageLicenseExpression>GPL3</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/rds1983/OpenSora</PackageProjectUrl>
+    <Description>Open Source Engine for running "Trails in the Sky" games in C#</Description>
+    <RootNamespace>OpenSora</RootNamespace>
+    <MonoGameTargetFramework>net8.0</MonoGameTargetFramework>
+    <Version>0.1.0</Version>
+    <MonoGameVersion>3.8.6.1</MonoGameVersion>
+    <MyraVersion>1.6.8</MyraVersion>
+  </PropertyGroup>
+</Project>

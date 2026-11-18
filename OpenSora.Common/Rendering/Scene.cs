@@ -7,6 +7,7 @@ using OpenSora.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FontStashSharp;
 
 namespace OpenSora.Rendering
 {
@@ -212,7 +213,7 @@ namespace OpenSora.Rendering
 					if (RenderDebugInfo)
 					{
 						_defaultEffect.WorldViewProjection = view * _renderContext.ViewProjection;
-						_defaultEffect.Texture = DefaultAssets.White;
+						_defaultEffect.Texture = DefaultAssets.WhiteRegion.Texture;
 						foreach (var pass in _defaultEffect.CurrentTechnique.Passes)
 						{
 							pass.Apply();
@@ -252,7 +253,7 @@ namespace OpenSora.Rendering
 
 				_spriteBatch.Begin();
 
-				_spriteBatch.DrawString(DefaultAssets.Font,
+				_spriteBatch.DrawString(DefaultAssets.DebugFont,
 					string.Format("Camera: X={0}, Y={1}, Z={2}, Zoom={3}", Camera.Position.X, Camera.Position.Y, Camera.Position.Z, Camera.Zoom), 
 					new Vector2(x, y), Color.White);
 				y += 20;

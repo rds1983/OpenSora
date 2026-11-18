@@ -1,0 +1,10 @@
+<Project>
+  <Project.ExportOptions Namespace="OpenSora.UI" Class="CharacterTalkWidget" OutputPath="D:\Projects\OpenSora\OpenSora.Common\UI" />
+  <HorizontalStackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="700" Height="220" Background="#0000007C">
+    <Image Id="_imageCharacter" />
+    <VerticalStackPanel StackPanel.ProportionType="Fill">
+      <Label Text="Estelle" Id="_labelName" />
+      <Label Text="Daddy's really late." Id="_labelText" StackPanel.ProportionType="Fill" />
+    </VerticalStackPanel>
+  </HorizontalStackPanel>
+</Project>

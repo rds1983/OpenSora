@@ -174,7 +174,7 @@ namespace OpenSora
 				}
 			}
 
-			return DefaultAssets.White;
+			return DefaultAssets.WhiteRegion.Texture;
 		}
 
 		public Texture2D LoadImage(DirEntry entry)

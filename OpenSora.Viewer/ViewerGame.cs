@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using OpenSora.Rendering;
 using OpenSora.Scenarios;
+using Myra.Events;
 
 namespace OpenSora.Viewer
 {
@@ -85,14 +86,14 @@ namespace OpenSora.Viewer
 			_mainPanel._buttonChange.Click += OnChangeFolder;
 			_mainPanel._buttonAbout.Click += OnAbout;
 
-			_mainPanel._listFiles.Items.Clear();
+			_mainPanel._listFiles.Widgets.Clear();
 			_mainPanel._listFiles.SelectedIndexChanged += _listFiles_SelectedIndexChanged;
 
 			_mainPanel._textFilter.TextChanged += _textFilter_TextChanged;
 
 			_mainPanel._comboResourceType.SelectedIndexChanged += _comboResourceType_SelectedIndexChanged;
 
-			_mainPanel._comboFunctions.Items.Clear();
+			_mainPanel._comboFunctions.Widgets.Clear();
 			_mainPanel._comboFunctions.SelectedIndexChanged += _comboFunctions_SelectedIndexChanged;
 
 			_mainPanel._numericAnimationStart.ValueChanged += _numericAnimationStart_ValueChanged;
@@ -118,7 +119,7 @@ namespace OpenSora.Viewer
 			_mainPanel._comboResourceType.SelectedIndex = 3;
 		}
 
-		private void _sliderPlayer_ValueChangedByUser(object sender, Myra.Utility.ValueChangedEventArgs<float> e)
+		private void _sliderPlayer_ValueChangedByUser(object sender, ValueChangedEventArgs<float> e)
 		{
 			if (_executionContext == null)
 			{
@@ -130,7 +131,7 @@ namespace OpenSora.Viewer
 			_executionContext.PlayedPart = part;
 		}
 
-		private void SliderPlayer_PressedChanged(object sender, EventArgs e)
+		private void SliderPlayer_PressedChanged(object sender, MyraEventArgs e)
 		{
 			if (_executionContext == null)
 			{
@@ -141,7 +142,8 @@ namespace OpenSora.Viewer
 			{
 				_wasPlaying = _executionContext.IsPlaying;
 				_executionContext.Stop();
-			} else
+			}
+			else
 			{
 				if (_wasPlaying)
 				{
@@ -170,12 +172,13 @@ namespace OpenSora.Viewer
 				FormatDuration(_executionContext.MainWorker.TotalDurationInMs);
 		}
 
-		private void _buttonPlayPause_Click(object sender, EventArgs e)
+		private void _buttonPlayPause_Click(object sender, MyraEventArgs e)
 		{
 			if (_executionContext.IsPlaying)
 			{
 				_executionContext.Stop();
-			} else
+			}
+			else
 			{
 				_executionContext.Play();
 			}
@@ -199,7 +202,6 @@ namespace OpenSora.Viewer
 				return;
 			}
 
-			_mainPanel._boxTop.Proportions.RemoveAt(2);
 			_mainPanel._boxTop.Widgets.Remove(_mainPanel._boxAnimation);
 		}
 
@@ -210,7 +212,6 @@ namespace OpenSora.Viewer
 				return;
 			}
 
-			_mainPanel._boxTop.Proportions.Insert(2, new Proportion(ProportionType.Part, 1.0f));
 			_mainPanel._boxTop.Widgets.Insert(2, _mainPanel._boxAnimation);
 		}
 
@@ -221,7 +222,6 @@ namespace OpenSora.Viewer
 				return;
 			}
 
-			_mainPanel._boxTop.Proportions.RemoveAt(2);
 			_mainPanel._boxTop.Widgets.Remove(_mainPanel._boxScenarios);
 		}
 
@@ -232,33 +232,32 @@ namespace OpenSora.Viewer
 				return;
 			}
 
-			_mainPanel._boxTop.Proportions.Insert(2, new Proportion(ProportionType.Part, 1.0f));
 			_mainPanel._boxTop.Widgets.Insert(2, _mainPanel._boxScenarios);
 		}
 
-		private void _numericAnimationStep_ValueChanged(object sender, Myra.Utility.ValueChangedEventArgs<float?> e)
+		private void _numericAnimationStep_ValueChanged(object sender, ValueChangedEventArgs<float?> e)
 		{
 			ResetAnimation();
 		}
 
-		private void _numericAnimationStart_ValueChanged(object sender, Myra.Utility.ValueChangedEventArgs<float?> e)
+		private void _numericAnimationStart_ValueChanged(object sender, ValueChangedEventArgs<float?> e)
 		{
 			ResetAnimation();
 		}
 
-		private void _textFilter_TextChanged(object sender, Myra.Utility.ValueChangedEventArgs<string> e)
+		private void _textFilter_TextChanged(object sender, ValueChangedEventArgs<string> e)
 		{
 			RefreshFilesSafe();
 		}
 
-		private void OnAbout(object sender, EventArgs e)
+		private void OnAbout(object sender, MyraEventArgs e)
 		{
 			var name = new AssemblyName(typeof(FalcomDecompressor).Assembly.FullName);
 			var messageBox = Dialog.CreateMessageBox("About", "OpenSora.Viewer " + name.Version.ToString());
 			messageBox.ShowModal(_desktop);
 		}
 
-		private void _comboResourceType_SelectedIndexChanged(object sender, EventArgs e)
+		private void _comboResourceType_SelectedIndexChanged(object sender, MyraEventArgs e)
 		{
 			_typeEntries = null;
 			_animation = null;
@@ -385,7 +384,7 @@ namespace OpenSora.Viewer
 
 						_mainPanel._textScenarioLocation.Text = "Location: " + scenario.Location;
 
-						_mainPanel._comboFunctions.Items.Clear();
+						_mainPanel._comboFunctions.Widgets.Clear();
 
 						int idx = 0;
 						foreach (var function in scenario.Functions)
@@ -395,7 +394,7 @@ namespace OpenSora.Viewer
 								continue;
 							}
 
-							_mainPanel._comboFunctions.Items.Add(new ListItem
+							_mainPanel._comboFunctions.Widgets.Add(new Label
 							{
 								Text = string.Format("0x{0:X}", function.Offset),
 								Tag = function
@@ -420,7 +419,7 @@ namespace OpenSora.Viewer
 			PushStatusMessage(string.Empty);
 		}
 
-		private void _listFiles_SelectedIndexChanged(object sender, EventArgs e)
+		private void _listFiles_SelectedIndexChanged(object sender, MyraEventArgs e)
 		{
 			var item = _mainPanel._listFiles.SelectedItem;
 			if (item == null)
@@ -460,7 +459,7 @@ namespace OpenSora.Viewer
 			}
 
 			_resourceLoader.ClearTextureCache();
-			_mainPanel._listFiles.Items.Clear();
+			_mainPanel._listFiles.Widgets.Clear();
 
 			var index = _mainPanel._comboResourceType.SelectedIndex;
 
@@ -515,30 +514,12 @@ namespace OpenSora.Viewer
 					}
 				}
 
-				_mainPanel._listFiles.Items.Add(new ListItem
+				_mainPanel._listFiles.Widgets.Add(new Label
 				{
 					Text = a.Name,
 					Tag = a
 				});
 			}
-
-/*			if (index == 4)
-			{
-				int? idx = null;
-				for (var i = 0; i < _mainPanel._listFiles.Items.Count; ++i)
-				{
-					if (_mainPanel._listFiles.Items[i].Text.Contains("R2412"))
-					{
-						idx = i;
-						break;
-					}
-				}
-
-				if (idx != null)
-				{
-					_mainPanel._listFiles.SelectedIndex = idx.Value;
-				}
-			}*/
 		}
 
 		private void RefreshFilesSafe()
@@ -554,7 +535,7 @@ namespace OpenSora.Viewer
 			}
 		}
 
-		private void _comboFunctions_SelectedIndexChanged(object sender, EventArgs e)
+		private void _comboFunctions_SelectedIndexChanged(object sender, MyraEventArgs e)
 		{
 			if (_executionContext == null || _mainPanel._comboFunctions.SelectedItem == null)
 			{
@@ -574,13 +555,14 @@ namespace OpenSora.Viewer
 					return;
 				}
 
-				if (gameType.Value == GameType.SC && _mainPanel._comboResourceType.Items.Count == 5)
+				if (gameType.Value == GameType.SC && _mainPanel._comboResourceType.Widgets.Count == 5)
 				{
 					// Remove scenes
-					_mainPanel._comboResourceType.Items.RemoveAt(4);
-				} else if (gameType.Value == GameType.FC && _mainPanel._comboResourceType.Items.Count == 4)
+					_mainPanel._comboResourceType.Widgets.RemoveAt(4);
+				}
+				else if (gameType.Value == GameType.FC && _mainPanel._comboResourceType.Widgets.Count == 4)
 				{
-					_mainPanel._comboResourceType.Items.Add(new ListItem("Scenes"));
+					_mainPanel._comboResourceType.Widgets.Add(new Label() { Text = "Scenes" });
 				}
 
 				_mainPanel._textPath.Text = folder;
@@ -609,7 +591,7 @@ namespace OpenSora.Viewer
 			}
 		}
 
-		private void OnChangeFolder(object sender, EventArgs e)
+		private void OnChangeFolder(object sender, MyraEventArgs e)
 		{
 			var dlg = new FileDialog(FileDialogMode.ChooseFolder);
 

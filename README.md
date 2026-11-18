@@ -65,6 +65,7 @@ current-state snapshot; it is updated whenever a task lands.
   and an F12 diagnostics overlay in the viewer.
 * Working format notes for DIR/DAT, Falcom compression, DDS, CH/CP, X2/X3, FC scenarios, and SCP
   expressions.
+* Architecture decision records and an automated project-dependency/architecture test.
 
 ### Known limitations
 
@@ -86,6 +87,8 @@ current-state snapshot; it is updated whenever a task lands.
 * Diagnostics are local only. There is no telemetry, automatic upload, or log retention policy yet.
 * Save, audio, movie, and effect format pages are open research notes; those loaders are not
   implemented. SC/3rd scenario and sidecar formats remain largely undocumented.
+* The engine runtime still lives in `OpenSora.Common`; the dedicated engine assembly and UI-boundary
+  cleanup are tracked as M2-14.
 
 ## Running the current viewer
 
@@ -199,11 +202,10 @@ runtime rendering core into a dedicated engine project while keeping the viewer 
 
 ## Architecture decisions
 
-Design decisions are recorded in [docs/adr](docs/adr). See
-[ADR 0001 - Engine host and fixed-timestep clock](docs/adr/0001-engine-host.md) for the deterministic
-update model and
-[ADR 0002 - Deterministic random numbers and input traces](docs/adr/0002-deterministic-input-and-random.md)
-for reproducible randomness and input.
+Design decisions are recorded in [docs/adr](docs/adr). The index links all accepted ADRs, including
+the engine/viewer boundary, MonoGame boundaries, scenario VM, asset access, save format, modding, and
+project dependency rules. `ArchitectureTests` enforces the current project graph and simulation
+boundaries in CI.
 
 ## Format documentation
 

@@ -6,8 +6,8 @@
 
 **Last updated:** 2026-11-18
 **Current milestone:** M0 - Foundations, tests, and architecture
-**Next task:** M0-08 - Record architecture decisions and dependency rules
-**Last completed:** M0-07 - Document the binary formats (2026-11-18)
+**Next task:** M0-09 - Establish the asset and legal policy
+**Last completed:** M0-08 - Record architecture decisions and dependency rules (2026-11-18)
 
 ## Purpose
 
@@ -50,7 +50,7 @@ Discovery work that spans milestones goes to `Cross-cutting backlog` until it is
 ## Current focus
 
 - **Milestone:** M0 - make the codebase safe to evolve before adding gameplay.
-- **Next task:** M0-08 - record architecture decisions and dependency rules.
+- **Next task:** M0-09 - establish the asset and legal policy.
 - **Why:** every later milestone depends on automated verification and deterministic updates. The VM,
   asset loaders, and battle formulas cannot be validated by "the viewer still opens".
 - **Suggested first vertical slice after M0:** FC prologue through the first field map, first
@@ -165,11 +165,15 @@ enforced.
     FC entry catalog, references, and open questions. Loader/source files link to their pages.
     Entry counts and structures were verified against the local FC installation and fixtures.
 
-- [ ] **M0-08 - Record architecture decisions and dependency rules** - _todo_
+- [x] **M0-08 - Record architecture decisions and dependency rules** - _done 2026-11-18_
   - Depends on: M0-02
   - Scope: `docs/adr/` with decisions on engine vs viewer separation, MonoGame boundaries, VM design,
     asset access, save format, and modding. Define allowed project references.
   - Done when: the first ADRs are accepted and CI or review checks the dependency direction.
+  - Result: ADR index plus ADRs 0003-0009 covering boundaries, VM, assets, saves, modding, and
+    dependencies. `ArchitectureTests` enforces the project graph and simulation source boundaries.
+    Removed Myra portrait resolution from scenario instructions; remaining `Scene` UI cleanup is
+    tracked as M2-14.
 
 - [ ] **M0-09 - Establish the asset and legal policy** - _todo_
   - Depends on: none
@@ -386,6 +390,13 @@ golden traces pass for representative scripts in all three games.
   - Scope: golden traces for representative scripts per game: dialogue, movement, flags, choices,
     events, and save/restore.
   - Done when: traces are checked in as fixtures and CI compares state hashes.
+
+- [ ] **M2-14 - Extract the engine runtime and enforce UI boundaries** - _todo_
+  - Depends on: M0-08, M2-07, M2-10
+  - Scope: introduce a dedicated engine runtime assembly for simulation, VM, state, and scene data;
+    move Myra/dialogue UI out of `Scene` into the viewer; update project references, tests, and CI.
+  - Done when: the engine runtime has no viewer/UI references, the viewer consumes it, and the
+    architecture tests enforce the new dependency graph.
 
 ## M3 - Field gameplay and game shell (FC)
 
@@ -850,6 +861,7 @@ A task is done only when all of the following are true:
 | 2026-11-18 | M0-05 | Added GitHub Actions CI for Windows and Linux with caching, tests, and downloadable artifacts. |
 | 2026-11-18 | M0-06 | Added structured logging, local crash reports, unknown-data deduplication, and the F12 diagnostics overlay. |
 | 2026-11-18 | M0-07 | Documented archive, compression, texture, sprite, model, scenario, expression, save, audio, movie, and effect formats with open questions. |
+| 2026-11-18 | M0-08 | Added ADRs for engine/viewer, MonoGame, VM, assets, saves, modding, and dependencies; enforced the graph in tests. |
 
 ## Changelog
 
@@ -862,3 +874,4 @@ A task is done only when all of the following are true:
 | 2026-11-18 | Completed M0-05; next focus is M0-06 | Establish hosted verification before diagnostics and asset work |
 | 2026-11-18 | Completed M0-06; next focus is M0-07 | Make failures actionable and suppress unknown-data spam before format documentation |
 | 2026-11-18 | Completed M0-07; next focus is M0-08 | Establish shared format knowledge before asset pipeline work |
+| 2026-11-18 | Completed M0-08; next focus is M0-09; added M2-14 | Make boundaries explicit and enforceable before policy and asset work |

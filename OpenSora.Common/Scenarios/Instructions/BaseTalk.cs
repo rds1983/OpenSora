@@ -1,5 +1,4 @@
-﻿using Myra.Graphics2D.TextureAtlases;
-using OpenSora.Rendering;
+﻿using OpenSora.Rendering;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -158,10 +157,6 @@ namespace OpenSora.Scenarios.Instructions
 			}
 
 			str = TalkStrings[i];
-			if (str.PortraitId != null && str.Portrait == null)
-			{
-				str.Portrait = new TextureRegion(worker.Context.ResourceLoader.GetCharacterPortrait(str.PortraitId));
-			}
 
 			int symbolsCount = str.Text.Length;
 			if (passed < symbolsCount * SymbolDurationInMs)

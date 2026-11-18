@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Myra;
+using Myra.Graphics2D.TextureAtlases;
 using Myra.Graphics2D.UI;
 using OpenSora.ModelLoading;
 using OpenSora.UI;
@@ -28,6 +29,7 @@ namespace OpenSora.Rendering
 		private readonly SpriteBatch _spriteBatch;
 		private readonly Desktop _desktop;
 		private readonly CharacterTalkWidget _talkWidget;
+		private readonly Dictionary<string, TextureRegion> _portraits = new Dictionary<string, TextureRegion>();
 		private Rectangle _bounds;
 
 		public ResourceLoader ResourceLoader { get; set; }
@@ -287,7 +289,22 @@ namespace OpenSora.Rendering
 
 		public void ShowTalk(TalkString talk, int symbolsCount)
 		{
-			_talkWidget._imageCharacter.Renderable = talk.Portrait;
+			if (!string.IsNullOrEmpty(talk.PortraitId))
+			{
+				TextureRegion portrait;
+				if (!_portraits.TryGetValue(talk.PortraitId, out portrait))
+				{
+					portrait = new TextureRegion(ResourceLoader.GetCharacterPortrait(talk.PortraitId));
+					_portraits[talk.PortraitId] = portrait;
+				}
+
+				_talkWidget._imageCharacter.Renderable = portrait;
+			}
+			else
+			{
+				_talkWidget._imageCharacter.Renderable = null;
+			}
+
 			_talkWidget._labelName.Text = talk.Name;
 			_talkWidget._labelText.Text = talk.Text.Substring(0, symbolsCount);
 

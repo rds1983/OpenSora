@@ -84,7 +84,10 @@ Implementation rules:
 - Keep the change focused on the task. Do not sneak in unrelated refactors, renames, or formatting
   churn.
 - Prefer small, readable changes that fit the existing architecture. If the task requires an
-  architectural change, write or update an ADR first (see M0-08).
+  architectural change, write or update an ADR first (see M0-08). Respect accepted ADRs; supersede
+  rather than silently rewriting them.
+- Keep the project dependency graph in `docs/adr/0009-project-dependencies.md`; `ArchitectureTests`
+  must stay green.
 - Add the tests alongside the code, not afterward, when practical.
 - Handle failure paths: malformed data, missing assets, unsupported editions, and partial state.
   Error messages must identify the asset/script and the operation that failed.
@@ -292,6 +295,8 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <game-fol
   `docs/diagnostics.md`. Nothing is uploaded
 - Binary format notes live in `docs/formats/`; when changing a loader, update its format page and mark
   statements as verified, inferred, or unknown
+- Architecture decisions live in `docs/adr/`; dependency direction is enforced by
+  `OpenSora.Tests/ArchitectureTests.cs` and CI
 - Simulation time comes from `OpenSora.Engine.EngineHost`; do not use `DateTime.Now` or other
   wall-clock sources in simulation or animation code
 - Simulation randomness must use `DeterministicRandom`; do not use `System.Random` in simulation code

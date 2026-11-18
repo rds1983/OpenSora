@@ -1,5 +1,7 @@
 # OpenSora
 
+[![CI](https://github.com/rds1983/OpenSora/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/rds1983/OpenSora/actions/workflows/ci.yml)
+
 OpenSora is an open-source engine for running the **Trails in the Sky** trilogy
 (*FC*, *SC*, and *the 3rd*) from the original game data, written in C# on MonoGame. Cross-platform
 support for Windows, Linux, and macOS is a 1.0 goal.
@@ -39,7 +41,7 @@ current-state snapshot; it is updated whenever a task lands.
 | Save/load | Viewer window state only | Full game saves, slots, FC -> SC import |
 | Platforms | Windows (MonoGame DesktopGL) | Windows, Linux, macOS |
 | Tests | xUnit suite with synthetic fixtures for archives, DDS, CH/CP, X2/X3, and FC scenarios | Unit, integration, golden-trace, and visual regression suites |
-| CI | AppVeyor build | Windows and Linux build + test on every change |
+| CI | GitHub Actions: Windows + Linux build, test, and artifact publishing | Hosted PR checks and release automation |
 
 ### What works today
 
@@ -71,6 +73,8 @@ current-state snapshot; it is updated whenever a task lands.
   timing, deterministic RNG, input traces, and minimal CH/CP/model fixtures. There are no integration,
   golden-trace, or visual regression tests yet.
 * SC and 3rd scenario fixtures are pending their parsers (M2-03/M2-04).
+* The first hosted GitHub Actions run is not part of the local verification record; Windows and Linux
+  commands have been validated locally.
 * The engine host still lives in `OpenSora.Common`, and the viewer owns input and UI. Input
   abstraction and the engine/viewer project split are later M0 tasks.
 * The viewer still polls MonoGame devices directly; logical input snapshots are not yet wired into
@@ -110,6 +114,17 @@ dotnet run --project OpenSora.Viewer/OpenSora.Viewer.MonoGame.csproj
 ```
 
 The solution builds with 0 errors as of 2026-11-18 (warnings are tracked as cleanup work).
+
+### Continuous integration
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on pushes to `master`, pull requests, and
+manual dispatch. The matrix covers Windows x64 and Linux x64 and performs:
+
+1. NuGet restore with package caching.
+2. Release build.
+3. Release test run with downloadable TRX results.
+4. Publishing of the viewer, `Unpacker`, and `Decompiler` for the target runtime.
+5. Upload of per-platform artifacts.
 
 ### Testing
 

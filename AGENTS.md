@@ -212,7 +212,9 @@ After confirmation:
    git push
    ```
    If the branch has no upstream, ask the developer which remote/branch to use before setting one.
-9. Report the commit hash, push result, and the next recommended task.
+9. Check the CI run for the pushed commit. If it fails, fix the failure before claiming the task is
+   complete or starting the next task.
+10. Report the commit hash, push result, CI result, and the next recommended task.
 
 If the push fails (permissions, conflicts, protected branch), stop and report the exact error. Do not
 force-push, rewrite history, or create a pull request unless the developer asks.
@@ -281,6 +283,8 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <game-fol
 - The solution currently builds with warnings; treat new warnings as regressions and fix existing
   ones under M0-11
 - Automated tests live in `OpenSora.Tests`; run them with `dotnet test OpenSora.MonoGame.sln`
+- CI runs on GitHub Actions for Windows and Linux; validate locally on Windows and, when available,
+  WSL/Linux before pushing
 - Simulation time comes from `OpenSora.Engine.EngineHost`; do not use `DateTime.Now` or other
   wall-clock sources in simulation or animation code
 - Simulation randomness must use `DeterministicRandom`; do not use `System.Random` in simulation code

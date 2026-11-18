@@ -6,8 +6,8 @@
 
 **Last updated:** 2026-11-18
 **Current milestone:** M0 - Foundations, tests, and architecture
-**Next task:** M0-05 - Establish CI
-**Last completed:** M0-04 - Build the synthetic fixture toolkit (2026-11-18)
+**Next task:** M0-06 - Add diagnostics, logging, and crash reporting
+**Last completed:** M0-05 - Establish CI (2026-11-18)
 
 ## Purpose
 
@@ -50,7 +50,7 @@ Discovery work that spans milestones goes to `Cross-cutting backlog` until it is
 ## Current focus
 
 - **Milestone:** M0 - make the codebase safe to evolve before adding gameplay.
-- **Next task:** M0-05 - establish CI for Windows and Linux with build, test, and artifact publishing.
+- **Next task:** M0-06 - add diagnostics, logging, and crash reporting.
 - **Why:** every later milestone depends on automated verification and deterministic updates. The VM,
   asset loaders, and battle formulas cannot be validated by "the viewer still opens".
 - **Suggested first vertical slice after M0:** FC prologue through the first field map, first
@@ -132,11 +132,16 @@ enforced.
     Release; real-data CH/CP sample decoding passed; fixture policy documented in
     `docs/testing/fixtures.md`.
 
-- [ ] **M0-05 - Establish CI** - _todo_
+- [x] **M0-05 - Establish CI** - _done 2026-11-18_
   - Depends on: M0-01, M0-04
   - Scope: GitHub Actions (or keep AppVeyor) for Windows and Linux: restore, build, test, publish
-    viewer/tool artifacts, cache NuGet packages.
+    viewer/tool artifacts, cache NuGet packages. Keep the workflow runnable on pull requests and
+    manually via `workflow_dispatch`.
   - Done when: a pull request runs build + tests on both OSes and artifacts are downloadable.
+  - Result: GitHub Actions matrix for Windows x64 and Linux x64 with NuGet caching, Release
+    build/test, TRX test results, and viewer/Unpacker/Decompiler artifacts. Workflow commands passed
+    locally on Windows and Linux (WSL); removed the unused WinForms reference that blocked clean
+    Linux builds. Hosted run recorded after push.
 
 - [ ] **M0-06 - Add diagnostics, logging, and crash reporting** - _todo_
   - Depends on: M0-02
@@ -822,6 +827,7 @@ A task is done only when all of the following are true:
 - The developer explicitly confirmed the task is finished.
 - `TASKS.md` is updated with status, date, completed-log entry, and any newly discovered work.
 - The commit is focused, message references the task ID, and it has been pushed.
+- CI is green for the pushed commit, or the failure is understood and tracked.
 
 ## Completed log
 
@@ -832,6 +838,7 @@ A task is done only when all of the following are true:
 | 2026-11-18 | M0-02 | Added the fixed-timestep engine host, removed wall-clock timing from simulation/animation, and recorded ADR 0001. |
 | 2026-11-18 | M0-03 | Added deterministic RNG, input snapshots/traces with recording and replay, frame-time sources, and ADR 0002. |
 | 2026-11-18 | M0-04 | Added the synthetic fixture toolkit and headless CH/animation decoders; documented fixture policy. |
+| 2026-11-18 | M0-05 | Added GitHub Actions CI for Windows and Linux with caching, tests, and downloadable artifacts. |
 
 ## Changelog
 
@@ -841,3 +848,4 @@ A task is done only when all of the following are true:
 | 2026-11-18 | Added ADR 0001 and completed M0-02; next focus is M0-03 | Establish deterministic fixed-step timing before input abstraction and gameplay work |
 | 2026-11-18 | Added ADR 0002 and completed M0-03; next focus is M0-04 | Seal deterministic random/input contracts before building the fixture toolkit |
 | 2026-11-18 | Completed M0-04; SC/3rd scenario fixtures moved to M2-03/M2-04 | Build loadable fixtures only for formats the engine can currently parse |
+| 2026-11-18 | Completed M0-05; next focus is M0-06 | Establish hosted verification before diagnostics and asset work |

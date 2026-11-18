@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-publish:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            os: windows-latest
+            rid: win-x64
+            artifact: opensora-win-x64
+          - name: Linux x64
+            os: ubuntu-latest
+            rid: linux-x64
+            artifact: opensora-linux-x64
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'Directory.Build.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore
+        run: dotnet restore OpenSora.MonoGame.sln
+
+      - name: Build
+        run: dotnet build OpenSora.MonoGame.sln --configuration Release --no-restore
+
+      - name: Test
+        run: >-
+          dotnet test OpenSora.MonoGame.sln
+          --configuration Release
+          --no-build
+          --no-restore
+          --logger "trx;LogFileName=test-results.trx"
+          --results-directory artifacts/test-results
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}-test-results
+          path: artifacts/test-results
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Publish viewer
+        run: >-
+          dotnet publish OpenSora.Viewer/OpenSora.Viewer.MonoGame.csproj
+          --configuration Release
+          --runtime ${{ matrix.rid }}
+          --self-contained false
+          --output artifacts/viewer
+
+      - name: Publish tools
+        run: |
+          dotnet publish OpenSora.Unpacker/OpenSora.Unpacker.csproj --configuration Release --runtime ${{ matrix.rid }} --self-contained false --output artifacts/unpacker
+          dotnet publish OpenSora.Decompiler/OpenSora.Decompiler.csproj --configuration Release --runtime ${{ matrix.rid }} --self-contained false --output artifacts/decompiler
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: artifacts
+          if-no-files-found: error
+          retention-days: 14

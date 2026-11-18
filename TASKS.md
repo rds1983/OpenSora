@@ -141,7 +141,8 @@ enforced.
   - Result: GitHub Actions matrix for Windows x64 and Linux x64 with NuGet caching, Release
     build/test, TRX test results, and viewer/Unpacker/Decompiler artifacts. Workflow commands passed
     locally on Windows and Linux (WSL); removed the unused WinForms reference that blocked clean
-    Linux builds. Hosted run recorded after push.
+    Linux builds. Hosted run green:
+    https://github.com/rds1983/OpenSora/actions/runs/44260301782
 
 - [ ] **M0-06 - Add diagnostics, logging, and crash reporting** - _todo_
   - Depends on: M0-02

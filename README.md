@@ -73,8 +73,6 @@ current-state snapshot; it is updated whenever a task lands.
   timing, deterministic RNG, input traces, and minimal CH/CP/model fixtures. There are no integration,
   golden-trace, or visual regression tests yet.
 * SC and 3rd scenario fixtures are pending their parsers (M2-03/M2-04).
-* The first hosted GitHub Actions run is not part of the local verification record; Windows and Linux
-  commands have been validated locally.
 * The engine host still lives in `OpenSora.Common`, and the viewer owns input and UI. Input
   abstraction and the engine/viewer project split are later M0 tasks.
 * The viewer still polls MonoGame devices directly; logical input snapshots are not yet wired into

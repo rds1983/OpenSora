@@ -1,4 +1,5 @@
 ﻿using OpenSora;
+using OpenSora.Diagnostics;
 using OpenSora.Dir;
 using System;
 using System.IO;
@@ -9,69 +10,74 @@ namespace Unpacker
 	{
 		static void Main(string[] args)
 		{
-			if (args.Length < 2)
+			using (var diagnostics = DiagnosticsBootstrap.Start("OpenSora.Unpacker"))
 			{
-				Console.WriteLine("Usage: Unpacker <path/to/sora> <output/path>");
-				return;
-			}
-
-			try
-			{
-				var entries = DirProcessor.BuildEntries(args[0]);
-
-				foreach (var pair in entries)
+				if (args.Length < 2)
 				{
-					Console.WriteLine("Processing '{0}'", pair.Key);
+					Console.WriteLine("Usage: Unpacker <path/to/sora> <output/path>");
+					return;
+				}
 
-					foreach (var entry in pair.Value)
+				try
+				{
+					var entries = DirProcessor.BuildEntries(args[0]);
+
+					foreach (var pair in entries)
 					{
-						if (entry.CompressedSize == 0 || entry.DecompressedSize == 0)
-						{
-							continue;
-						}
+						Console.WriteLine("Processing '{0}'", pair.Key);
 
-						if (!entry.Name.EndsWith("_X2"))
+						foreach (var entry in pair.Value)
 						{
-							continue;
-						}
-
-						var unpack = !entry.Name.EndsWith("_DT") && !entry.Name.EndsWith("_DS") &&
-									!entry.Name.EndsWith("WAV") && !entry.Name.EndsWith("_VS");
-						if (unpack)
-						{
-							Console.WriteLine("Unpacking '{0}'", entry.Name);
-						}
-						else
-						{
-							Console.WriteLine("Saving '{0}'", entry.Name);
-						}
-
-						try
-						{
-							byte[] bytes = new byte[entry.CompressedSize];
-							using (var stream = File.OpenRead(pair.Key))
+							if (entry.CompressedSize == 0 || entry.DecompressedSize == 0)
 							{
-								stream.Seek(entry.Offset, SeekOrigin.Begin);
-								stream.Read(bytes, 0, bytes.Length);
+								continue;
 							}
+
+							if (!entry.Name.EndsWith("_X2"))
+							{
+								continue;
+							}
+
+							var unpack = !entry.Name.EndsWith("_DT") && !entry.Name.EndsWith("_DS") &&
+										!entry.Name.EndsWith("WAV") && !entry.Name.EndsWith("_VS");
 							if (unpack)
 							{
-								bytes = FalcomDecompressor.Decompress(bytes);
+								Console.WriteLine("Unpacking '{0}'", entry.Name);
+							}
+							else
+							{
+								Console.WriteLine("Saving '{0}'", entry.Name);
 							}
 
-							var outputPath = Path.Combine(args[1], entry.Name);
-							File.WriteAllBytes(outputPath, bytes);
-						}
-						catch (Exception ex)
-						{
-							Console.WriteLine(ex);
+							try
+							{
+								byte[] bytes = new byte[entry.CompressedSize];
+								using (var stream = File.OpenRead(pair.Key))
+								{
+									stream.Seek(entry.Offset, SeekOrigin.Begin);
+									stream.Read(bytes, 0, bytes.Length);
+								}
+								if (unpack)
+								{
+									bytes = FalcomDecompressor.Decompress(bytes);
+								}
+
+								var outputPath = Path.Combine(args[1], entry.Name);
+								File.WriteAllBytes(outputPath, bytes);
+							}
+							catch (Exception ex)
+							{
+								Log.Error(LogCategory.Archive, "Failed to unpack '" + entry.Name + "'.", ex);
+								Console.WriteLine(ex);
+							}
 						}
 					}
 				}
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex);
+				catch (Exception ex)
+				{
+					Log.Critical(LogCategory.Archive, "Unpacker terminated with an error.", ex);
+					Console.WriteLine(ex);
+				}
 			}
 		}
 	}

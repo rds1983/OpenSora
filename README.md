@@ -26,6 +26,7 @@ current-state snapshot; it is updated whenever a task lands.
 |---|---|---|
 | Engine loop | Fixed 60 Hz engine host; viewer owns input and UI | Replayable deterministic simulation across platforms |
 | Determinism | Seeded RNG and recordable/replayable input traces | Full save/replay coverage for all game systems |
+| Diagnostics | Structured logs, local crash reports, unknown-data dedup, F12 overlay | Log retention policy and developer analysis tooling |
 | Game detection | FC and SC folders recognized | FC, SC, and the 3rd, all supported PC editions |
 | Archives (`.dir`/`.dat`) | Read-only browsing | Full virtual filesystem with loose-file overrides |
 | Textures | DDS and CH images | Complete format coverage, mipmaps, alpha |
@@ -59,6 +60,8 @@ current-state snapshot; it is updated whenever a task lands.
   input traces for deterministic simulation tests.
 * A synthetic fixture toolkit for DIR/DAT archives, uncompressed DDS textures, CH/CP sprite data,
   X2/X3 models, and FC scenarios. Fixtures are generated from code, never copied from game data.
+* Structured diagnostic logs, local crash reports with recent log context, unknown-data deduplication,
+  and an F12 diagnostics overlay in the viewer.
 
 ### Known limitations
 
@@ -77,6 +80,7 @@ current-state snapshot; it is updated whenever a task lands.
   abstraction and the engine/viewer project split are later M0 tasks.
 * The viewer still polls MonoGame devices directly; logical input snapshots are not yet wired into
   the viewer or scenario VM.
+* Diagnostics are local only. There is no telemetry, automatic upload, or log retention policy yet.
 
 ## Running the current viewer
 
@@ -94,6 +98,7 @@ current-state snapshot; it is updated whenever a task lands.
 * Hold the right mouse button and move the mouse - rotate the camera.
 * `I` / `O` - increase / decrease the view angle.
 * `~` - toggle render debug info.
+* `F12` - toggle the diagnostics log overlay.
 
 ## Building from source
 
@@ -147,9 +152,18 @@ the fixture policy and builders. The initial suite covers:
 * Seeded RNG sequence/state restoration and range checks.
 * Input snapshot recording, replay, and trace independence.
 * A 10,000-update simulation with the same seed and input trace producing identical state.
+* Structured log sinks, crash report contents, unknown-data deduplication, and forced load failures.
 
 Add a test for every behavioral change. A change that cannot be covered automatically needs a
 recorded manual verification step in the task report.
+
+## Diagnostics
+
+Diagnostics are local: a per-session log, crash reports with recent log context, and an F12 overlay in
+the viewer. See [docs/diagnostics.md](docs/diagnostics.md) for file locations, categories, and
+unknown-data deduplication.
+
+Logs and crash reports are never uploaded.
 
 ### Command-line tools
 
@@ -172,6 +186,7 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <path/to/
 | `OpenSora.Tests` | xUnit tests, synthetic fixtures, deterministic simulation checks, and future game systems |
 | `docs/adr` | Architecture decision records |
 | `docs/testing` | Test and fixture policy |
+| `docs/diagnostics.md` | Logging, crash reports, and debug-overlay guide |
 
 The engine host currently lives in `OpenSora.Common`. The roadmap separates the simulation and
 runtime rendering core into a dedicated engine project while keeping the viewer as a developer tool.

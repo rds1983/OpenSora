@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenSora.Diagnostics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -9,13 +10,23 @@ namespace OpenSora.Dir
 	{
 		const string LbDirSignature = "LB DIR";
 
-		static void Log(string message, params object[] args)
+		static void LogMessage(string message, params object[] args)
 		{
+			if (args == null || args.Length == 0)
+			{
+				Log.Trace(LogCategory.Archive, message);
+			}
+			else
+			{
+				Log.WriteFormat(LogLevel.Trace, LogCategory.Archive, message, args);
+			}
 		}
 
 		static void GenerateError(string message, params object[] args)
 		{
-			throw new Exception(string.Format(message, args));
+			var text = string.Format(message, args);
+			Log.Error(LogCategory.Archive, text);
+			throw new Exception(text);
 		}
 
 		static string ToString(byte[] data)
@@ -25,7 +36,7 @@ namespace OpenSora.Dir
 
 		static List<DirEntry> ProcessDirFile(string dirFile, string datFile)
 		{
-			Log("Processing file '{0}'", dirFile);
+			LogMessage("Processing file '{0}'", dirFile);
 
 			var result = new List<DirEntry>();
 
@@ -41,7 +52,7 @@ namespace OpenSora.Dir
 				stream.Seek(2, SeekOrigin.Current);
 
 				var numEntries = reader.ReadInt32();
-				Log("Number of entries: {0}", numEntries);
+				LogMessage("Number of entries: {0}", numEntries);
 
 				var shouldBeZero = reader.ReadInt32();
 				if (shouldBeZero != 0)
@@ -96,7 +107,7 @@ namespace OpenSora.Dir
 				}
 				catch (Exception ex)
 				{
-					Log("Error: " + ex);
+					Log.Error(LogCategory.Archive, "Error processing archive.", ex);
 				}
 			}
 

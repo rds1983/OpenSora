@@ -1,4 +1,5 @@
 ﻿using OpenSora;
+using OpenSora.Diagnostics;
 using OpenSora.Dir;
 using OpenSora.Scenarios;
 using System;
@@ -10,70 +11,70 @@ namespace Unpacker
 	{
 		static void Main(string[] args)
 		{
-			if (args.Length < 2)
+			using (var diagnostics = DiagnosticsBootstrap.Start("OpenSora.Decompiler"))
 			{
-				Console.WriteLine("Usage: Unpacker <path/to/sora> <output/path>");
-				return;
-			}
-
-			try
-			{
-				var entries = DirProcessor.BuildEntries(args[0]);
-
-				foreach (var pair in entries)
+				if (args.Length < 2)
 				{
-					Console.WriteLine("Processing '{0}'", pair.Key);
+					Console.WriteLine("Usage: Unpacker <path/to/sora> <output/path>");
+					return;
+				}
 
-					foreach (var entry in pair.Value)
+				try
+				{
+					var entries = DirProcessor.BuildEntries(args[0]);
+
+					foreach (var pair in entries)
 					{
-						if (entry.CompressedSize == 0 || entry.DecompressedSize == 0)
-						{
-							continue;
-						}
+						Console.WriteLine("Processing '{0}'", pair.Key);
 
-						if (!entry.Name.EndsWith("_SN"))
+						foreach (var entry in pair.Value)
 						{
-							continue;
-						}
-
-/*						if (!entry.Name.StartsWith("T0310"))
-						{
-							continue;
-						}*/
-
-						Console.WriteLine("Processing script '{0}'", entry.Name);
-
-						try
-						{
-							byte[] bytes = new byte[entry.CompressedSize];
-							using (var stream = File.OpenRead(pair.Key))
+							if (entry.CompressedSize == 0 || entry.DecompressedSize == 0)
 							{
-								stream.Seek(entry.Offset, SeekOrigin.Begin);
-								stream.Read(bytes, 0, bytes.Length);
+								continue;
 							}
 
-							bytes = FalcomDecompressor.Decompress(bytes);
-
-							var output = string.Empty;
-							using (var stream = new MemoryStream(bytes))
+							if (!entry.Name.EndsWith("_SN"))
 							{
-								var scenario = Scenario.FromFCStream(stream);
-								output = scenario.ToString();
+								continue;
 							}
 
-							var fileName = Path.Combine(args[1], Path.ChangeExtension(entry.Name, "txt"));
-							File.WriteAllText(fileName, output);
-						}
-						catch (Exception ex)
-						{
-							Console.WriteLine(ex);
+							Console.WriteLine("Processing script '{0}'", entry.Name);
+
+							try
+							{
+								byte[] bytes = new byte[entry.CompressedSize];
+								using (var stream = File.OpenRead(pair.Key))
+								{
+									stream.Seek(entry.Offset, SeekOrigin.Begin);
+									stream.Read(bytes, 0, bytes.Length);
+								}
+
+								bytes = FalcomDecompressor.Decompress(bytes);
+
+								var output = string.Empty;
+								using (var stream = new MemoryStream(bytes))
+								{
+									var scenario = Scenario.FromFCStream(stream);
+									output = scenario.ToString();
+								}
+
+								var fileName = Path.Combine(args[1], Path.ChangeExtension(entry.Name, "txt"));
+								File.WriteAllText(fileName, output);
+							}
+							catch (Exception ex)
+							{
+								Log.Error(LogCategory.Scenario, "Failed to decompile '" + entry.Name + "'.", ex);
+								Console.WriteLine(ex);
+							}
 						}
 					}
 				}
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex);
+				catch (Exception ex)
+				{
+					Log.Critical(LogCategory.Archive, "Decompiler terminated with an error.", ex);
+					Console.WriteLine(ex);
+				}
 			}
 		}
 	}

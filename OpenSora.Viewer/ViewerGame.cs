@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using FontStashSharp;
 using Myra;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.File;
@@ -16,6 +17,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using OpenSora.Rendering;
 using OpenSora.Engine;
+using OpenSora.Diagnostics;
 using OpenSora.Scenarios;
 using Myra.Events;
 
@@ -36,6 +38,7 @@ namespace OpenSora.Viewer
 		private Desktop _desktop;
 		private bool _wasPlaying;
 		private KeyboardState _lastKeyboardState;
+		private bool _showDiagnostics;
 		private readonly FrameTimeSource _frameTimeSource = new FrameTimeSource();
 		private readonly EngineHost _engineHost = new EngineHost();
 
@@ -693,6 +696,12 @@ namespace OpenSora.Viewer
 				_executionContext.Scene.RenderDebugInfo = !_executionContext.Scene.RenderDebugInfo;
 			}
 
+			if (keyboardState.IsKeyDown(Keys.F12) && !_lastKeyboardState.IsKeyDown(Keys.F12))
+			{
+				_showDiagnostics = !_showDiagnostics;
+				Log.Info(LogCategory.Ui, "Diagnostics overlay " + (_showDiagnostics ? "shown." : "hidden."));
+			}
+
 			if (CanControlCamera())
 			{
 				// Manage camera input controller
@@ -813,6 +822,43 @@ namespace OpenSora.Viewer
 			}
 
 			_desktop.Render();
+
+			DrawDiagnostics();
+		}
+
+		private void DrawDiagnostics()
+		{
+			if (!_showDiagnostics)
+			{
+				return;
+			}
+
+			var entries = Log.RecentEntries;
+			if (entries.Length == 0)
+			{
+				return;
+			}
+
+			var count = Math.Min(entries.Length, 24);
+			var start = entries.Length - count;
+			var bounds = _mainPanel._panelViewer.Bounds;
+			const int lineHeight = 18;
+			var height = count * lineHeight + 8;
+
+			_spriteBatch.Begin(blendState: BlendState.AlphaBlend);
+			_spriteBatch.Draw(DefaultAssets.WhiteRegion.Texture,
+				new Rectangle(bounds.X, bounds.Y, bounds.Width, height),
+				Color.Black * 0.75f);
+
+			var y = bounds.Y + 4;
+			for (var i = start; i < entries.Length; ++i)
+			{
+				_spriteBatch.DrawString(DefaultAssets.DebugFont, entries[i].ToString(),
+					new Vector2(bounds.X + 8, y), Color.White);
+				y += lineHeight;
+			}
+
+			_spriteBatch.End();
 		}
 
 		protected override void EndRun()

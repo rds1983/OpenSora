@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenSora.Diagnostics;
+using System;
 
 namespace OpenSora.Viewer
 {
@@ -6,16 +7,30 @@ namespace OpenSora.Viewer
 	{
 		static void Main(string[] args)
 		{
-			try
+			using (var diagnostics = DiagnosticsBootstrap.Start("OpenSora.Viewer"))
 			{
-				using (var game = new ViewerGame())
+				try
 				{
-					game.Run();
+					using (var game = new ViewerGame())
+					{
+						game.Run();
+					}
 				}
-			}
-			catch(Exception ex)
-			{
-				Console.WriteLine(ex.ToString());
+				catch (Exception ex)
+				{
+					Log.Critical(LogCategory.Diagnostics, "Viewer terminated with an unhandled exception.", ex);
+					Console.WriteLine(ex.ToString());
+
+					try
+					{
+						var path = CrashReporter.WriteReport(ex);
+						Console.WriteLine("Crash report: " + path);
+					}
+					catch (Exception reportException)
+					{
+						Console.Error.WriteLine("Failed to write crash report: " + reportException.Message);
+					}
+				}
 			}
 		}
 	}

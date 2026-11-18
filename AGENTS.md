@@ -95,6 +95,9 @@ Implementation rules:
   behind the asset catalog and game profile abstractions.
 - Do not use wall-clock time, unseeded randomness, or platform-specific behavior in simulation code.
   Use the engine clock, RNG, and input abstractions.
+- Route diagnostics through `OpenSora.Diagnostics.Log` with an appropriate category. Use
+  `UnknownDataReporter.ReportOnce` for unknown opcodes/chunks/fields; do not spam the log per frame.
+  Do not add telemetry or automatic log uploads.
 - Update comments and docs when behavior or formats become clearer. Unknowns belong in
   `docs/formats/` with a tracked task, not in silent guesses.
 
@@ -285,6 +288,8 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <game-fol
 - Automated tests live in `OpenSora.Tests`; run them with `dotnet test OpenSora.MonoGame.sln`
 - CI runs on GitHub Actions for Windows and Linux; validate locally on Windows and, when available,
   WSL/Linux before pushing
+- Diagnostics write local logs and crash reports under the platform's application-data directory; see
+  `docs/diagnostics.md`. Nothing is uploaded
 - Simulation time comes from `OpenSora.Engine.EngineHost`; do not use `DateTime.Now` or other
   wall-clock sources in simulation or animation code
 - Simulation randomness must use `DeterministicRandom`; do not use `System.Random` in simulation code

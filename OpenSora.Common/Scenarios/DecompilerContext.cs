@@ -1,4 +1,5 @@
-﻿using OpenSora.Scenarios.Expressions;
+﻿using OpenSora.Diagnostics;
+using OpenSora.Scenarios.Expressions;
 using OpenSora.Utility;
 using System;
 using System.Collections.Generic;
@@ -16,8 +17,9 @@ namespace OpenSora.Scenarios
 		private readonly HashSet<int> _globalLabelTable = new HashSet<int>();
 
 		public BinaryReader Reader { get; }
+		public string Source { get; }
 
-		public DecompilerContext(BinaryReader reader, Dictionary<int, DecompilerTableEntry> entriesTable)
+		public DecompilerContext(BinaryReader reader, Dictionary<int, DecompilerTableEntry> entriesTable, string source = null)
 		{
 			if (reader == null)
 			{
@@ -31,6 +33,7 @@ namespace OpenSora.Scenarios
 
 			Reader = reader;
 			_entriesTable = entriesTable;
+			Source = string.IsNullOrEmpty(source) ? "scenario" : source;
 		}
 
 		public BaseInstruction DecompileInstruction(out int[] branchTargets)
@@ -38,7 +41,15 @@ namespace OpenSora.Scenarios
 			int offset = (int)Reader.BaseStream.Position;
 			var op = Reader.ReadByte();
 
-			var entry = _entriesTable[op];
+			DecompilerTableEntry entry;
+			if (!_entriesTable.TryGetValue(op, out entry))
+			{
+				UnknownDataReporter.ReportOnce(Source, LogCategory.Scenario, "opcode",
+					string.Format("0x{0:X2}", op), string.Format("Offset 0x{0:X}.", offset));
+				throw new InvalidDataException(string.Format(
+					"Unknown scenario opcode 0x{0:X2} at 0x{1:X} (source: {2}).", op, offset, Source));
+			}
+
 			var instruction = (BaseInstruction)Activator.CreateInstance(entry.InstructionType);
 			instruction.Offset = offset;
 			instruction.Entry = entry;

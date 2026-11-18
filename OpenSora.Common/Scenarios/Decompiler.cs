@@ -56,9 +56,9 @@ namespace OpenSora.Scenarios
 			}
 		}
 
-		public Decompiler(BinaryReader reader)
+		public Decompiler(BinaryReader reader, string source = null)
 		{
-			_context = new DecompilerContext(reader, DecompilerTableFC);
+			_context = new DecompilerContext(reader, DecompilerTableFC, source);
 		}
 
 		public BaseInstruction[] DecompileBlock()

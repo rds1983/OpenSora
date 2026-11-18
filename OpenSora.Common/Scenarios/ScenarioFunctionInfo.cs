@@ -69,7 +69,7 @@ namespace OpenSora.Scenarios
 		{
 			reader.BaseStream.Seek(offset, SeekOrigin.Begin);
 
-			var decompiler = new Decompiler(reader);
+			var decompiler = new Decompiler(reader, string.Format("function_0x{0:X}", offset));
 
 			var instructions = decompiler.DecompileBlock();
 

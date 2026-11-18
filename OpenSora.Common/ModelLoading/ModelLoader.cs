@@ -1,4 +1,5 @@
-﻿using OpenSora.Utility;
+﻿using OpenSora.Diagnostics;
+using OpenSora.Utility;
 using System;
 using System.IO;
 
@@ -8,34 +9,43 @@ namespace OpenSora.ModelLoading
 	{
 		public static Frame Load(Stream stream, int version)
 		{
-			using (var reader = new BinaryReader(stream))
+			try
 			{
-				reader.SkipBytes(version == 2?4:48);
-
-				int length = 0;
-				var id = reader.LoadZeroTerminatedString(out length);
-
-				var rootFrame = new Frame
+				using (var reader = new BinaryReader(stream))
 				{
-					Id = id
-				};
+					reader.SkipBytes(version == 2?4:48);
 
-				var context = new ModelLoadContext
-				{
-					Reader = reader,
-					Version = version,
-					Parent = rootFrame
-				};
+					int length = 0;
+					var id = reader.LoadZeroTerminatedString(out length);
 
-				try
-				{
-					rootFrame.LoadFromStream(context);
+					var rootFrame = new Frame
+					{
+						Id = id
+					};
+
+					var context = new ModelLoadContext
+					{
+						Reader = reader,
+						Version = version,
+						Parent = rootFrame
+					};
+
+					try
+					{
+						rootFrame.LoadFromStream(context);
+					}
+					catch (Exception ex)
+					{
+						Log.Error(LogCategory.Asset, "Failed to load model.", ex);
+					}
+
+					return rootFrame;
 				}
-				catch (Exception)
-				{
-				}
-
-				return rootFrame;
+			}
+			catch (Exception ex)
+			{
+				Log.Error(LogCategory.Asset, "Failed to load model.", ex);
+				throw;
 			}
 		}
 	}

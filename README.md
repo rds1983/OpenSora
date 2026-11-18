@@ -23,6 +23,7 @@ current-state snapshot; it is updated whenever a task lands.
 | Area | Today | Goal |
 |---|---|---|
 | Engine loop | Fixed 60 Hz engine host; viewer owns input and UI | Replayable deterministic simulation across platforms |
+| Determinism | Seeded RNG and recordable/replayable input traces | Full save/replay coverage for all game systems |
 | Game detection | FC and SC folders recognized | FC, SC, and the 3rd, all supported PC editions |
 | Archives (`.dir`/`.dat`) | Read-only browsing | Full virtual filesystem with loose-file overrides |
 | Textures | DDS and CH images | Complete format coverage, mipmaps, alpha |
@@ -37,7 +38,7 @@ current-state snapshot; it is updated whenever a task lands.
 | Movies | None | Intro and event movie playback with skip |
 | Save/load | Viewer window state only | Full game saves, slots, FC -> SC import |
 | Platforms | Windows (MonoGame DesktopGL) | Windows, Linux, macOS |
-| Tests | xUnit suite for archives, DDS, scenarios, and engine timing | Unit, integration, golden-trace, and visual regression suites |
+| Tests | xUnit suite for archives, DDS, scenarios, timing, RNG, and input | Unit, integration, golden-trace, and visual regression suites |
 | CI | AppVeyor build | Windows and Linux build + test on every change |
 
 ### What works today
@@ -52,6 +53,8 @@ current-state snapshot; it is updated whenever a task lands.
   header/function decompilation, deterministic engine timing, and delta-based camera movement.
 * A fixed-timestep engine host (60 Hz by default) drives scenario playback, sprite animation, and
   camera movement. Simulation no longer reads wall-clock time.
+* Seeded SplitMix64 randomness, logical input snapshots, frame-time sources, and recordable/replayable
+  input traces for deterministic simulation tests.
 
 ### Known limitations
 
@@ -62,10 +65,13 @@ current-state snapshot; it is updated whenever a task lands.
   game flags, inventory, or save state.
 * There is no player movement, collision, interaction, encounter, battle, menu, audio, movie, or
   save/load system.
-* Test coverage is limited to archive parsing, DDS decoding, FC scenario parsing/decompilation, and
-  engine timing. There are no integration, golden-trace, or visual regression tests yet.
+* Test coverage is limited to archive parsing, DDS decoding, FC scenario parsing/decompilation, engine
+  timing, deterministic RNG, and input traces. There are no integration, golden-trace, or visual
+  regression tests yet.
 * The engine host still lives in `OpenSora.Common`, and the viewer owns input and UI. Input
   abstraction and the engine/viewer project split are later M0 tasks.
+* The viewer still polls MonoGame devices directly; logical input snapshots are not yet wired into
+  the viewer or scenario VM.
 
 ## Running the current viewer
 
@@ -118,6 +124,9 @@ code; never commit extracted game data. The initial suite covers:
 * FC scenario header/function-table parsing and instruction decompilation.
 * Deterministic fixed-timestep host updates and long-frame clamping.
 * Delta-based camera movement.
+* Seeded RNG sequence/state restoration and range checks.
+* Input snapshot recording, replay, and trace independence.
+* A 10,000-update simulation with the same seed and input trace producing identical state.
 
 Add a test for every behavioral change. A change that cannot be covered automatically needs a
 recorded manual verification step in the task report.
@@ -136,7 +145,7 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <path/to/
 
 | Project | Purpose |
 |---|---|
-| `OpenSora.Common` | Format readers, loaders, rendering, engine host, scenario decompiler/VM |
+| `OpenSora.Common` | Format readers, loaders, rendering, engine host, deterministic RNG/input, scenario decompiler/VM |
 | `OpenSora.Viewer` | Myra-based resource viewer and scenario preview, acting as the engine host application |
 | `OpenSora.Unpacker` | CLI tool that extracts archive entries |
 | `OpenSora.Decompiler` | CLI tool that disassembles scenario scripts |
@@ -150,7 +159,9 @@ runtime rendering core into a dedicated engine project while keeping the viewer 
 
 Design decisions are recorded in [docs/adr](docs/adr). See
 [ADR 0001 - Engine host and fixed-timestep clock](docs/adr/0001-engine-host.md) for the deterministic
-update model.
+update model and
+[ADR 0002 - Deterministic random numbers and input traces](docs/adr/0002-deterministic-input-and-random.md)
+for reproducible randomness and input.
 
 ## Roadmap
 

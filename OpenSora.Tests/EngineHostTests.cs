@@ -72,6 +72,19 @@ namespace OpenSora.Tests
 		}
 
 		[Fact]
+		public void Advance_FromFrameTimeSource_UsesSourceDelta()
+		{
+			var host = new EngineHost(0.25, maxFrameSeconds: 1.0);
+			var timeSource = new FrameTimeSource(1.0);
+			var updateCount = 0;
+			host.Update += _ => ++updateCount;
+
+			host.Advance(timeSource);
+
+			Assert.Equal(4, updateCount);
+		}
+
+		[Fact]
 		public void Advance_NegativeElapsed_Throws()
 		{
 			var host = new EngineHost();

@@ -283,6 +283,9 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <game-fol
 - Automated tests live in `OpenSora.Tests`; run them with `dotnet test OpenSora.MonoGame.sln`
 - Simulation time comes from `OpenSora.Engine.EngineHost`; do not use `DateTime.Now` or other
   wall-clock sources in simulation or animation code
+- Simulation randomness must use `DeterministicRandom`; do not use `System.Random` in simulation code
+- Simulation input must come from `InputSnapshot`/`InputTrace`; do not read keyboard, mouse, or
+  gamepad state inside simulation code
 - Game data is not present in the repository and must never be added
 
 ## When in doubt

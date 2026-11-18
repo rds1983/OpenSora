@@ -6,8 +6,8 @@
 
 **Last updated:** 2026-11-18
 **Current milestone:** M0 - Foundations, tests, and architecture
-**Next task:** M0-03 - Add deterministic RNG and input abstractions
-**Last completed:** M0-02 - Create the engine host and deterministic update loop (2026-11-18)
+**Next task:** M0-04 - Build the synthetic fixture toolkit
+**Last completed:** M0-03 - Add deterministic RNG and input abstractions (2026-11-18)
 
 ## Purpose
 
@@ -50,8 +50,8 @@ Discovery work that spans milestones goes to `Cross-cutting backlog` until it is
 ## Current focus
 
 - **Milestone:** M0 - make the codebase safe to evolve before adding gameplay.
-- **Next task:** M0-03 - add seeded RNG, input snapshots, replayable input traces, and a time source
-  abstraction.
+- **Next task:** M0-04 - build the synthetic fixture toolkit for archives, textures, sprites, models,
+  and scenario scripts.
 - **Why:** every later milestone depends on automated verification and deterministic updates. The VM,
   asset loaders, and battle formulas cannot be validated by "the viewer still opens".
 - **Suggested first vertical slice after M0:** FC prologue through the first field map, first
@@ -110,12 +110,16 @@ enforced.
     from simulation/animation code. 11 tests pass in Debug and Release; viewer startup smoke test
     passed with the FC installation.
 
-- [ ] **M0-03 - Add deterministic RNG and input abstractions** - _todo_
+- [x] **M0-03 - Add deterministic RNG and input abstractions** - _done 2026-11-18_
   - Depends on: M0-02
   - Scope: seeded RNG service, input snapshot interface, replayable input trace, time source
     abstraction.
+  - ADR: `docs/adr/0002-deterministic-input-and-random.md`
   - Done when: the same seed and input trace produce identical state over 10,000 updates; a test
     proves it.
+  - Result: `DeterministicRandom`, `InputSnapshot`/`InputTrace` with recording and replay,
+    `IFrameTimeSource`/`FrameTimeSource`, and a 10,000-update deterministic simulation test. 23 tests
+    pass in Debug and Release; viewer startup smoke test passed with the FC installation.
 
 - [ ] **M0-04 - Build the synthetic fixture toolkit** - _todo_
   - Depends on: M0-01
@@ -821,6 +825,7 @@ A task is done only when all of the following are true:
 | 2026-11-18 | DOC-01 | Established the project goal, live roadmap, and agent workflow; documented the current viewer state. |
 | 2026-11-18 | M0-01 | Added the xUnit test project with archive, DDS, and FC scenario coverage; documented the test workflow. |
 | 2026-11-18 | M0-02 | Added the fixed-timestep engine host, removed wall-clock timing from simulation/animation, and recorded ADR 0001. |
+| 2026-11-18 | M0-03 | Added deterministic RNG, input snapshots/traces with recording and replay, frame-time sources, and ADR 0002. |
 
 ## Changelog
 
@@ -828,3 +833,4 @@ A task is done only when all of the following are true:
 |---|---|---|
 | 2026-11-18 | Initial roadmap with M0-M8, cross-cutting backlog, spikes, risks, and definition of done | Turn the revived viewer into a full trilogy engine with an actionable, testable plan |
 | 2026-11-18 | Added ADR 0001 and completed M0-02; next focus is M0-03 | Establish deterministic fixed-step timing before input abstraction and gameplay work |
+| 2026-11-18 | Added ADR 0002 and completed M0-03; next focus is M0-04 | Seal deterministic random/input contracts before building the fixture toolkit |

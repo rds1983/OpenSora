@@ -36,6 +36,7 @@ namespace OpenSora.Viewer
 		private Desktop _desktop;
 		private bool _wasPlaying;
 		private KeyboardState _lastKeyboardState;
+		private readonly FrameTimeSource _frameTimeSource = new FrameTimeSource();
 		private readonly EngineHost _engineHost = new EngineHost();
 
 		public ViewerGame()
@@ -715,7 +716,8 @@ namespace OpenSora.Viewer
 				}
 			}
 
-			_engineHost.Advance(gameTime.ElapsedGameTime);
+			_frameTimeSource.DeltaSeconds = gameTime.ElapsedGameTime.TotalSeconds;
+			_engineHost.Advance(_frameTimeSource);
 
 			_lastKeyboardState = keyboardState;
 		}

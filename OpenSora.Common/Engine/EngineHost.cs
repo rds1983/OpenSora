@@ -66,6 +66,20 @@ namespace OpenSora.Engine
 		}
 
 		/// <summary>
+		/// Adds the delta supplied by a frame-time source. The source is sampled once per frame; the
+		/// host still owns the fixed-step accumulator.
+		/// </summary>
+		public void Advance(IFrameTimeSource timeSource)
+		{
+			if (timeSource == null)
+			{
+				throw new ArgumentNullException(nameof(timeSource));
+			}
+
+			Advance(timeSource.DeltaSeconds);
+		}
+
+		/// <summary>
 		/// Adds elapsed frame time and runs as many fixed updates as the accumulator allows. Long
 		/// frames are clamped to <see cref="MaxFrameSeconds"/> to prevent catch-up spirals.
 		/// </summary>

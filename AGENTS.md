@@ -286,6 +286,8 @@ dotnet run --project OpenSora.Decompiler/OpenSora.Decompiler.csproj -- <game-fol
 - Simulation randomness must use `DeterministicRandom`; do not use `System.Random` in simulation code
 - Simulation input must come from `InputSnapshot`/`InputTrace`; do not read keyboard, mouse, or
   gamepad state inside simulation code
+- Test fixtures must be generated from code in `OpenSora.Tests/Fixtures`; see
+  `docs/testing/fixtures.md`. Never copy game data into the repository
 - Game data is not present in the repository and must never be added
 
 ## When in doubt

@@ -9,11 +9,11 @@ namespace OpenSora
 	{
 		private const int BytesPerColor = 2;
 
-		private const int TextureSize = 1024;
+		public const int TextureSize = 1024;
 		public const int ChunkSize = 16;
 		public const int ChunksPerRow = TextureSize / ChunkSize;
 
-		public static Texture2D LoadImage(GraphicsDevice device, Stream chStream)
+		public static Color[] LoadImageData(Stream chStream)
 		{
 			var colorBuffer = new Color[TextureSize * TextureSize];
 			var chunkBuffer = new Color[ChunkSize * ChunkSize];
@@ -51,6 +51,12 @@ namespace OpenSora
 					}
 				}
 			}
+			return colorBuffer;
+		}
+
+		public static Texture2D LoadImage(GraphicsDevice device, Stream chStream)
+		{
+			var colorBuffer = LoadImageData(chStream);
 			var texture = new Texture2D(device, TextureSize, TextureSize);
 			texture.SetData(colorBuffer);
 

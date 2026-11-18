@@ -6,8 +6,8 @@
 
 **Last updated:** 2026-11-18
 **Current milestone:** M0 - Foundations, tests, and architecture
-**Next task:** M0-04 - Build the synthetic fixture toolkit
-**Last completed:** M0-03 - Add deterministic RNG and input abstractions (2026-11-18)
+**Next task:** M0-05 - Establish CI
+**Last completed:** M0-04 - Build the synthetic fixture toolkit (2026-11-18)
 
 ## Purpose
 
@@ -50,8 +50,7 @@ Discovery work that spans milestones goes to `Cross-cutting backlog` until it is
 ## Current focus
 
 - **Milestone:** M0 - make the codebase safe to evolve before adding gameplay.
-- **Next task:** M0-04 - build the synthetic fixture toolkit for archives, textures, sprites, models,
-  and scenario scripts.
+- **Next task:** M0-05 - establish CI for Windows and Linux with build, test, and artifact publishing.
 - **Why:** every later milestone depends on automated verification and deterministic updates. The VM,
   asset loaders, and battle formulas cannot be validated by "the viewer still opens".
 - **Suggested first vertical slice after M0:** FC prologue through the first field map, first
@@ -121,13 +120,17 @@ enforced.
     `IFrameTimeSource`/`FrameTimeSource`, and a 10,000-update deterministic simulation test. 23 tests
     pass in Debug and Release; viewer startup smoke test passed with the FC installation.
 
-- [ ] **M0-04 - Build the synthetic fixture toolkit** - _todo_
+- [x] **M0-04 - Build the synthetic fixture toolkit** - _done 2026-11-18_
   - Depends on: M0-01
   - Scope: generators for minimal DIR/DAT archives, DDS textures, CH/CP sprites, X2/X3 models, and
-    FC/SC/3rd scenario scripts. Fixtures must be generated from code or scripts, never copied from a
-    game installation.
+    FC scenario scripts. SC/3rd scenario fixtures are added with their parsers in M2-03/M2-04.
+    Fixtures must be generated from code or scripts, never copied from a game installation.
   - Done when: tests can create fixtures in a temp folder, load them, and assert on known values;
     fixture policy is documented.
+  - Result: `SyntheticArchive`, `SyntheticDds`, `SyntheticCh`, `SyntheticModel`, and
+    `SyntheticScenario` builders plus headless CH/animation decoders. 29 tests pass in Debug and
+    Release; real-data CH/CP sample decoding passed; fixture policy documented in
+    `docs/testing/fixtures.md`.
 
 - [ ] **M0-05 - Establish CI** - _todo_
   - Depends on: M0-01, M0-04
@@ -302,13 +305,15 @@ golden traces pass for representative scripts in all three games.
 
 - [ ] **M2-03 - Add SC opcode and decompiler coverage** - _todo_
   - Depends on: M2-02
-  - Scope: SC-specific table, format differences, expression extensions, and a corpus report.
+  - Scope: SC-specific table, format differences, expression extensions, a corpus report, and
+    extending the synthetic scenario fixtures to SC.
   - Done when: every SC script decompiles and round-trips structurally; differences from FC are
     documented.
 
 - [ ] **M2-04 - Add the 3rd opcode and decompiler coverage** - _todo_
   - Depends on: M2-03
-  - Scope: 3rd-specific table, format differences, and a corpus report.
+  - Scope: 3rd-specific table, format differences, a corpus report, and extending the synthetic
+    scenario fixtures to the 3rd.
   - Done when: every 3rd script decompiles and differences from SC are documented.
 
 - [ ] **M2-05 - Complete the expression VM** - _todo_
@@ -826,6 +831,7 @@ A task is done only when all of the following are true:
 | 2026-11-18 | M0-01 | Added the xUnit test project with archive, DDS, and FC scenario coverage; documented the test workflow. |
 | 2026-11-18 | M0-02 | Added the fixed-timestep engine host, removed wall-clock timing from simulation/animation, and recorded ADR 0001. |
 | 2026-11-18 | M0-03 | Added deterministic RNG, input snapshots/traces with recording and replay, frame-time sources, and ADR 0002. |
+| 2026-11-18 | M0-04 | Added the synthetic fixture toolkit and headless CH/animation decoders; documented fixture policy. |
 
 ## Changelog
 
@@ -834,3 +840,4 @@ A task is done only when all of the following are true:
 | 2026-11-18 | Initial roadmap with M0-M8, cross-cutting backlog, spikes, risks, and definition of done | Turn the revived viewer into a full trilogy engine with an actionable, testable plan |
 | 2026-11-18 | Added ADR 0001 and completed M0-02; next focus is M0-03 | Establish deterministic fixed-step timing before input abstraction and gameplay work |
 | 2026-11-18 | Added ADR 0002 and completed M0-03; next focus is M0-04 | Seal deterministic random/input contracts before building the fixture toolkit |
+| 2026-11-18 | Completed M0-04; SC/3rd scenario fixtures moved to M2-03/M2-04 | Build loadable fixtures only for formats the engine can currently parse |

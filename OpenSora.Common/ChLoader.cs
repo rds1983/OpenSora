@@ -12,6 +12,22 @@ namespace OpenSora
 		BGRA8888
 	}
 
+	public sealed class ChImageData
+	{
+		public int Width { get; }
+		public int Height { get; }
+		public ChFormat Format { get; }
+		public Color[] Pixels { get; }
+
+		public ChImageData(int width, int height, ChFormat format, Color[] pixels)
+		{
+			Width = width;
+			Height = height;
+			Format = format;
+			Pixels = pixels;
+		}
+	}
+
 	public static class ChLoader
 	{
 		private class ImageTypeInfo
@@ -108,7 +124,7 @@ namespace OpenSora
 
 		private static readonly ImageTypeInfo DefaultImageType = new ImageTypeInfo { Bytes = 2, Width = 768, Height = 768 };
 
-		public static Texture2D LoadImage(GraphicsDevice device, string dataFilePath, string chFileName, Stream chStream)
+		public static ChImageData LoadImageData(string dataFilePath, string chFileName, Stream chStream)
 		{
 			dataFilePath = Path.GetFileNameWithoutExtension(dataFilePath);
 
@@ -140,7 +156,6 @@ namespace OpenSora
 			// Plain image
 			using (var chReader = new BinaryReader(chStream))
 			{
-				var texture = new Texture2D(device, imageType.Height, imageType.Width);
 				var data = chReader.ReadBytes((int)chStream.Length);
 
 				var colorBuffer = new Color[imageType.Width * imageType.Height];
@@ -189,10 +204,17 @@ namespace OpenSora
 					}
 				}
 
-				texture.SetData(colorBuffer);
-
-				return texture;
+				return new ChImageData(imageType.Width, imageType.Height, imageType.Format, colorBuffer);
 			}
+		}
+
+		public static Texture2D LoadImage(GraphicsDevice device, string dataFilePath, string chFileName, Stream chStream)
+		{
+			var image = LoadImageData(dataFilePath, chFileName, chStream);
+			var texture = new Texture2D(device, image.Height, image.Width);
+			texture.SetData(image.Pixels);
+
+			return texture;
 		}
 	}
 }
